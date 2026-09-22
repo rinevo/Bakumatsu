@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>維新の嵐：双極の蒼穹 - Rogue Deck-Build -</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Canvas エフェクトオーバーレイ（墨飛沫・斬撃・火花・コネクトリンク描画） -->
+    <canvas id="fx-canvas"></canvas>
+
+    <!-- メイン常設ヘッダーバー -->
+    <header id="main-header" class="main-header">
+        <div class="header-left">
+            <div id="header-faction-badge" class="faction-badge">陣営未選択</div>
+            <div class="header-stat-box">
+                <span class="stat-label">体力</span>
+                <div class="header-bar hp-bar-bg">
+                    <div id="header-hp-fill" class="header-bar-fill hp-bar-fill"></div>
+                </div>
+                <span id="header-hp-text" class="stat-value">75 / 75</span>
+            </div>
+            <div class="header-stat-box">
+                <span class="stat-label">防</span>
+                <span id="header-shield-text" class="stat-badge-small def">0</span>
+            </div>
+            <div class="header-stat-box">
+                <span class="stat-label">資金</span>
+                <span id="header-gold-text" class="stat-gold">100 両</span>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <!-- 列強介入メーター（インペリアル・ゲージ） -->
+            <div class="imperial-container">
+                <div class="imperial-header">
+                    <span class="imperial-title">⚠️ 列強介入メーター（植民地化リスク）</span>
+                    <span id="header-imperial-text" class="imperial-percent">0% / 100%</span>
+                </div>
+                <div class="imperial-bar-bg">
+                    <div id="header-imperial-fill" class="imperial-bar-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div id="header-trend-badge" class="trend-badge" title="世論トレンド">世論: 平穏</div>
+            <div id="header-relic-list" class="relic-icon-list" title="所持遺物"></div>
+            <button id="btn-view-deck" class="btn-wood">📜 帖（山札確認）</button>
+            <button id="btn-toggle-sound" class="btn-wood">🔊 音声: 鳴</button>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ画面群 -->
+    <main id="game-container" class="game-container">
+
+        <!-- 1. タイトル ＆ 陣営選択画面 -->
+        <section id="screen-title" class="game-screen active">
+            <div class="title-wrapper">
+                <div class="title-crest-top">✦ 幕末双極録 ✦</div>
+                <h1 class="main-title">維新の嵐<span class="title-sub">双極の蒼穹</span></h1>
+                <p class="title-genre">- Rogue Deck-Build -</p>
+                <p class="title-flavor">
+                    慶応の空は血煙と硝煙に染まる――<br>
+                    東洋の孤島に迫る欧米列強の黒船の影。<br>
+                    天下を覆す志士となるか、幕威を貫く武士となるか。
+                </p>
+
+                <div class="faction-selection-box">
+                    <h2 class="select-heading">【出陣する陣営を選択せよ】</h2>
+                    <div class="faction-cards-grid">
+                        <!-- 🔴 薩長同盟（討幕派） -->
+                        <div class="faction-card tobaku-card">
+                            <div class="faction-crest">🔴</div>
+                            <h3 class="faction-name">薩長同盟（討幕派）</h3>
+                            <div class="faction-leader">代表志士: 坂本龍馬 / 桂小五郎 / 西郷隆盛</div>
+                            <ul class="faction-traits">
+                                <li><strong>剛撃・抜刀連鎖:</strong> 圧倒的な攻撃力とドロー回転力</li>
+                                <li><strong>維新の連携:</strong> 同盟の志士を連続で場に出すコンボ</li>
+                                <li><strong>⚠️ 致命的リスク:</strong> 洋式兵器の借款に依存しやすく、列強介入が急加速</li>
+                            </ul>
+                            <button id="btn-select-tobaku" class="btn-faction select-tobaku">薩長同盟で決起する</button>
+                        </div>
+
+                        <!-- 🔵 幕府・会津藩（佐幕派） -->
+                        <div class="faction-card sabaku-card">
+                            <div class="faction-crest">🔵</div>
+                            <h3 class="faction-name">幕府・会津藩（佐幕派）</h3>
+                            <div class="faction-leader">代表志士: 土方歳三 / 近藤勇 / 勝海舟</div>
+                            <ul class="faction-traits">
+                                <li><strong>鉄壁の陣構え:</strong> 堅牢無比なシールドとカウンター反撃</li>
+                                <li><strong>局中法度の掟:</strong> シールド無視の直接貫通攻撃</li>
+                                <li><strong>⚠️ 致命的リスク:</strong> 組織疲弊や家臣の寝返り（呪い混入）との戦い</li>
+                            </ul>
+                            <button id="btn-select-sabaku" class="btn-faction select-sabaku">幕府・会津で死守する</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 分岐マップ画面 -->
+        <section id="screen-map" class="game-screen">
+            <div class="map-view-wrapper">
+                <div class="map-header-bar">
+                    <h2 id="map-act-title" class="map-act-title">第一幕：京洛動乱</h2>
+                    <div class="map-legend">
+                        <span>⚔️ 戦場</span>
+                        <span>👹 強敵</span>
+                        <span>📜 歴史事件</span>
+                        <span>💰 洋行商人</span>
+                        <span>🍵 休息</span>
+                        <span>🏯 決戦大陣</span>
+                    </div>
+                </div>
+                <div class="map-scroll-area">
+                    <div id="map-grid-container" class="map-grid-container">
+                        <svg id="map-svg-lines" class="map-svg-overlay"></svg>
+                        <div id="map-nodes-container" class="map-nodes-container">
+                            <!-- マップノードが動的生成されます -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 戦闘画面 -->
+        <section id="screen-battle" class="game-screen">
+            <div class="battle-arena">
+                <!-- 敵側エリア -->
+                <div class="battle-upper-arena">
+                    <div id="battle-enemy-container" class="battle-enemy-box">
+                        <div class="enemy-intent-bubble" id="battle-enemy-intent">
+                            <span class="intent-icon">⚔️</span>
+                            <span class="intent-desc">攻撃 8</span>
+                        </div>
+                        <div class="enemy-avatar-frame">
+                            <div class="enemy-silhouette" id="battle-enemy-avatar">武士</div>
+                        </div>
+                        <div class="enemy-info-panel">
+                            <div id="battle-enemy-name" class="enemy-name">京都見廻組隊士</div>
+                            <div class="enemy-hp-bar-bg">
+                                <div id="battle-enemy-hp-fill" class="enemy-hp-bar-fill"></div>
+                            </div>
+                            <div class="enemy-stats-row">
+                                <span>体力: <strong id="battle-enemy-hp-text">34 / 34</strong></span>
+                                <span>防: <strong id="battle-enemy-shield-text">0</strong></span>
+                            </div>
+                            <div id="battle-enemy-status" class="enemy-status-row"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- プレイヤー情報＆盤面エリア -->
+                <div class="battle-middle-bar">
+                    <div class="player-battle-stats">
+                        <div class="energy-orb-box">
+                            <div class="energy-orb">
+                                <span id="battle-player-energy">3 / 3</span>
+                                <span class="energy-unit">文</span>
+                            </div>
+                        </div>
+                        <div class="player-shield-box">
+                            <span class="shield-icon">🛡️</span>
+                            <span id="battle-player-shield">0</span>
+                        </div>
+                        <div id="battle-player-buffs" class="battle-buffs-list"></div>
+                    </div>
+
+                    <div class="deck-counts-box">
+                        <span>山札: <strong id="battle-draw-count">10</strong></span>
+                        <span>捨札: <strong id="battle-discard-count">0</strong></span>
+                    </div>
+
+                    <div class="battle-action-box">
+                        <button id="btn-end-turn" class="btn-end-turn">
+                            <span class="btn-inner-text">太刀を収める<br><small>(ターン終了)</small></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 手札エリア -->
+                <div class="battle-hand-container">
+                    <div id="battle-hand" class="battle-hand">
+                        <!-- カードDOMが動的生成されます -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 歴史イベント画面 -->
+        <section id="screen-event" class="game-screen">
+            <div class="event-parchment-box">
+                <div class="event-stamp">幕末秘録</div>
+                <h2 id="event-title" class="event-title">歴史事件名</h2>
+                <div id="event-desc" class="event-description">事件の詳細説明文…</div>
+                <div id="event-choices-container" class="event-choices-list">
+                    <!-- 選択肢が動的生成されます -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. ショップ画面（長崎・横浜 洋行商人） -->
+        <section id="screen-shop" class="game-screen">
+            <div class="shop-wrapper">
+                <div class="shop-header">
+                    <h2>長崎・横浜 洋行商人処</h2>
+                    <p class="shop-flavor">「金次第で勝敗が決まる時代です。…あるいは、英国公使の密書に調印なさいますか？」</p>
+                </div>
+
+                <div class="shop-sections-grid">
+                    <!-- 通常カード販売 -->
+                    <div class="shop-card-section">
+                        <h3 class="shop-section-title">【国内調達・志士カード】</h3>
+                        <div id="shop-cards-container" class="shop-cards-grid"></div>
+                    </div>
+
+                    <!-- レリック販売 ＆ 密貿易 -->
+                    <div class="shop-side-section">
+                        <h3 class="shop-section-title">【舶来珍品（レリック）】</h3>
+                        <div id="shop-relics-container" class="shop-relics-grid"></div>
+
+                        <h3 class="shop-section-title">【列強密貿易（借款・武器貸与）】</h3>
+                        <div id="shop-smuggle-container" class="shop-smuggle-box"></div>
+
+                        <div class="shop-removal-box">
+                            <h4>【無用の札の破棄（カード削除）】</h4>
+                            <p>デッキから不要なカードを1枚完全に除外します。</p>
+                            <button id="btn-shop-remove-card" class="btn-wood">
+                                札を破棄する (<span id="shop-remove-card-cost">75 両</span>)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="shop-footer">
+                    <button id="btn-leave-shop" class="btn-wood large">店を後にする（街道へ戻る）</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. 休息画面（茶屋・本陣） -->
+        <section id="screen-rest" class="game-screen">
+            <div class="rest-wrapper">
+                <h2 class="rest-title">陣屋・茶屋での一服</h2>
+                <p class="rest-desc">篝火が揺れる静かな夜。次の戦場に備えて英気を養うか、外交交渉に頭を悩ませるか。</p>
+
+                <div class="rest-choices-grid">
+                    <div class="rest-card">
+                        <div class="rest-icon">🍵</div>
+                        <h3>手当てと休息</h3>
+                        <p id="rest-heal-desc">HPを最大値の35%回復します。</p>
+                        <button id="btn-rest-heal" class="btn-wood">湯茶を喫して休む</button>
+                    </div>
+
+                    <div class="rest-card">
+                        <div class="rest-icon">📜</div>
+                        <h3>条約交渉と世論工作</h3>
+                        <p>列強介入メーターを <strong>-15%</strong> 抑制し、主権を守ります。</p>
+                        <button id="btn-rest-negotiate" class="btn-wood">世論と条約を統制する</button>
+                    </div>
+
+                    <div class="rest-card">
+                        <div class="rest-icon">⚔️</div>
+                        <h3>心の鍛錬（札の破棄）</h3>
+                        <p>手札の不要なカード、または混入した呪いカードを1枚破棄します。</p>
+                        <button id="btn-rest-purge" class="btn-wood">雑念の札を斬り捨てる</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. ゲームオーバー画面 -->
+        <section id="screen-gameover" class="game-screen">
+            <div class="result-box gameover-box">
+                <div class="result-emblem">散華</div>
+                <h2 class="result-title">大義潰え、夢幻の如く</h2>
+                <div id="gameover-reason" class="result-desc">戦乱の荒波に呑まれ、志半ばで倒れた…</div>
+                <button id="btn-restart" class="btn-wood large">新たな志を抱き、再起する</button>
+            </div>
+        </section>
+
+        <!-- 8. ゲームクリア画面 -->
+        <section id="screen-gamewin" class="game-screen">
+            <div class="result-box gamewin-box">
+                <div class="result-emblem gold">天運照覧</div>
+                <h2 class="result-title">幕末の夜明け・天下泰平</h2>
+                <div id="gamewin-message" class="result-desc">新時代の光が日本全土を包み込んだ！</div>
+                <button id="btn-restart-win" class="btn-wood large">新たな幕末の歴史を紡ぐ</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- モーダル群 -->
+
+    <!-- デッキ確認モーダル -->
+    <div id="modal-deck" class="game-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content-box">
+            <div class="modal-header">
+                <h2>所持札録（現在のデッキ一覧）</h2>
+                <span id="deck-total-count">所持カード: 10 枚</span>
+                <button id="btn-close-deck" class="modal-close-btn">✕</button>
+            </div>
+            <div id="deck-cards-grid" class="modal-cards-grid"></div>
+        </div>
+    </div>
+
+    <!-- カード削除選択モーダル -->
+    <div id="modal-removal" class="game-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content-box">
+            <div class="modal-header">
+                <h2>破棄する札を選択してください</h2>
+                <button id="btn-close-removal" class="modal-close-btn">✕</button>
+            </div>
+            <div id="removal-cards-grid" class="modal-cards-grid"></div>
+        </div>
+    </div>
+
+    <!-- 戦闘報酬モーダル -->
+    <div id="modal-reward" class="game-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content-box reward-box">
+            <div class="modal-header">
+                <h2>戦果確認（勝利報酬）</h2>
+            </div>
+            <div class="reward-content">
+                <div class="reward-gold-line">
+                    <span>獲得資金: </span>
+                    <strong id="reward-gold-amount" class="stat-gold">25 両</strong>
+                </div>
+                <div id="reward-relic-container"></div>
+                <h3>【新たな札を1枚選択して仲間に加える】</h3>
+                <div id="reward-cards-container" class="reward-cards-grid"></div>
+                <div class="reward-skip-box">
+                    <button id="btn-skip-reward" class="btn-wood">札を受け取らず立ち去る</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- スクリプトの読み込み（依存順序に注意：独立したファイル） -->
+    <script src="js/audio.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/battle.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+
