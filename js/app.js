@@ -146,85 +146,26 @@ class BakumatsuApp {
             this.maxHp = 75;
             this.hp = 75;
             this.gold = 100;
-            const tobakuDecks = [
-                [
-                    "tobaku_strike", "tobaku_strike", "tobaku_strike",
-                    "tobaku_defend", "tobaku_defend", "tobaku_defend",
-                    "ryoma_kaiwentai", "katsura_shindo", "saigo_jigen", "ito_diplomat", "omura_reform", "satcho_secret",
-                    "tobaku_strike", "okada_izo", "ryoma_kaiwentai", "katsura_shindo", "saigo_jigen", "ito_diplomat", "omura_reform", "akane_negotiation"
-                ],
-                [
-                    "tobaku_strike", "tobaku_strike", "tobaku_strike",
-                    "tobaku_defend", "ryoma_kaiwentai", "satcho_secret",
-                    "takasugi_kiheitai", "sonno_joi", "katsura_shindo", "saigo_jigen", "ito_diplomat", "omura_reform",
-                    "tobaku_strike", "tobaku_strike", "tobaku_defend", "ryoma_kaiwentai", "katsura_shindo", "saigo_jigen", "ito_diplomat", "omura_reform"
-                ],
-                [
-                    "tobaku_strike", "tobaku_strike", "tobaku_strike", "tobaku_strike", "tobaku_strike",
-                    "tobaku_defend", "ryoma_kaiwentai", "takasugi_kiheitai", "saigo_jigen", "katsura_shindo", "ito_diplomat", "omura_reform",
-                    "tobaku_strike", "tobaku_strike", "tobaku_defend", "ryoma_kaiwentai", "katsura_shindo", "saigo_jigen", "ito_diplomat", "takasugi_kiheitai"
-                ],
-                [
-                    "tobaku_strike", "tobaku_strike",
-                    "tobaku_defend", "tobaku_defend",
-                    "satcho_secret", "katsura_shindo", "okubo_strategy", "saigo_jigen",
-                    "ryoma_kaiwentai", "takasugi_kiheitai", "ito_diplomat", "omura_reform",
-                    "tobaku_strike", "tobaku_strike", "tobaku_defend", "ryoma_kaiwentai", "katsura_shindo", "saigo_jigen", "ito_diplomat", "omura_reform"
-                ],
-                [
-                    "tobaku_strike", "tobaku_strike", "tobaku_strike", "tobaku_strike",
-                    "tobaku_defend", "ryoma_kaiwentai", "katsura_shindo", "saigo_jigen", "takasugi_kiheitai", "ito_diplomat",
-                    "omura_reform", "satcho_secret", "tobaku_strike", "ryoma_kaiwentai", "katsura_shindo", "saigo_jigen", "takasugi_kiheitai", "ito_diplomat", "omura_reform", "sonno_joi"
-                ],
-                [
-                    "tobaku_strike", "tobaku_strike", "tobaku_strike",
-                    "tobaku_defend", "tobaku_defend", "ryoma_kaiwentai", "katsura_shindo", "saigo_jigen", "takasugi_kiheitai", "ito_diplomat",
-                    "omura_reform", "satcho_secret", "tobaku_strike", "tobaku_defend", "ryoma_kaiwentai", "katsura_shindo", "saigo_jigen", "ito_diplomat", "omura_reform", "okubo_strategy"
-                ]
+            // 初期デッキ（スターターカードのみで構成：計10枚）
+            this.deck = [
+                "tobaku_strike", "tobaku_strike", "tobaku_strike", "tobaku_strike",
+                "tobaku_defend", "tobaku_defend", "tobaku_defend", "tobaku_defend",
+                "ryoma_kaiwentai",
+                "satcho_secret"
             ];
-            this.deck = [...tobakuDecks[Math.floor(Math.random() * tobakuDecks.length)]];
             this.obtainRelic("kaientai_log");
         } else {
             // 🔵 幕府・会津藩（佐幕派）
             this.maxHp = 85;
             this.hp = 85;
             this.gold = 120;
-            const sabakuDecks = [
-                [
-                    "sabaku_strike", "sabaku_strike", "sabaku_strike",
-                    "sabaku_defend", "sabaku_defend", "sabaku_defend",
-                    "hijikata_fukucho", "kondo_kotetsu", "okita_sandan", "nagakura_bushin", "yamagawa_defense", "kyokuchu_hatto",
-                    "sabaku_strike", "matsumoto_medicine", "hijikata_fukucho", "kondo_kotetsu", "okita_sandan", "nagakura_bushin", "yamagawa_defense", "abe_juro_tactics"
-                ],
-                [
-                    "sabaku_strike", "sabaku_strike", "sabaku_strike",
-                    "sabaku_defend", "hijikata_fukucho", "kyokuchu_hatto",
-                    "kondo_kotetsu", "saito_gato", "aizu_shield", "okita_sandan", "nagakura_bushin", "yamagawa_defense",
-                    "sabaku_strike", "sabaku_strike", "sabaku_defend", "hijikata_fukucho", "kondo_kotetsu", "okita_sandan", "nagakura_bushin", "yamagawa_defense"
-                ],
-                [
-                    "sabaku_strike", "sabaku_strike",
-                    "sabaku_defend", "sabaku_defend", "sabaku_defend", "sabaku_defend",
-                    "hijikata_fukucho", "kondo_kotetsu", "aizu_shield", "saito_gato", "nagakura_bushin", "yamagawa_defense",
-                    "sabaku_strike", "sabaku_strike", "sabaku_defend", "hijikata_fukucho", "kondo_kotetsu", "okita_sandan", "nagakura_bushin", "yamagawa_defense"
-                ],
-                [
-                    "sabaku_strike", "sabaku_strike", "sabaku_strike", "sabaku_strike", "sabaku_strike",
-                    "sabaku_defend", "hijikata_fukucho", "okita_sandan", "saito_gato", "kondo_kotetsu", "nagakura_bushin", "yamagawa_defense",
-                    "sabaku_strike", "sabaku_strike", "sabaku_defend", "hijikata_fukucho", "kondo_kotetsu", "okita_sandan", "nagakura_bushin", "yamagawa_defense"
-                ],
-                [
-                    "sabaku_strike", "sabaku_strike", "sabaku_strike", "sabaku_strike",
-                    "sabaku_defend", "hijikata_fukucho", "kondo_kotetsu", "okita_sandan", "saito_gato", "nagakura_bushin",
-                    "yamagawa_defense", "aizu_shield", "sabaku_strike", "hijikata_fukucho", "kondo_kotetsu", "okita_sandan", "saito_gato", "nagakura_bushin", "yamagawa_defense", "kyokuchu_hatto"
-                ],
-                [
-                    "sabaku_strike", "sabaku_strike", "sabaku_strike",
-                    "sabaku_defend", "sabaku_defend", "hijikata_fukucho", "kondo_kotetsu", "okita_sandan", "saito_gato", "nagakura_bushin",
-                    "yamagawa_defense", "aizu_shield", "sabaku_strike", "sabaku_defend", "hijikata_fukucho", "kondo_kotetsu", "okita_sandan", "nagakura_bushin", "yamagawa_defense", "saito_gato"
-                ]
+            // 初期デッキ（スターターカードのみで構成：計10枚）
+            this.deck = [
+                "sabaku_strike", "sabaku_strike", "sabaku_strike", "sabaku_strike",
+                "sabaku_defend", "sabaku_defend", "sabaku_defend", "sabaku_defend",
+                "hijikata_fukucho",
+                "kyokuchu_hatto"
             ];
-            this.deck = [...sabakuDecks[Math.floor(Math.random() * sabakuDecks.length)]];
             this.obtainRelic("makoto_haori");
         }
 

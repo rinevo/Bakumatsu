@@ -146,27 +146,32 @@ class UIManager {
 
     // --- コネクトリンク予測ハイライト ---
     highlightSynergyCards(hoveredCard) {
+        if (!hoveredCard) return;
         const handCards = document.querySelectorAll('#battle-hand .card-frame');
+        const hoveredElem = document.querySelector(`[data-card-id="${hoveredCard.id}"]`);
+
+        // 1. 志士のコンボパートナーを判定
+        let partnerChars = [];
+        if (hoveredCard.character && GAME_DATA.combos) {
+            const relevantCombos = GAME_DATA.combos.filter(combo => combo.chars && combo.chars.includes(hoveredCard.character));
+            partnerChars = [...new Set(relevantCombos.flatMap(combo => combo.chars.filter(ch => ch !== hoveredCard.character)))];
+        }
+
         handCards.forEach(cardElem => {
             const cId = cardElem.dataset.cardId;
             const cData = GAME_DATA.cards[cId];
-            if (!cData) return;
+            if (!cData || cardElem === hoveredElem) return;
 
-            // 龍馬＆桂、近藤＆土方などの相乗チェック
-            const isPartner = (
-                (hoveredCard.character === 'ryoma' && cData.character === 'katsura') ||
-                (hoveredCard.character === 'katsura' && cData.character === 'ryoma') ||
-                (hoveredCard.character === 'hijikata' && cData.character === 'kondo') ||
-                (hoveredCard.character === 'kondo' && cData.character === 'hijikata') ||
-                (hoveredCard.character === 'saigo' && cData.character === 'okubo') ||
-                (hoveredCard.character === 'okubo' && cData.character === 'saigo') ||
-                (hoveredCard.character === 'katsu' && cData.character === 'ryoma') ||
-                (hoveredCard.character === 'ryoma' && cData.character === 'katsu')
-            );
+            let isPartner = false;
+            if (cData.character && partnerChars.includes(cData.character)) {
+                isPartner = true;
+            }
 
             if (isPartner) {
                 cardElem.classList.add('synergy-partner-glow');
-                window.particleSystem.createConnectLink(document.querySelector(`[data-card-id="${hoveredCard.id}"]`), cardElem);
+                if (hoveredElem) {
+                    window.particleSystem.createConnectLink(hoveredElem, cardElem);
+                }
             }
         });
     }
@@ -451,8 +456,14 @@ class UIManager {
                 `;
 
                 btn.addEventListener('click', () => {
-                    choice.action(this.app);
-                    window.soundSystem.playTaiko(false);
+                    try {
+                        choice.action(this.app);
+                    } catch (err) {
+                        console.error("Event choice execution error:", err);
+                    }
+                    if (window.soundSystem && window.soundSystem.playTaiko) {
+                        window.soundSystem.playTaiko(false);
+                    }
                     setTimeout(() => {
                         this.app.returnToMap();
                     }, 400);

@@ -295,6 +295,11 @@ class SoundSystem {
         setTimeout(() => this.playTaiko(true), notes.length * 140);
     }
 
+    // --- 志士獲得・達成ファンファーレ ---
+    playFanfare() {
+        this.playVictory();
+    }
+
     playKotoNote(freq, duration = 0.5) {
         if (this.isMuted || !this.ctx) return;
         const now = this.ctx.currentTime;
