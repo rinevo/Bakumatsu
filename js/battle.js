@@ -1,5 +1,5 @@
 /**
- * 維新の嵐：双極の蒼穹 - Rogue Deck-Build -
+ * 幕末風雲録：双極の蒼穹 - Rogue Deck-Build -
  * 戦闘ロジック・ターン進行・AI・連鎖・コネクトリンク エンジン
  */
 
@@ -23,6 +23,7 @@ class BattleSystem {
         // 敵情報
         this.enemy = null;
         this.enemyIntentIndex = 0;
+        this.enemyComboCount = 0;
 
         // ターン内記録
         this.turnCount = 0;
@@ -105,6 +106,7 @@ class BattleSystem {
             intent: null
         };
         this.enemyIntentIndex = 0;
+        this.enemyComboCount = 0;
 
         // デッキ初期化（シャッフルして山札へ）
         this.drawPile = this.shuffleArray([...this.app.deck]);
@@ -307,7 +309,69 @@ class BattleSystem {
              (currentCard.character === 'saigo' && c.character === 'okubo') ||
              (currentCard.character === 'okubo' && c.character === 'saigo') ||
              (currentCard.character === 'katsu' && c.character === 'ryoma') ||
-             (currentCard.character === 'ryoma' && c.character === 'katsu'))
+             (currentCard.character === 'ryoma' && c.character === 'katsu') ||
+             (currentCard.character === 'ito' && c.character === 'omura') ||
+             (currentCard.character === 'omura' && c.character === 'ito') ||
+             (currentCard.character === 'hijikata' && c.character === 'nagakura') ||
+             (currentCard.character === 'nagakura' && c.character === 'hijikata') ||
+             (currentCard.character === 'okita' && c.character === 'saito') ||
+             (currentCard.character === 'saito' && c.character === 'okita') ||
+             (currentCard.character === 'kondo' && c.character === 'sannan') ||
+             (currentCard.character === 'sannan' && c.character === 'kondo') ||
+             (currentCard.character === 'enomoto' && c.character === 'otori') ||
+             (currentCard.character === 'otori' && c.character === 'enomoto') ||
+             (currentCard.character === 'nakaoka' && c.character === 'ryoma') ||
+             (currentCard.character === 'ryoma' && c.character === 'nakaoka') ||
+             (currentCard.character === 'kido' && c.character === 'katsura') ||
+             (currentCard.character === 'katsura' && c.character === 'kido') ||
+             (currentCard.character === 'katamori' && c.character === 'yamagawa') ||
+             (currentCard.character === 'yamagawa' && c.character === 'katamori') ||
+             (currentCard.character === 'kawai' && c.character === 'koga') ||
+             (currentCard.character === 'koga' && c.character === 'kawai') ||
+             (currentCard.character === 'sagawa' && c.character === 'harada') ||
+             (currentCard.character === 'harada' && c.character === 'sagawa') ||
+             (currentCard.character === 'takechi' && c.character === 'mochizuki') ||
+             (currentCard.character === 'mochizuki' && c.character === 'takechi') ||
+             (currentCard.character === 'takechi' && c.character === 'izo') ||
+             (currentCard.character === 'izo' && c.character === 'takechi') ||
+             (currentCard.character === 'tanaka' && c.character === 'shinagawa') ||
+             (currentCard.character === 'shinagawa' && c.character === 'tanaka') ||
+             (currentCard.character === 'yamaoka' && c.character === 'takahashi') ||
+             (currentCard.character === 'takahashi' && c.character === 'yamaoka') ||
+             (currentCard.character === 'takeda' && c.character === 'hijikata') ||
+             (currentCard.character === 'hijikata' && c.character === 'takeda') ||
+             (currentCard.character === 'sakuma' && c.character === 'kuroda') ||
+             (currentCard.character === 'kuroda' && c.character === 'sakuma') ||
+             (currentCard.character === 'yoshida' && c.character === 'yamada') ||
+             (currentCard.character === 'yamada' && c.character === 'yoshida') ||
+             (currentCard.character === 'iwazaki' && c.character === 'enomoto') ||
+             (currentCard.character === 'enomoto' && c.character === 'iwazaki') ||
+             (currentCard.character === 'matsumoto' && c.character === 'abe_juro') ||
+             (currentCard.character === 'abe_juro' && c.character === 'matsumoto') ||
+             (currentCard.character === 'akane' && c.character === 'yamaoka') ||
+             (currentCard.character === 'yamaoka' && c.character === 'akane') ||
+             (currentCard.character === 'kusaka' && c.character === 'irie') ||
+             (currentCard.character === 'irie' && c.character === 'kusaka') ||
+             (currentCard.character === 'goto' && c.character === 'iwakura') ||
+             (currentCard.character === 'iwakura' && c.character === 'goto') ||
+             (currentCard.character === 'fukuoka' && c.character === 'soejima') ||
+             (currentCard.character === 'soejima' && c.character === 'fukuoka') ||
+             (currentCard.character === 'yamagata' && c.character === 'ijichi') ||
+             (currentCard.character === 'ijichi' && c.character === 'yamagata') ||
+             (currentCard.character === 'yokoi' && c.character === 'eto') ||
+             (currentCard.character === 'eto' && c.character === 'yokoi') ||
+             (currentCard.character === 'yodo' && c.character === 'sanjo') ||
+             (currentCard.character === 'sanjo' && c.character === 'yodo') ||
+             (currentCard.character === 'shungaku' && c.character === 'abe') ||
+             (currentCard.character === 'abe' && c.character === 'shungaku') ||
+             (currentCard.character === 'kimura' && c.character === 'oguri') ||
+             (currentCard.character === 'oguri' && c.character === 'kimura') ||
+             (currentCard.character === 'suzuki' && c.character === 'sasaki_aijiro') ||
+             (currentCard.character === 'sasaki_aijiro' && c.character === 'suzuki') ||
+             (currentCard.character === 'yoshida_minomaru' && c.character === 'kusaka') ||
+             (currentCard.character === 'kusaka' && c.character === 'yoshida_minomaru') ||
+             (currentCard.character === 'tanaka_shinbei' && c.character === 'izo') ||
+             (currentCard.character === 'izo' && c.character === 'tanaka_shinbei'))
         );
 
         if (partner) {
@@ -331,6 +395,166 @@ class BattleSystem {
                        (currentCard.character === 'ryoma' && partner.character === 'katsu')) {
                 this.modifyImperialGauge(-5);
                 this.gainPlayerShield(10);
+            } else if ((currentCard.character === 'ito' && partner.character === 'omura') ||
+                       (currentCard.character === 'omura' && partner.character === 'ito')) {
+                this.drawCards(1);
+                this.gainPlayerEnergy(1);
+                window.particleSystem.showComboText("【新政の両輪！】", this.comboCount);
+            } else if ((currentCard.character === 'hijikata' && partner.character === 'nagakura') ||
+                       (currentCard.character === 'nagakura' && partner.character === 'hijikata')) {
+                this.dealDamageToEnemy(8);
+                this.gainPlayerShield(8);
+                window.particleSystem.showComboText("【二番隊の猛襲！】", this.comboCount);
+            } else if ((currentCard.character === 'okita' && partner.character === 'saito') ||
+                       (currentCard.character === 'saito' && partner.character === 'okita')) {
+                this.dealDamageToEnemy(10);
+                this.applyStatusToEnemy("bleed", 2);
+                window.particleSystem.showComboText("【一番隊の双刃！】", this.comboCount);
+            } else if ((currentCard.character === 'kondo' && partner.character === 'sannan') ||
+                       (currentCard.character === 'sannan' && partner.character === 'kondo')) {
+                this.gainPlayerShield(10);
+                this.drawCards(1);
+                window.particleSystem.showComboText("【誠の軍議！】", this.comboCount);
+            } else if ((currentCard.character === 'enomoto' && partner.character === 'otori') ||
+                       (currentCard.character === 'otori' && partner.character === 'enomoto')) {
+                this.dealDamageToEnemy(10);
+                this.applyPlayerBuff("strength", 3);
+                window.particleSystem.showComboText("【北海艦隊！】", this.comboCount);
+            } else if ((currentCard.character === 'nakaoka' && partner.character === 'ryoma') ||
+                       (currentCard.character === 'ryoma' && partner.character === 'nakaoka')) {
+                this.gainPlayerEnergy(1);
+                this.drawCards(2);
+                window.particleSystem.showComboText("【土佐の盟友！】", this.comboCount);
+            } else if ((currentCard.character === 'kido' && partner.character === 'katsura') ||
+                       (currentCard.character === 'katsura' && partner.character === 'kido')) {
+                this.modifyImperialGauge(-5);
+                this.applyPlayerBuff("strength", 4);
+                window.particleSystem.showComboText("【維新の設計図！】", this.comboCount);
+            } else if ((currentCard.character === 'katamori' && partner.character === 'yamagawa') ||
+                       (currentCard.character === 'yamagawa' && partner.character === 'katamori')) {
+                this.gainPlayerShield(14);
+                this.healPlayer(5);
+                window.particleSystem.showComboText("【会津守護の陣！】", this.comboCount);
+            } else if ((currentCard.character === 'kawai' && partner.character === 'koga') ||
+                       (currentCard.character === 'koga' && partner.character === 'kawai')) {
+                this.dealDamageToEnemy(14);
+                if (this.enemy) {
+                    this.enemy.shield = 0;
+                }
+                window.particleSystem.showComboText("【北辺艦砲連携！】", this.comboCount);
+            } else if ((currentCard.character === 'sagawa' && partner.character === 'harada') ||
+                       (currentCard.character === 'harada' && partner.character === 'sagawa')) {
+                this.dealDamageToEnemy(12);
+                this.applyStatusToEnemy("bleed", 3);
+                window.particleSystem.showComboText("【鬼神の槍騎！】", this.comboCount);
+            } else if ((currentCard.character === 'takechi' && partner.character === 'mochizuki') ||
+                       (currentCard.character === 'mochizuki' && partner.character === 'takechi')) {
+                this.dealDamageToEnemy(15);
+                this.applyPlayerBuff("strength", 4);
+                window.particleSystem.showComboText("【土佐勤王の烈火！】", this.comboCount);
+            } else if ((currentCard.character === 'takechi' && partner.character === 'izo') ||
+                       (currentCard.character === 'izo' && partner.character === 'takechi')) {
+                this.dealDamageToEnemy(12);
+                this.applyStatusToEnemy("bleed", 3);
+                this.applyPlayerBuff("strength", 3);
+                window.particleSystem.showComboText("【勤王暗殺連携！】", this.comboCount);
+            } else if ((currentCard.character === 'tanaka' && partner.character === 'shinagawa') ||
+                       (currentCard.character === 'shinagawa' && partner.character === 'tanaka')) {
+                this.drawCards(2);
+                this.modifyImperialGauge(-4);
+                window.particleSystem.showComboText("【密使の連絡網！】", this.comboCount);
+            } else if ((currentCard.character === 'yamaoka' && partner.character === 'takahashi') ||
+                       (currentCard.character === 'takahashi' && partner.character === 'yamaoka')) {
+                this.gainPlayerShield(18);
+                this.applyPlayerBuff("damage_reduction", 4);
+                window.particleSystem.showComboText("【江戸無血の双槍！】", this.comboCount);
+            } else if ((currentCard.character === 'takeda' && partner.character === 'hijikata') ||
+                       (currentCard.character === 'hijikata' && partner.character === 'takeda')) {
+                this.applyStatusToEnemy("weak", 3);
+                this.dealDamageToEnemy(9);
+                window.particleSystem.showComboText("【局中軍学！】", this.comboCount);
+            } else if ((currentCard.character === 'sakuma' && partner.character === 'kuroda') ||
+                       (currentCard.character === 'kuroda' && partner.character === 'sakuma')) {
+                this.dealDamageToEnemy(16);
+                this.gainPlayerShield(10);
+                window.particleSystem.showComboText("【北辺海防の砲陣！】", this.comboCount);
+            } else if ((currentCard.character === 'yoshida' && partner.character === 'yamada') ||
+                       (currentCard.character === 'yamada' && partner.character === 'yoshida')) {
+                this.drawCards(2);
+                this.applyPlayerBuff("strength", 3);
+                window.particleSystem.showComboText("【松下村塾の継承！】", this.comboCount);
+            } else if ((currentCard.character === 'iwazaki' && partner.character === 'enomoto') ||
+                       (currentCard.character === 'enomoto' && partner.character === 'iwazaki')) {
+                this.gainPlayerEnergy(1);
+                this.dealDamageToEnemy(12);
+                this.modifyImperialGauge(3);
+                window.particleSystem.showComboText("【海運艦隊の連携！】", this.comboCount);
+            } else if ((currentCard.character === 'matsumoto' && partner.character === 'abe_juro') ||
+                       (currentCard.character === 'abe_juro' && partner.character === 'matsumoto')) {
+                this.healPlayer(8);
+                this.applyStatusToEnemy("weak", 2);
+                window.particleSystem.showComboText("【軍医遊撃の陣！】", this.comboCount);
+            } else if ((currentCard.character === 'goto' && partner.character === 'iwakura') ||
+                       (currentCard.character === 'iwakura' && partner.character === 'goto')) {
+                this.modifyImperialGauge(-8);
+                this.drawCards(1);
+                window.particleSystem.showComboText("【大政の双策！】", this.comboCount);
+            } else if ((currentCard.character === 'fukuoka' && partner.character === 'soejima') ||
+                       (currentCard.character === 'soejima' && partner.character === 'fukuoka')) {
+                this.gainPlayerShield(12);
+                this.gainPlayerEnergy(1);
+                window.particleSystem.showComboText("【新政外交の両翼！】", this.comboCount);
+            } else if ((currentCard.character === 'yamagata' && partner.character === 'ijichi') ||
+                       (currentCard.character === 'ijichi' && partner.character === 'yamagata')) {
+                this.dealDamageToEnemy(14);
+                this.applyPlayerBuff("strength", 4);
+                window.particleSystem.showComboText("【薩摩陸軍の猛進！】", this.comboCount);
+            } else if ((currentCard.character === 'yokoi' && partner.character === 'eto') ||
+                       (currentCard.character === 'eto' && partner.character === 'yokoi')) {
+                this.healPlayer(6);
+                this.drawCards(1);
+                this.modifyImperialGauge(-4);
+                window.particleSystem.showComboText("【実学改革の連環！】", this.comboCount);
+            } else if ((currentCard.character === 'yodo' && partner.character === 'sanjo') ||
+                       (currentCard.character === 'sanjo' && partner.character === 'yodo')) {
+                this.gainPlayerShield(15);
+                this.modifyImperialGauge(-6);
+                window.particleSystem.showComboText("【公議朝廷の結束！】", this.comboCount);
+            } else if ((currentCard.character === 'shungaku' && partner.character === 'abe') ||
+                       (currentCard.character === 'abe' && partner.character === 'shungaku')) {
+                this.gainPlayerShield(16);
+                this.drawCards(1);
+                window.particleSystem.showComboText("【海防公議の盾！】", this.comboCount);
+            } else if ((currentCard.character === 'kimura' && partner.character === 'oguri') ||
+                       (currentCard.character === 'oguri' && partner.character === 'kimura')) {
+                this.dealDamageToEnemy(12);
+                this.modifyImperialGauge(-5);
+                window.particleSystem.showComboText("【造船海防の双翼！】", this.comboCount);
+            } else if ((currentCard.character === 'suzuki' && partner.character === 'sasaki_aijiro') ||
+                       (currentCard.character === 'sasaki_aijiro' && partner.character === 'suzuki')) {
+                this.dealDamageToEnemy(10);
+                this.applyStatusToEnemy("bleed", 2);
+                window.particleSystem.showComboText("【見廻り双刃！】", this.comboCount);
+            } else if ((currentCard.character === 'yoshida_minomaru' && partner.character === 'kusaka') ||
+                       (currentCard.character === 'kusaka' && partner.character === 'yoshida_minomaru')) {
+                this.dealDamageToEnemy(15);
+                this.applyPlayerBuff("strength", 3);
+                window.particleSystem.showComboText("【松下村塾の急襲！】", this.comboCount);
+            } else if ((currentCard.character === 'tanaka_shinbei' && partner.character === 'izo') ||
+                       (currentCard.character === 'izo' && partner.character === 'tanaka_shinbei')) {
+                this.dealDamageToEnemy(14);
+                this.applyStatusToEnemy("bleed", 4);
+                window.particleSystem.showComboText("【刺客血盟の太刀！】", this.comboCount);
+            } else if ((currentCard.character === 'akane' && partner.character === 'yamaoka') ||
+                       (currentCard.character === 'yamaoka' && partner.character === 'akane')) {
+                this.modifyImperialGauge(-8);
+                this.gainPlayerShield(12);
+                window.particleSystem.showComboText("【和平談判の刃！】", this.comboCount);
+            } else if ((currentCard.character === 'kusaka' && partner.character === 'irie') ||
+                       (currentCard.character === 'irie' && partner.character === 'kusaka')) {
+                this.dealDamageToEnemy(13);
+                this.applyPlayerBuff("strength", 4);
+                window.particleSystem.showComboText("【長州密議の猛攻！】", this.comboCount);
             }
         }
     }
@@ -429,7 +653,43 @@ class BattleSystem {
         if (dmg > 0) {
             this.playerHp = Math.max(0, this.playerHp - dmg);
             this.app.hp = this.playerHp;
+
+            const hpFill = document.getElementById('header-hp-fill');
+            if (hpFill) {
+                hpFill.classList.remove('hp-damage-flash');
+                void hpFill.offsetWidth;
+                hpFill.classList.add('hp-damage-flash');
+                setTimeout(() => hpFill.classList.remove('hp-damage-flash'), 420);
+            }
+
+            const battleScreen = document.getElementById('screen-battle');
+            if (battleScreen) {
+                battleScreen.classList.remove('battle-damage-impact');
+                void battleScreen.offsetWidth;
+                battleScreen.classList.add('battle-damage-impact');
+                setTimeout(() => battleScreen.classList.remove('battle-damage-impact'), 520);
+            }
+
+            window.particleSystem.createInkSplash(
+                window.innerWidth * 0.5,
+                window.innerHeight * 0.78,
+                32,
+                'rgba(220, 20, 20, '
+            );
+            window.particleSystem.createSparks(
+                window.innerWidth * 0.5,
+                window.innerHeight * 0.78,
+                24,
+                false
+            );
         }
+
+        window.particleSystem.createSparks(
+            window.innerWidth * 0.5,
+            window.innerHeight * 0.78,
+            12,
+            false
+        );
 
         // 反撃（Thorns）
         if (this.playerBuffs.thorns > 0) {
@@ -545,6 +805,11 @@ class BattleSystem {
 
         const intent = this.enemy.intent;
         if (intent) {
+            const isOffensiveIntent = intent.type === 'attack' || intent.type === 'curse';
+            this.enemyComboCount = isOffensiveIntent ? this.enemyComboCount + 1 : 0;
+            const comboLabel = this.enemyComboCount >= 2 ? `・敵${this.enemyComboCount}連撃` : '';
+            window.particleSystem.showEnemyActionText(`敵技・${intent.desc}${comboLabel}`, this.enemyComboCount);
+
             switch (intent.type) {
                 case 'attack': {
                     let dmg = intent.damage;

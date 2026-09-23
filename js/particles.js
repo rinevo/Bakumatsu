@@ -1,5 +1,5 @@
 /**
- * 維新の嵐：双極の蒼穹 - Rogue Deck-Build -
+ * 幕末風雲録：双極の蒼穹 - Rogue Deck-Build -
  * 墨絵・斬撃・火花・コネクトリンク エフェクト描画エンジン (HTML5 Canvas)
  */
 
@@ -152,6 +152,23 @@ class ParticleSystem {
         }
     }
 
+    showEnemyActionText(text, count) {
+        const x = window.innerWidth / 2;
+        const y = window.innerHeight * 0.42;
+        this.textFloats.push({
+            text,
+            count,
+            x,
+            y,
+            life: 1.0,
+            maxLife: 1.0,
+            scale: 0.6,
+            isEnemy: true
+        });
+        this.createInkSplash(x, y, 18, 'rgba(110, 20, 20, ');
+        this.createSparks(x, y, count >= 2 ? 18 : 10, false);
+    }
+
     update(dt) {
         // パーティクル更新
         for (let i = this.particles.length - 1; i >= 0; i--) {
@@ -264,18 +281,22 @@ class ParticleSystem {
             this.ctx.globalAlpha = alpha;
 
             // 影（墨の滲み）
-            this.ctx.font = 'bold 52px "Yu Mincho", "Hiragino Mincho ProN", serif';
+            this.ctx.font = t.isEnemy
+                ? 'bold 34px "Yu Mincho", "Hiragino Mincho ProN", serif'
+                : 'bold 52px "Yu Mincho", "Hiragino Mincho ProN", serif';
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
 
             this.ctx.fillStyle = 'rgba(10, 10, 12, 0.9)';
-            this.ctx.shadowColor = t.count >= 3 ? 'rgba(215, 40, 40, 0.8)' : 'rgba(212, 175, 55, 0.8)';
+            this.ctx.shadowColor = t.isEnemy || t.count >= 3
+                ? 'rgba(215, 40, 40, 0.8)'
+                : 'rgba(212, 175, 55, 0.8)';
             this.ctx.shadowBlur = 24;
             this.ctx.fillText(t.text, 0, 0);
 
             // 金または朱のハイライト縁取り
             this.ctx.lineWidth = 2;
-            this.ctx.strokeStyle = t.count >= 3 ? '#ff3b30' : '#e6be65';
+            this.ctx.strokeStyle = t.isEnemy || t.count >= 3 ? '#ff3b30' : '#e6be65';
             this.ctx.strokeText(t.text, 0, 0);
 
             this.ctx.restore();

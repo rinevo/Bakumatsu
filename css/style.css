@@ -1,5 +1,5 @@
 /* ==========================================================================
-   維新の嵐：双極の蒼穹 - Rogue Deck-Build -
+    幕末風雲録：双極の蒼穹 - Rogue Deck-Build -
    スタイルシート: 和モダン × 浮世絵風ダークファンタジー
    ========================================================================== */
 
@@ -134,6 +134,23 @@ body {
     width: 100%;
     background: linear-gradient(90deg, #b3261e, #e63946);
     transition: width 0.3s ease;
+}
+.hp-bar-fill.hp-damage-flash {
+    animation: hp-damage-flash 0.42s ease-out;
+}
+@keyframes hp-damage-flash {
+    0%, 100% {
+        filter: brightness(1);
+        box-shadow: 0 0 0 rgba(255, 60, 40, 0);
+    }
+    25% {
+        filter: brightness(2.2);
+        box-shadow: 0 0 14px rgba(255, 60, 40, 0.95);
+    }
+    55% {
+        filter: brightness(1.35);
+        box-shadow: 0 0 8px rgba(255, 60, 40, 0.65);
+    }
 }
 .stat-badge-small {
     display: inline-block;
@@ -280,7 +297,10 @@ body {
 #screen-title {
     top: 0;
     height: 100%;
-    background: radial-gradient(circle at center, #1b2838 0%, #0a0b0e 80%);
+    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/nippon.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -437,6 +457,10 @@ body {
    2. マップ画面
    ========================================== */
 #screen-map {
+    background-image: linear-gradient(rgba(10, 11, 14, 0.84), rgba(10, 11, 14, 0.95)), url('../img/nippon.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     justify-content: center;
     align-items: center;
 }
@@ -592,7 +616,42 @@ body {
    3. 戦闘画面
    ========================================== */
 #screen-battle {
+    --battle-danger: 0;
+    --battle-hit-flash: 0;
+    background-image:
+        linear-gradient(rgba(255, 30, 20, var(--battle-hit-flash)), rgba(80, 0, 0, var(--battle-hit-flash))),
+        linear-gradient(rgba(150, 0, 0, var(--battle-danger)), rgba(70, 0, 0, var(--battle-danger))),
+        linear-gradient(rgba(10, 11, 14, 0.84), rgba(10, 11, 14, 0.95)),
+        url('../img/tatakai.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     flex-direction: column;
+}
+#screen-battle.battle-damage-impact {
+    animation: battle-damage-impact 0.52s ease-out;
+}
+@keyframes battle-damage-impact {
+    0%, 100% {
+        transform: translate(0, 0);
+        --battle-hit-flash: 0;
+    }
+    12% {
+        transform: translate(-7px, 2px);
+        --battle-hit-flash: 0.32;
+    }
+    24% {
+        transform: translate(8px, -2px);
+        --battle-hit-flash: 0.2;
+    }
+    38% {
+        transform: translate(-5px, 1px);
+        --battle-hit-flash: 0.12;
+    }
+    55% {
+        transform: translate(3px, 0);
+        --battle-hit-flash: 0.06;
+    }
 }
 
 .battle-arena {
@@ -716,6 +775,18 @@ body {
     border-bottom: 1px solid #332d22;
     padding: 8px 24px;
     border-radius: 6px;
+}
+
+.enemy-deck-counts {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    color: #c8bfb0;
+    font-size: 11px;
+    margin-top: 6px;
+}
+.enemy-deck-counts strong {
+    color: #ff8c82;
 }
 
 .player-battle-stats {
@@ -974,6 +1045,10 @@ body {
    4. 歴史イベント画面
    ========================================== */
 #screen-event {
+    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/event.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     justify-content: center;
     align-items: center;
 }
@@ -1060,6 +1135,10 @@ body {
    5. ショップ画面
    ========================================== */
 #screen-shop {
+    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/shop.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     justify-content: center;
     align-items: center;
 }
@@ -1235,6 +1314,10 @@ body {
    6. 休息画面
    ========================================== */
 #screen-rest {
+    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/rest.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     justify-content: center;
     align-items: center;
 }
@@ -1302,7 +1385,22 @@ body {
 /* ==========================================
    7 & 8. ゲームオーバー ＆ 勝利画面
    ========================================== */
-#screen-gameover, #screen-gamewin {
+#screen-gamewin {
+    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/gamewin.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    top: 0;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+#screen-gameover {
+    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/gameover.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     top: 0;
     height: 100%;
     justify-content: center;

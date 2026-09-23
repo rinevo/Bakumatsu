@@ -1,5 +1,5 @@
 /**
- * 維新の嵐：双極の蒼穹 - Rogue Deck-Build -
+ * 幕末風雲録：双極の蒼穹 - Rogue Deck-Build -
  * UI描画更新・カードレンダラー・モーダル・予測ガイドライン
  */
 
@@ -183,17 +183,33 @@ class UIManager {
         const b = this.app.battle;
         if (!b) return;
 
+        const battleScreen = document.getElementById('screen-battle');
+        if (battleScreen && b.playerMaxHp > 0) {
+            const damageRatio = 1 - Math.max(0, Math.min(1, b.playerHp / b.playerMaxHp));
+            const dangerOpacity = (damageRatio * 0.58).toFixed(3);
+            battleScreen.style.setProperty('--battle-danger', dangerOpacity);
+        }
+
         // プレイヤー戦闘情報
         const energyText = document.getElementById('battle-player-energy');
         const shieldText = document.getElementById('battle-player-shield');
         const drawCount = document.getElementById('battle-draw-count');
         const discardCount = document.getElementById('battle-discard-count');
+        const enemyDeckCount = document.getElementById('battle-enemy-deck-count');
+        const enemyIntentCount = document.getElementById('battle-enemy-intent-count');
         const buffsContainer = document.getElementById('battle-player-buffs');
 
         if (energyText) energyText.textContent = `${b.playerEnergy} / ${b.playerMaxEnergy}`;
         if (shieldText) shieldText.textContent = b.playerShield;
         if (drawCount) drawCount.textContent = b.drawPile.length;
         if (discardCount) discardCount.textContent = b.discardPile.length;
+        if (enemyDeckCount && b.enemy) {
+            const currentIntent = Math.min(b.enemyIntentIndex, b.enemy.intents.length);
+            enemyDeckCount.textContent = `${currentIntent} / ${b.enemy.intents.length}`;
+        }
+        if (enemyIntentCount && b.enemy) {
+            enemyIntentCount.textContent = b.enemy.intents.length;
+        }
 
         // プレイヤーバフ表示
         if (buffsContainer) {
@@ -420,7 +436,9 @@ class UIManager {
 
         if (choicesContainer) {
             choicesContainer.innerHTML = '';
-            eventData.choices.forEach(choice => {
+            eventData.choices
+                .filter(choice => !choice.faction || choice.faction === this.app.faction)
+                .forEach(choice => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-event-choice';
 
@@ -440,8 +458,8 @@ class UIManager {
                     }, 400);
                 });
 
-                choicesContainer.appendChild(btn);
-            });
+                    choicesContainer.appendChild(btn);
+                });
         }
     }
 
