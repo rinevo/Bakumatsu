@@ -261,13 +261,13 @@ git clone https://github.com/rinevo/Bakumatsu.git
 
 ## 📸 背景画像
 
-| 1. マップ画面 | 2. 戦闘画面 |
+| 1. 戦闘画面 | 2. 商人画面 |
 |:---:|:---:|
-| <img src="img/nippon.jpg" width="400" alt="マップ画面"> | <img src="img/tatakai.jpg" width="400" alt="戦闘画面"> |
+| <img src="img/tatakai.jpg" width="400" alt="戦闘画面"> | <img src="img/shop.jpg" width="400" alt="商人画面"> |
 
-| 3. 承認（商人）画面 | 4. 歴史事件 |
+| 3. 歴史事件 | 4. 休息画面 |
 |:---:|:---:|
-| <img src="img/shop.jpg" width="400" alt="商人画面"> | <img src="img/event.jpg" width="400" alt="歴史事件画面"> |
+| <img src="img/event.jpg" width="400" alt="歴史事件画面"> | <img src="img/rest.jpg" width="400" alt="休息画面"> |
 
 ---
 
