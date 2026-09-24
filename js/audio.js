@@ -7,10 +7,51 @@
 class SoundSystem {
     constructor() {
         this.ctx = null;
-        this.isMuted = false;
+        this.isBgmMuted = false;
+        this.isSeMuted = false;
         this.bgmTimer = null;
         this.isBgmPlaying = false;
         this.initOnFirstGesture = false;
+
+        // MP3 BGM システム
+        this.bgmAudio = null;
+        this.currentBgmKey = null;
+        this.bgmVolume = 0.45;
+        this.bgmTracks = {
+            title: "bgm/The_Iron_Horizon.mp3",
+            map: "bgm/Edge_of_the_Setting_Sun.mp3",
+            battle: "bgm/Thunder_of_the_Shogunate.mp3"
+        };
+        this.audioElements = {};
+
+        // タイトル画面BGMを最速で再生可能にするため即時プリロード
+        this.preloadTrack("title");
+    }
+
+    // トラックの事前ロード
+    preloadTrack(trackKey) {
+        if (typeof Audio === 'undefined') return;
+        const src = this.bgmTracks[trackKey];
+        if (!src || this.audioElements[trackKey]) return;
+        try {
+            const audio = new Audio(src);
+            audio.preload = "auto";
+            audio.loop = true;
+            audio.volume = this.bgmVolume;
+            this.audioElements[trackKey] = audio;
+        } catch (e) {
+            // Audio非対応環境など
+        }
+    }
+
+    // 互換用プロパティ
+    get isMuted() {
+        return this.isBgmMuted && this.isSeMuted;
+    }
+
+    set isMuted(val) {
+        this.isBgmMuted = val;
+        this.isSeMuted = val;
     }
 
     init() {
@@ -21,23 +62,66 @@ class SoundSystem {
             }
         }
         if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
+            this.ctx.resume().catch(() => {});
         }
     }
 
-    toggleMute() {
-        this.isMuted = !this.isMuted;
-        if (this.isMuted) {
-            this.stopBgm();
+    // --- BGM 個別ON/OFF ---
+    toggleBgm() {
+        this.isBgmMuted = !this.isBgmMuted;
+        if (this.isBgmMuted) {
+            if (this.bgmAudio) {
+                this.bgmAudio.pause();
+            }
+            this.stopProceduralBgm();
         } else {
-            this.startBgm();
+            if (this.currentBgmKey) {
+                const key = this.currentBgmKey;
+                this.currentBgmKey = null; // 強制再ロード・再生
+                this.playBgm(key);
+            } else {
+                this.playBgm('title');
+            }
         }
-        return this.isMuted;
+        return this.isBgmMuted;
+    }
+
+    // --- 効果音 個別ON/OFF ---
+    toggleSe() {
+        this.isSeMuted = !this.isSeMuted;
+        if (!this.isSeMuted) {
+            this.init();
+            this.playHyoshigi(); // ON時の確認用音
+        }
+        return this.isSeMuted;
+    }
+
+    // 旧互換用
+    toggleMute() {
+        const nextState = !(this.isBgmMuted && this.isSeMuted);
+        this.isBgmMuted = nextState;
+        this.isSeMuted = nextState;
+        if (this.isBgmMuted) {
+            if (this.bgmAudio) {
+                this.bgmAudio.pause();
+            }
+            this.stopProceduralBgm();
+        } else {
+            if (this.currentBgmKey) {
+                const key = this.currentBgmKey;
+                this.currentBgmKey = null;
+                this.playBgm(key);
+            } else {
+                this.playBgm('title');
+            }
+            this.playHyoshigi();
+        }
+        return nextState;
     }
 
     // --- 和太鼓（ドン！） ---
-    playTaiko(strong = false) {
-        if (this.isMuted) return;
+    playTaiko(strong = false, isBgm = false) {
+        if (!isBgm && this.isSeMuted) return;
         this.init();
         if (!this.ctx) return;
 
@@ -65,7 +149,7 @@ class SoundSystem {
 
     // --- 拍子木（カンッ！） ---
     playHyoshigi() {
-        if (this.isMuted) return;
+        if (this.isSeMuted) return;
         this.init();
         if (!this.ctx) return;
 
@@ -89,7 +173,7 @@ class SoundSystem {
 
     // --- 居合・斬撃（シャキーン！） ---
     playSlash() {
-        if (this.isMuted) return;
+        if (this.isSeMuted) return;
         this.init();
         if (!this.ctx) return;
 
@@ -131,7 +215,7 @@ class SoundSystem {
 
     // --- 防御・鉄壁（カキィン！） ---
     playShield() {
-        if (this.isMuted) return;
+        if (this.isSeMuted) return;
         this.init();
         if (!this.ctx) return;
 
@@ -158,7 +242,7 @@ class SoundSystem {
 
     // --- 西洋銃・大砲（ズドン！） ---
     playGunshot() {
-        if (this.isMuted) return;
+        if (this.isSeMuted) return;
         this.init();
         if (!this.ctx) return;
 
@@ -182,7 +266,7 @@ class SoundSystem {
 
     // --- コネクト・リンク発動（煌めき） ---
     playConnectLink() {
-        if (this.isMuted) return;
+        if (this.isSeMuted) return;
         this.init();
         if (!this.ctx) return;
 
@@ -208,7 +292,7 @@ class SoundSystem {
 
     // --- 墨絵・連鎖音（シュッ） ---
     playCombo(count) {
-        if (this.isMuted) return;
+        if (this.isSeMuted) return;
         this.init();
         if (!this.ctx) return;
 
@@ -232,7 +316,7 @@ class SoundSystem {
 
     // --- 貨幣（両・チャリン） ---
     playCoin() {
-        if (this.isMuted) return;
+        if (this.isSeMuted) return;
         this.init();
         if (!this.ctx) return;
 
@@ -253,7 +337,7 @@ class SoundSystem {
 
     // --- 列強警報・不平等条約（ゴォォ…重低音） ---
     playWarning() {
-        if (this.isMuted) return;
+        if (this.isSeMuted) return;
         this.init();
         if (!this.ctx) return;
 
@@ -281,7 +365,7 @@ class SoundSystem {
 
     // --- 勝利ファンファーレ（和風短音階） ---
     playVictory() {
-        if (this.isMuted) return;
+        if (this.isSeMuted) return;
         this.init();
         if (!this.ctx) return;
 
@@ -300,8 +384,8 @@ class SoundSystem {
         this.playVictory();
     }
 
-    playKotoNote(freq, duration = 0.5) {
-        if (this.isMuted || !this.ctx) return;
+    playKotoNote(freq, duration = 0.5, isBgm = false) {
+        if ((!isBgm && this.isSeMuted) || !this.ctx) return;
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
@@ -346,9 +430,105 @@ class SoundSystem {
         noise.start();
     }
 
-    // 幕末アンビエントBGMループ（静かな琴・太鼓のリズム）
-    startBgm() {
-        if (this.isBgmPlaying || this.isMuted) return;
+    // --- MP3 BGM 再生エンジン ---
+    playBgm(trackKey) {
+        if (!trackKey) return;
+
+        // 同じトラックが再生中の場合は何もしない（頭出し防止）
+        if (this.currentBgmKey === trackKey && this.bgmAudio && !this.bgmAudio.paused) {
+            return;
+        }
+
+        this.currentBgmKey = trackKey;
+        if (this.isBgmMuted) return;
+
+        // 既存の再生をスムーズに停止
+        this.stopProceduralBgm();
+        if (this.bgmAudio) {
+            this.bgmAudio.pause();
+            this.bgmAudio.currentTime = 0;
+            this.bgmAudio = null;
+        }
+
+        const src = this.bgmTracks[trackKey];
+        if (!src) return;
+
+        try {
+            let audio = this.audioElements[trackKey];
+            if (!audio) {
+                audio = new Audio(src);
+                audio.loop = true;
+                audio.volume = this.bgmVolume;
+                audio.preload = "auto";
+                this.audioElements[trackKey] = audio;
+            } else {
+                audio.volume = this.bgmVolume;
+                audio.loop = true;
+            }
+            this.bgmAudio = audio;
+
+            // 再生失敗時（404エラーなど）はプロシージャルBGMにフォールバック
+            audio.onerror = () => {
+                console.warn(`[SoundSystem] MP3ファイルの読み込みに失敗しました (${src})。プロシージャル合成音にフォールバックします。`);
+                if (this.bgmAudio === audio) {
+                    this.bgmAudio = null;
+                    this.startProceduralBgm();
+                }
+            };
+
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // 再生成功時
+                    const hint = document.getElementById('bgm-autoplay-hint');
+                    if (hint) hint.classList.add('hidden');
+                }).catch(err => {
+                    // ブラウザの自動再生ポリシーでブロックされた場合
+                    const hint = document.getElementById('bgm-autoplay-hint');
+                    if (hint && !this.isBgmMuted) {
+                        hint.classList.remove('hidden');
+                    }
+
+                    const validGestures = ['click', 'pointerdown', 'mousedown', 'touchstart', 'touchend', 'keydown'];
+                    const unlockHandler = () => {
+                        if (this.currentBgmKey === trackKey && !this.isBgmMuted && this.bgmAudio) {
+                            this.bgmAudio.play().then(() => {
+                                const h = document.getElementById('bgm-autoplay-hint');
+                                if (h) h.classList.add('hidden');
+                                validGestures.forEach(ev => {
+                                    window.removeEventListener(ev, unlockHandler, true);
+                                    document.removeEventListener(ev, unlockHandler, true);
+                                });
+                            }).catch(() => {
+                                // 再生できるまでリスナーを維持
+                            });
+                        }
+                    };
+                    validGestures.forEach(ev => {
+                        window.addEventListener(ev, unlockHandler, { capture: true, passive: true });
+                        document.addEventListener(ev, unlockHandler, { capture: true, passive: true });
+                    });
+                });
+            }
+        } catch (e) {
+            console.warn('[SoundSystem] Audio element creation error:', e);
+            this.startProceduralBgm();
+        }
+    }
+
+    stopBgm() {
+        this.currentBgmKey = null;
+        if (this.bgmAudio) {
+            this.bgmAudio.pause();
+            this.bgmAudio.currentTime = 0;
+            this.bgmAudio = null;
+        }
+        this.stopProceduralBgm();
+    }
+
+    // 互換性＆フォールバック用：プロシージャル合成BGM
+    startProceduralBgm() {
+        if (this.isBgmPlaying || this.isBgmMuted) return;
         this.isBgmPlaying = true;
         this.init();
 
@@ -356,25 +536,34 @@ class SoundSystem {
         let step = 0;
 
         this.bgmTimer = setInterval(() => {
-            if (this.isMuted || !this.isBgmPlaying) return;
+            if (this.isBgmMuted || !this.isBgmPlaying) return;
             step++;
             // 4拍ごとに薄い太鼓
             if (step % 4 === 0) {
-                this.playTaiko(false);
+                this.playTaiko(false, true);
             }
             // ランダムに琴の静かな響き
             if (Math.random() < 0.5) {
                 const note = pentatonic[Math.floor(Math.random() * pentatonic.length)];
-                this.playKotoNote(note, 0.9);
+                this.playKotoNote(note, 0.9, true);
             }
         }, 1100);
     }
 
-    stopBgm() {
+    stopProceduralBgm() {
         this.isBgmPlaying = false;
         if (this.bgmTimer) {
             clearInterval(this.bgmTimer);
             this.bgmTimer = null;
+        }
+    }
+
+    // 旧メソッド互換
+    startBgm() {
+        if (this.currentBgmKey) {
+            this.playBgm(this.currentBgmKey);
+        } else {
+            this.playBgm('title');
         }
     }
 }

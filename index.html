@@ -47,8 +47,39 @@
         <div class="header-right">
             <div id="header-trend-badge" class="trend-badge" title="世論トレンド">世論: 平穏</div>
             <div id="header-relic-list" class="relic-icon-list" title="所持遺物"></div>
-            <button id="btn-view-deck" class="btn-wood">📜 帖（山札確認）</button>
-            <button id="btn-toggle-sound" class="btn-wood">🔊 音声: 鳴</button>
+
+            <!-- 通常表示（幅広画面時）のボタングループ -->
+            <div class="header-desktop-actions" id="header-desktop-actions">
+                <button id="btn-view-deck" class="btn-wood">📜 帖（山札確認）</button>
+                <button id="btn-toggle-bgm" class="btn-wood" title="BGMの再生/停止">🎵 BGM: 鳴</button>
+                <button id="btn-toggle-se" class="btn-wood" title="効果音の再生/停止">🔊 効果音: 鳴</button>
+            </div>
+
+            <!-- 狭小画面用プルダウンメニュー（ドロップダウン） -->
+            <div class="header-dropdown-wrapper" id="header-dropdown-wrapper">
+                <button id="btn-header-menu" class="btn-wood btn-header-menu" aria-label="メニュー" aria-expanded="false" title="状況・各種設定メニュー">
+                    <span class="menu-icon">☰</span> <span class="menu-label">メニュー</span>
+                </button>
+                <div id="header-dropdown-menu" class="header-dropdown-menu" role="menu">
+                    <!-- 画面幅狭小時に収まらない情報（世論・遺物） -->
+                    <div class="dropdown-info-box" id="menu-info-box">
+                        <div class="dropdown-info-row">
+                            <span class="info-label">世論趨勢</span>
+                            <div id="menu-trend-badge" class="trend-badge">世論: 平穏</div>
+                        </div>
+                        <div class="dropdown-info-row" id="menu-relic-row">
+                            <span class="info-label">所持遺物</span>
+                            <div id="menu-relic-list" class="relic-icon-list"></div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                    </div>
+
+                    <button id="btn-menu-view-deck" class="dropdown-item" role="menuitem">📜 帖（山札確認）</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="btn-menu-toggle-bgm" class="dropdown-item" role="menuitem">🎵 BGM: 鳴</button>
+                    <button id="btn-menu-toggle-se" class="dropdown-item" role="menuitem">🔊 効果音: 鳴</button>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -99,6 +130,11 @@
                             <button id="btn-select-sabaku" class="btn-faction select-sabaku">幕府・会津で死守する</button>
                         </div>
                     </div>
+
+                    <!-- 自動再生保留時のみ表示される案内（クリックで即再生＆自動消去） -->
+                    <div id="bgm-autoplay-hint" class="bgm-autoplay-hint hidden" title="クリックして音楽を再生">
+                        <span class="hint-pulse">🎵</span> 画面をクリックしてBGMを再生
+                    </div>
                 </div>
             </div>
         </section>
@@ -133,6 +169,19 @@
             <div class="battle-arena">
                 <!-- 敵側エリア -->
                 <div class="battle-upper-arena">
+                    <!-- 敵デッキ統計（山札・捨札） -->
+                    <div class="enemy-deck-stats-box">
+                        <div class="enemy-deck-pile">
+                            <span class="pile-icon">🎴</span>
+                            <span>山札: <strong id="battle-enemy-draw-count">8</strong></span>
+                        </div>
+                        <div class="enemy-discard-pile">
+                            <span class="pile-icon">📜</span>
+                            <span>捨札: <strong id="battle-enemy-discard-count">0</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- 敵メイン情報（アバター・HPバー・シールド・手札） -->
                     <div id="battle-enemy-container" class="battle-enemy-box">
                         <div class="enemy-avatar-frame">
                             <div class="enemy-silhouette" id="battle-enemy-avatar">武士</div>
@@ -147,12 +196,19 @@
                                 <span>防: <strong id="battle-enemy-shield-text">0</strong></span>
                             </div>
                             <div id="battle-enemy-status" class="enemy-status-row"></div>
-                            <div class="enemy-deck-counts">
-                                <span>敵行動札: <strong id="battle-enemy-deck-count">1 / 4</strong></span>
-                                <span>敵技数: <strong id="battle-enemy-intent-count">4</strong></span>
+                        </div>
+
+                        <!-- 敵伏せ手札エリア（体力ゲージの下に配置） -->
+                        <div class="enemy-hand-container">
+                            <div class="enemy-hand-title">敵手札（伏せ札）</div>
+                            <div id="battle-enemy-hand" class="battle-enemy-hand">
+                                <!-- 伏せカードDOMが動的生成されます -->
                             </div>
                         </div>
                     </div>
+
+                    <!-- 敵カードプレイ演出用ゾーン -->
+                    <div id="battle-enemy-play-zone" class="battle-enemy-play-zone"></div>
                 </div>
 
                 <!-- プレイヤー情報＆盤面エリア -->

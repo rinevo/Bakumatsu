@@ -60,23 +60,50 @@ class UIManager {
         }
 
         // 世論（トレンド）
-        if (trendBadge && this.app.currentTrend) {
-            trendBadge.className = `trend-badge ${this.app.currentTrend.badgeClass}`;
-            trendBadge.textContent = `世論: ${this.app.currentTrend.name}`;
-            trendBadge.title = this.app.currentTrend.desc;
+        const menuTrendBadge = document.getElementById('menu-trend-badge');
+        if (this.app.currentTrend) {
+            const trendClass = `trend-badge ${this.app.currentTrend.badgeClass}`;
+            const trendText = `世論: ${this.app.currentTrend.name}`;
+            const trendTitle = this.app.currentTrend.desc;
+            if (trendBadge) {
+                trendBadge.className = trendClass;
+                trendBadge.textContent = trendText;
+                trendBadge.title = trendTitle;
+            }
+            if (menuTrendBadge) {
+                menuTrendBadge.className = trendClass;
+                menuTrendBadge.textContent = trendText;
+                menuTrendBadge.title = trendTitle;
+            }
         }
 
         // レリックアイコン一覧
-        if (relicList) {
-            relicList.innerHTML = '';
+        const menuRelicList = document.getElementById('menu-relic-list');
+        if (relicList) relicList.innerHTML = '';
+        if (menuRelicList) menuRelicList.innerHTML = '';
+
+        if (this.app.relics.length === 0) {
+            if (menuRelicList) {
+                menuRelicList.innerHTML = '<span class="empty-relic-hint">（未所持）</span>';
+            }
+        } else {
             this.app.relics.forEach(relicId => {
                 const r = GAME_DATA.relics[relicId];
                 if (r) {
-                    const span = document.createElement('span');
-                    span.className = 'relic-icon-item';
-                    span.textContent = '🏮';
-                    span.title = `【${r.name}】\n${r.desc}`;
-                    relicList.appendChild(span);
+                    if (relicList) {
+                        const span = document.createElement('span');
+                        span.className = 'relic-icon-item';
+                        span.textContent = '🏮';
+                        span.title = `【${r.name}】\n${r.desc}`;
+                        relicList.appendChild(span);
+                    }
+                    if (menuRelicList) {
+                        const mSpan = document.createElement('span');
+                        mSpan.className = 'relic-icon-item';
+                        mSpan.textContent = '🏮';
+                        mSpan.title = `【${r.name}】\n${r.desc}`;
+                        menuRelicList.appendChild(mSpan);
+                    }
                 }
             });
         }
@@ -200,21 +227,19 @@ class UIManager {
         const shieldText = document.getElementById('battle-player-shield');
         const drawCount = document.getElementById('battle-draw-count');
         const discardCount = document.getElementById('battle-discard-count');
-        const enemyDeckCount = document.getElementById('battle-enemy-deck-count');
-        const enemyIntentCount = document.getElementById('battle-enemy-intent-count');
+        const enemyDrawCount = document.getElementById('battle-enemy-draw-count');
+        const enemyDiscardCount = document.getElementById('battle-enemy-discard-count');
         const buffsContainer = document.getElementById('battle-player-buffs');
 
         if (energyText) energyText.textContent = `${b.playerEnergy} / ${b.playerMaxEnergy}`;
         if (shieldText) shieldText.textContent = b.playerShield;
         if (drawCount) drawCount.textContent = b.drawPile.length;
         if (discardCount) discardCount.textContent = b.discardPile.length;
-        if (enemyDeckCount && b.enemy) {
-            const currentIntent = Math.min(b.enemyIntentIndex, b.enemy.intents.length);
-            enemyDeckCount.textContent = `${currentIntent} / ${b.enemy.intents.length}`;
-        }
-        if (enemyIntentCount && b.enemy) {
-            enemyIntentCount.textContent = b.enemy.intents.length;
-        }
+        if (enemyDrawCount) enemyDrawCount.textContent = b.enemyDrawPile ? b.enemyDrawPile.length : 0;
+        if (enemyDiscardCount) enemyDiscardCount.textContent = b.enemyDiscardPile ? b.enemyDiscardPile.length : 0;
+
+        // 敵伏せ手札の描画
+        this.renderEnemyHand();
 
         // プレイヤーバフ表示
         if (buffsContainer) {
@@ -319,6 +344,119 @@ class UIManager {
         if (endTurnBtn) {
             endTurnBtn.disabled = !b.isPlayerTurn;
         }
+    }
+
+    // --- 敵伏せ手札描画 ---
+    renderEnemyHand() {
+        const handContainer = document.getElementById('battle-enemy-hand');
+        if (!handContainer) return;
+        handContainer.innerHTML = '';
+
+        const b = this.app.battle;
+        if (!b || !b.enemyHand) return;
+
+        b.enemyHand.forEach(card => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'enemy-card-back';
+
+            // 次手予告のオーラクラス
+            if (card.isPending) {
+                const intentType = card.type || 'attack';
+                cardEl.classList.add(`intent-${intentType}`);
+            }
+
+            // 家紋アイコンの決定（葵紋・菊花・誠など）
+            let crestChar = '⚜️';
+            if (b.enemy && b.enemy.name) {
+                const name = b.enemy.name;
+                if (name.includes('新選組') || name.includes('近藤') || name.includes('土方') || name.includes('沖田') || name.includes('斎藤')) {
+                    crestChar = '誠';
+                } else if (name.includes('徳川') || name.includes('幕府') || name.includes('会津') || name.includes('容保') || name.includes('見廻組')) {
+                    crestChar = '葵';
+                } else if (name.includes('官軍') || name.includes('薩摩') || name.includes('長州') || name.includes('西郷') || name.includes('桂')) {
+                    crestChar = '菊';
+                } else {
+                    crestChar = '⚔️';
+                }
+            }
+
+            cardEl.innerHTML = `<div class="enemy-card-crest">${crestChar}</div>`;
+            cardEl.title = card.isPending ? `【敵の気配】次の行動札の予兆…` : '【伏せ札】敵の手札';
+
+            handContainer.appendChild(cardEl);
+        });
+    }
+
+    // --- 敵カードプレイ演出（3Dフリップ＆公開） ---
+    playEnemyCardAnimation(card, callback) {
+        const playZone = document.getElementById('battle-enemy-play-zone');
+        if (!playZone) {
+            if (callback) callback();
+            return;
+        }
+
+        playZone.innerHTML = '';
+
+        const cardEl = document.createElement('div');
+        const typeClass = card.type || 'attack';
+        cardEl.className = `enemy-revealed-card ${typeClass}`;
+
+        let typeLabel = '【攻撃】';
+        let statBadge = '';
+        if (card.type === 'attack') {
+            typeLabel = '【攻撃】';
+            const times = (card.times && card.times > 1) ? ` × ${card.times}` : '';
+            statBadge = `<span class="enemy-stat-badge atk">攻 ${card.damage || 0}${times}</span>`;
+        } else if (card.type === 'defend') {
+            typeLabel = '【防御】';
+            statBadge = `<span class="enemy-stat-badge def">防 ${card.shield || 0}</span>`;
+        } else if (card.type === 'buff') {
+            typeLabel = '【強化】';
+            statBadge = `<span class="enemy-stat-badge buff">腕力 +${card.strength || 2}</span>`;
+        } else if (card.type === 'curse') {
+            typeLabel = '【呪詛】';
+            statBadge = `<span class="enemy-stat-badge curse">呪詛 ${card.damage || 0}</span>`;
+        }
+
+        const owner = card.ownerName || (this.app.battle && this.app.battle.enemy ? this.app.battle.enemy.name : '敵武士');
+
+        cardEl.innerHTML = `
+            <div class="enemy-card-banner">
+                <span class="enemy-card-type-tag ${typeClass}">${typeLabel}</span>
+                <span class="enemy-card-owner">${owner}</span>
+            </div>
+            <div class="enemy-card-title">${card.name || card.desc || '必殺の太刀'}</div>
+            <div class="enemy-card-stats">
+                ${statBadge}
+            </div>
+            <div class="enemy-card-desc">${card.desc || card.name || '敵が秘術を繰り出した！'}</div>
+            <div class="enemy-card-foot">幕末武技札</div>
+        `;
+
+        playZone.appendChild(cardEl);
+
+        // 抜刀・プレイ音
+        if (window.soundSystem) {
+            if (card.type === 'attack') {
+                window.soundSystem.playSlash();
+            } else if (card.type === 'defend') {
+                window.soundSystem.playShield();
+            } else {
+                window.soundSystem.playTaiko(true);
+            }
+        }
+
+        // カードが表向きになって効果が発動するタイミング（約420ms）
+        setTimeout(() => {
+            if (callback) callback();
+        }, 420);
+
+        // アニメーション完了後に要素をクリア（約1450ms）
+        setTimeout(() => {
+            if (playZone.contains(cardEl)) {
+                playZone.removeChild(cardEl);
+            }
+        }, 1450);
     }
 
     // --- マップ描画 ---

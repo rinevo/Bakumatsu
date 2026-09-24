@@ -25,6 +25,13 @@ class BattleSystem {
         this.enemyIntentIndex = 0;
         this.enemyComboCount = 0;
 
+        // 敵デッキ・手札・捨札
+        this.enemyDeck = [];
+        this.enemyDrawPile = [];
+        this.enemyHand = [];
+        this.enemyDiscardPile = [];
+        this.enemyPendingCard = null;
+
         // ターン内記録
         this.turnCount = 0;
         this.comboCount = 0;
@@ -108,7 +115,11 @@ class BattleSystem {
         this.enemyIntentIndex = 0;
         this.enemyComboCount = 0;
 
-        // デッキ初期化（シャッフルして山札へ）
+        // 敵デッキ・手札の初期化
+        this.initEnemyDeck(enemyData);
+        this.drawEnemyCards(3);
+
+        // プレイヤーデッキ初期化（シャッフルして山札へ）
         this.drawPile = this.shuffleArray([...this.app.deck]);
         this.discardPile = [];
         this.exhaustPile = [];
@@ -122,22 +133,93 @@ class BattleSystem {
             }
         });
 
-        // 最初の敵Intent決定
+        // 最初の敵Intent（手札からカード選定）
         this.pickEnemyIntent();
 
         // プレイヤー第1ターン開始
         this.startPlayerTurn();
     }
 
+    initEnemyDeck(enemyData) {
+        this.enemyDeck = [];
+        this.enemyDrawPile = [];
+        this.enemyHand = [];
+        this.enemyDiscardPile = [];
+        this.enemyPendingCard = null;
+
+        const intents = enemyData.intents || [];
+        if (intents.length === 0) return;
+
+        // 敵の技データから10枚のカードデッキを生成
+        const targetDeckSize = 10;
+        const repeatCount = Math.ceil(targetDeckSize / intents.length);
+
+        let cardIdx = 1;
+        for (let r = 0; r < repeatCount; r++) {
+            for (let i = 0; i < intents.length; i++) {
+                if (this.enemyDeck.length >= targetDeckSize) break;
+                const intent = intents[i];
+                const card = {
+                    id: `enemy_card_${cardIdx++}`,
+                    intentIndex: i,
+                    name: intent.desc,
+                    type: intent.type, // 'attack', 'defend', 'buff', 'curse'
+                    damage: intent.damage || 0,
+                    shield: intent.shield || 0,
+                    strength: intent.strength || 0,
+                    curseId: intent.curseId || null,
+                    times: intent.times || 1,
+                    desc: intent.desc,
+                    ownerName: enemyData.name,
+                    isPending: false
+                };
+                this.enemyDeck.push(card);
+            }
+        }
+
+        // 山札をシャッフル
+        this.enemyDrawPile = this.shuffleArray([...this.enemyDeck]);
+    }
+
+    drawEnemyCards(count) {
+        for (let i = 0; i < count; i++) {
+            if (this.enemyDrawPile.length === 0) {
+                if (this.enemyDiscardPile.length === 0) break;
+                // 敵の捨て札をシャッフルして山札へ
+                this.enemyDrawPile = this.shuffleArray([...this.enemyDiscardPile]);
+                this.enemyDiscardPile = [];
+            }
+            if (this.enemyDrawPile.length > 0) {
+                const card = this.enemyDrawPile.pop();
+                card.isPending = false;
+                this.enemyHand.push(card);
+            }
+        }
+    }
+
     pickEnemyIntent() {
-        if (!this.enemy || !this.enemy.intents || this.enemy.intents.length === 0) return;
-        const currentTemplate = this.enemy.intents[this.enemyIntentIndex % this.enemy.intents.length];
+        if (!this.enemy) return;
+
+        // 手札が足りない場合は補充
+        if (this.enemyHand.length === 0) {
+            this.drawEnemyCards(3);
+        }
+        if (this.enemyHand.length === 0) return;
+
+        // 手札の全カードの pending をリセット
+        this.enemyHand.forEach(c => c.isPending = false);
+
+        // 手札の中から次にプレイするカードを決定
+        const selectedIndex = this.enemyIntentIndex % this.enemyHand.length;
         this.enemyIntentIndex++;
 
-        // 意図のクローン
-        this.enemy.intent = { ...currentTemplate };
+        this.enemyPendingCard = this.enemyHand[selectedIndex];
+        this.enemyPendingCard.isPending = true;
 
-        // 敵の筋力バフがあれば加算
+        // 敵のIntentオブジェクトを生成
+        this.enemy.intent = { ...this.enemyPendingCard };
+
+        // 敵の筋力バフを加算
         if (this.enemy.intent.type === 'attack' && this.enemy.buffStrength) {
             this.enemy.intent.damage += this.enemy.buffStrength;
         }
@@ -582,12 +664,32 @@ class BattleSystem {
             }
         }
 
-        const intent = this.enemy.intent;
-        if (intent) {
+        // プレイする敵カードを手札から取得
+        let playedCard = this.enemyPendingCard;
+        const cardIndex = this.enemyHand.findIndex(c => c === playedCard);
+        if (cardIndex !== -1) {
+            this.enemyHand.splice(cardIndex, 1);
+        } else if (this.enemyHand.length > 0) {
+            playedCard = this.enemyHand.shift();
+        }
+
+        // カード情報がない場合のフォールバック（既存intent）
+        const intent = playedCard || this.enemy.intent;
+        if (!intent) {
+            this.finishEnemyTurn();
+            return;
+        }
+
+        // 効果適用処理関数
+        const applyCardEffects = () => {
+            if (this.isBattleOver) return;
+
             const isOffensiveIntent = intent.type === 'attack' || intent.type === 'curse';
             this.enemyComboCount = isOffensiveIntent ? this.enemyComboCount + 1 : 0;
             const comboLabel = this.enemyComboCount >= 2 ? `・敵${this.enemyComboCount}連撃` : '';
-            window.particleSystem.showEnemyActionText(`敵技・${intent.desc}${comboLabel}`, this.enemyComboCount);
+            if (window.particleSystem && window.particleSystem.showEnemyActionText) {
+                window.particleSystem.showEnemyActionText(`敵技・${intent.desc || intent.name}${comboLabel}`, this.enemyComboCount);
+            }
 
             switch (intent.type) {
                 case 'attack': {
@@ -599,7 +701,9 @@ class BattleSystem {
                     const times = intent.times || 1;
                     for (let t = 0; t < times; t++) {
                         setTimeout(() => {
-                            this.damagePlayerWithShield(dmg);
+                            if (!this.isBattleOver) {
+                                this.damagePlayerWithShield(dmg);
+                            }
                         }, t * 150);
                     }
                     break;
@@ -625,20 +729,43 @@ class BattleSystem {
                     break;
                 }
             }
+
+            // 使用済みカードを敵捨て札へ
+            if (playedCard) {
+                this.enemyDiscardPile.push(playedCard);
+            }
+
+            // 敵手札に1枚補充
+            this.drawEnemyCards(1);
+
+            // 脱力ターン減衰
+            if (this.enemyStatus.weak > 0) {
+                this.enemyStatus.weak--;
+            }
+
+            // 敵の次のIntentを決定
+            this.pickEnemyIntent();
+
+            // UI更新
+            if (this.app.ui && this.app.ui.updateBattleUI) {
+                this.app.ui.updateBattleUI();
+            }
+
+            // 敵ターン完了・プレイヤーへ
+            setTimeout(() => {
+                this.finishEnemyTurn();
+            }, 600);
+        };
+
+        // UIアニメーションの実行（カードフリップ＆公開演出）
+        if (this.app.ui && this.app.ui.playEnemyCardAnimation) {
+            this.app.ui.playEnemyCardAnimation(intent, () => {
+                applyCardEffects();
+            });
+        } else {
+            // UIがない環境等のフォールバック
+            applyCardEffects();
         }
-
-        // 脱力ターン減衰
-        if (this.enemyStatus.weak > 0) {
-            this.enemyStatus.weak--;
-        }
-
-        // 敵の次のIntentを決定
-        this.pickEnemyIntent();
-
-        // 敵ターン完了・プレイヤーへ
-        setTimeout(() => {
-            this.finishEnemyTurn();
-        }, 700);
     }
 
     finishEnemyTurn() {
@@ -649,6 +776,11 @@ class BattleSystem {
     handleEnemyDefeated() {
         this.isBattleOver = true;
         this.isPlayerTurn = false;
+
+        // 戦闘終了時に BGM を停止
+        if (window.soundSystem && window.soundSystem.stopBgm) {
+            window.soundSystem.stopBgm();
+        }
         window.soundSystem.playVictory();
 
         // レリックの戦闘勝利効果
@@ -707,6 +839,11 @@ class BattleSystem {
     handlePlayerDefeated(reason) {
         this.isBattleOver = true;
         this.isPlayerTurn = false;
+
+        // 戦闘終了時に BGM を停止
+        if (window.soundSystem && window.soundSystem.stopBgm) {
+            window.soundSystem.stopBgm();
+        }
         window.soundSystem.playWarning();
         this.app.handleGameOver(reason);
     }

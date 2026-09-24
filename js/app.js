@@ -32,17 +32,117 @@ class BakumatsuApp {
         // イベントリスナーの登録
         this.bindEvents();
 
+        // 初期音声UIの同期
+        this.syncAudioUI();
+
         // 初期画面はタイトル（陣営選択）
         this.switchScreen('screen-title');
+
+        // 初期画面表示と同時に最速でBGM再生を起動
+        if (window.soundSystem) {
+            window.soundSystem.playBgm('title');
+        }
+
+        // 画面のどこかを操作した際に確実にBGMと効果音をアンロック
+        const validGestures = ['click', 'pointerdown', 'mousedown', 'touchstart', 'touchend', 'keydown'];
+        const unlockAllAudio = () => {
+            if (window.soundSystem) {
+                window.soundSystem.init();
+                if (!window.soundSystem.isBgmMuted) {
+                    if (!window.soundSystem.bgmAudio || window.soundSystem.bgmAudio.paused) {
+                        window.soundSystem.playBgm('title');
+                    }
+                }
+            }
+        };
+        validGestures.forEach(ev => {
+            document.addEventListener(ev, unlockAllAudio, { passive: true });
+        });
+    }
+
+    syncAudioUI() {
+        if (!window.soundSystem) return;
+        const isBgmMuted = window.soundSystem.isBgmMuted;
+        const isSeMuted = window.soundSystem.isSeMuted;
+
+        // BGMボタン（PC用 ＆ メニュー用）
+        const bgmText = isBgmMuted ? '🎵 BGM: 止' : '🎵 BGM: 鳴';
+        const bgmBtn = document.getElementById('btn-toggle-bgm');
+        const menuBgmBtn = document.getElementById('btn-menu-toggle-bgm');
+        if (bgmBtn) {
+            bgmBtn.textContent = bgmText;
+            bgmBtn.classList.toggle('muted', isBgmMuted);
+        }
+        if (menuBgmBtn) {
+            menuBgmBtn.textContent = bgmText;
+            menuBgmBtn.classList.toggle('muted', isBgmMuted);
+        }
+
+        // 効果音ボタン（PC用 ＆ メニュー用）
+        const seText = isSeMuted ? '🔈 効果音: 止' : '🔊 効果音: 鳴';
+        const seBtn = document.getElementById('btn-toggle-se');
+        const menuSeBtn = document.getElementById('btn-menu-toggle-se');
+        if (seBtn) {
+            seBtn.textContent = seText;
+            seBtn.classList.toggle('muted', isSeMuted);
+        }
+        if (menuSeBtn) {
+            menuSeBtn.textContent = seText;
+            menuSeBtn.classList.toggle('muted', isSeMuted);
+        }
     }
 
     bindEvents() {
-        // 音量ミュート切り替え
-        const muteBtn = document.getElementById('btn-toggle-sound');
-        if (muteBtn) {
-            muteBtn.addEventListener('click', () => {
-                const isMuted = window.soundSystem.toggleMute();
-                muteBtn.textContent = isMuted ? '🔇 音声: 滅' : '🔊 音声: 鳴';
+        // BGM 切り替え（PC用 & ドロップダウン用）
+        const handleBgmToggle = () => {
+            if (window.soundSystem) {
+                window.soundSystem.init();
+                window.soundSystem.toggleBgm();
+                this.syncAudioUI();
+            }
+        };
+        const bgmBtn = document.getElementById('btn-toggle-bgm');
+        const menuBgmBtn = document.getElementById('btn-menu-toggle-bgm');
+        if (bgmBtn) bgmBtn.addEventListener('click', handleBgmToggle);
+        if (menuBgmBtn) menuBgmBtn.addEventListener('click', handleBgmToggle);
+
+        // 効果音 切り替え（PC用 & ドロップダウン用）
+        const handleSeToggle = () => {
+            if (window.soundSystem) {
+                window.soundSystem.init();
+                window.soundSystem.toggleSe();
+                this.syncAudioUI();
+            }
+        };
+        const seBtn = document.getElementById('btn-toggle-se');
+        const menuSeBtn = document.getElementById('btn-menu-toggle-se');
+        if (seBtn) seBtn.addEventListener('click', handleSeToggle);
+        if (menuSeBtn) menuSeBtn.addEventListener('click', handleSeToggle);
+
+        // ヘッダー・プルダウンメニューの開閉制御
+        const menuBtn = document.getElementById('btn-header-menu');
+        const dropdownMenu = document.getElementById('header-dropdown-menu');
+        if (menuBtn && dropdownMenu) {
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = dropdownMenu.classList.toggle('active');
+                menuBtn.setAttribute('aria-expanded', isOpen);
+            });
+
+            // メニュー外クリックで閉じる
+            document.addEventListener('click', (e) => {
+                if (!dropdownMenu.contains(e.target) && !menuBtn.contains(e.target)) {
+                    dropdownMenu.classList.remove('active');
+                    menuBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // ESCキーで閉じる
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && dropdownMenu.classList.contains('active')) {
+                    dropdownMenu.classList.remove('active');
+                    menuBtn.setAttribute('aria-expanded', 'false');
+                }
             });
         }
 
@@ -57,11 +157,18 @@ class BakumatsuApp {
             btnSabaku.addEventListener('click', () => this.startNewRun('sabaku'));
         }
 
-        // デッキ確認モーダル
+        // デッキ確認モーダル（PC用 & ドロップダウン用）
         const btnViewDeck = document.getElementById('btn-view-deck');
+        const btnMenuViewDeck = document.getElementById('btn-menu-view-deck');
         const btnCloseDeck = document.getElementById('btn-close-deck');
         if (btnViewDeck) {
             btnViewDeck.addEventListener('click', () => this.ui.openDeckModal());
+        }
+        if (btnMenuViewDeck) {
+            btnMenuViewDeck.addEventListener('click', () => {
+                if (dropdownMenu) dropdownMenu.classList.remove('active');
+                this.ui.openDeckModal();
+            });
         }
         if (btnCloseDeck) {
             btnCloseDeck.addEventListener('click', () => this.ui.closeDeckModal());
@@ -198,14 +305,43 @@ class BakumatsuApp {
             }
         });
 
-        // ヘッダーバーの表示/非表示（タイトル・ゲームオーバー・クリア画面では非表示）
+        // ヘッダーバーの表示/非表示および初期画面（青色の帯）制御
         const header = document.getElementById('main-header');
         if (header) {
-            if (screenId === 'screen-title' || screenId === 'screen-gameover' || screenId === 'screen-gamewin') {
+            if (screenId === 'screen-gameover' || screenId === 'screen-gamewin') {
                 header.classList.remove('visible');
+                header.classList.remove('title-mode');
+            } else if (screenId === 'screen-title') {
+                header.classList.add('visible');
+                header.classList.add('title-mode');
             } else {
                 header.classList.add('visible');
+                header.classList.remove('title-mode');
                 this.ui.updateHeader();
+            }
+        }
+
+        // 画面に応じた BGM 切り替え
+        if (window.soundSystem && window.soundSystem.playBgm) {
+            switch (screenId) {
+                case 'screen-title':
+                    window.soundSystem.playBgm('title');
+                    break;
+                case 'screen-map':
+                    window.soundSystem.playBgm('map');
+                    break;
+                case 'screen-battle':
+                    window.soundSystem.playBgm('battle');
+                    break;
+                case 'screen-event':
+                case 'screen-shop':
+                case 'screen-rest':
+                    window.soundSystem.playBgm('map');
+                    break;
+                case 'screen-gameover':
+                case 'screen-gamewin':
+                    window.soundSystem.stopBgm();
+                    break;
             }
         }
     }
