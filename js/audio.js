@@ -20,7 +20,12 @@ class SoundSystem {
         this.bgmTracks = {
             title: "bgm/The_Iron_Horizon.mp3",
             map: "bgm/Edge_of_the_Setting_Sun.mp3",
-            battle: "bgm/Thunder_of_the_Shogunate.mp3"
+            battle: "bgm/Thunder_of_the_Shogunate.mp3",
+            win: "bgm/Still_Water_at_the_Temple_Gate.mp3"
+        };
+        // ループ再生しない（一度きりで停止する）トラック
+        this.bgmNonLooping = {
+            win: true
         };
         this.audioElements = {};
 
@@ -34,9 +39,10 @@ class SoundSystem {
         const src = this.bgmTracks[trackKey];
         if (!src || this.audioElements[trackKey]) return;
         try {
+            const isLoop = !this.bgmNonLooping[trackKey];
             const audio = new Audio(src);
             audio.preload = "auto";
-            audio.loop = true;
+            audio.loop = isLoop;
             audio.volume = this.bgmVolume;
             this.audioElements[trackKey] = audio;
         } catch (e) {
@@ -454,18 +460,27 @@ class SoundSystem {
         if (!src) return;
 
         try {
+            const isLoop = !this.bgmNonLooping[trackKey];
             let audio = this.audioElements[trackKey];
             if (!audio) {
                 audio = new Audio(src);
-                audio.loop = true;
+                audio.loop = isLoop;
                 audio.volume = this.bgmVolume;
                 audio.preload = "auto";
                 this.audioElements[trackKey] = audio;
             } else {
                 audio.volume = this.bgmVolume;
-                audio.loop = true;
+                audio.loop = isLoop;
             }
             this.bgmAudio = audio;
+
+            // 曲が最後まで終わったら停止する（リピートしないトラック用）
+            audio.onended = () => {
+                if (!isLoop && this.bgmAudio === audio) {
+                    this.bgmAudio = null;
+                    this.currentBgmKey = null;
+                }
+            };
 
             // 再生失敗時（404エラーなど）はプロシージャルBGMにフォールバック
             audio.onerror = () => {
@@ -521,6 +536,7 @@ class SoundSystem {
         if (this.bgmAudio) {
             this.bgmAudio.pause();
             this.bgmAudio.currentTime = 0;
+            this.bgmAudio.onended = null;
             this.bgmAudio = null;
         }
         this.stopProceduralBgm();

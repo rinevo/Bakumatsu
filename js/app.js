@@ -338,8 +338,10 @@ class BakumatsuApp {
                 case 'screen-rest':
                     window.soundSystem.playBgm('map');
                     break;
-                case 'screen-gameover':
                 case 'screen-gamewin':
+                    window.soundSystem.playBgm('win');
+                    break;
+                case 'screen-gameover':
                     window.soundSystem.stopBgm();
                     break;
             }
