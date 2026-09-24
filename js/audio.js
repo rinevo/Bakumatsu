@@ -25,6 +25,7 @@ class SoundSystem {
         };
         // ループ再生しない（一度きりで停止する）トラック
         this.bgmNonLooping = {
+            title: true,
             win: true
         };
         this.audioElements = {};
