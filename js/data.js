@@ -1966,6 +1966,7 @@ const GAME_DATA = {
     events: [
         {
             id: "event_ikedaya",
+            act: 1,
             title: "池田屋事件の急襲",
             desc: "三条小橋の旅籠「池田屋」に不逞志士が集結しているとの報せが入った。夜雨の中、提灯の明かりが揺れる。",
             choices: [
@@ -2000,6 +2001,7 @@ const GAME_DATA = {
         },
         {
             id: "event_glover",
+            act: 1,
             title: "長崎グラバー商会の密談",
             desc: "英国商人トーマス・グラバーが新式の洋式火器を前に、妖しい微笑みを浮かべている。「貴国の未来のために、格安で最新の兵器を用立てましょう…ただし代償は条約で」",
             choices: [
@@ -2039,6 +2041,7 @@ const GAME_DATA = {
         },
         {
             id: "event_teradaya",
+            act: 2,
             title: "伏見・寺田屋の遭難",
             desc: "深夜、宿が幕府捕吏に包囲された！「上意討ちである！」襖を蹴破る足音が響く。",
             choices: [
@@ -2063,6 +2066,7 @@ const GAME_DATA = {
         },
         {
             id: "event_taisei_hokan",
+            act: 2,
             title: "大政奉還の歴史的評議",
             desc: "徳川慶喜が政権を朝廷に返上するか否か、天下を揺るがす建白書が突きつけられた。",
             choices: [
@@ -2089,6 +2093,7 @@ const GAME_DATA = {
         },
         {
             id: "event_sakuradamon",
+            act: 1,
             title: "桜田門外の変・雪中の襲撃",
             desc: "江戸城桜田門の外に、井伊直弼の駕籠を待ち伏せる人影がある。雪に紛れて刀を抜くか、騒乱を未然に止めるか。",
             choices: [
@@ -2124,6 +2129,7 @@ const GAME_DATA = {
         },
         {
             id: "event_satcho_alliance",
+            act: 2,
             title: "薩長同盟の密約",
             desc: "犬猿の仲だった薩摩と長州が、坂本龍馬の仲介で一つの卓を囲んだ。互いの誇りを捨て、来るべき時代に備える必要がある。",
             choices: [
@@ -2159,6 +2165,7 @@ const GAME_DATA = {
         },
         {
             id: "event_toba_fushimi",
+            act: 2,
             title: "鳥羽・伏見の戦端",
             desc: "錦の御旗が翻り、淀川沿いに砲声が轟く。戦場へ急行すれば勝機はあるが、退けば兵を温存できる。",
             choices: [
@@ -2194,6 +2201,7 @@ const GAME_DATA = {
         },
         {
             id: "event_goryokaku",
+            act: 3,
             title: "五稜郭、北辺の決断",
             desc: "北の大地に築かれた星形要塞へ、最後の兵たちが集う。新政府への降伏か、異国との交易を見据えた独立か。",
             choices: [
@@ -2229,6 +2237,7 @@ const GAME_DATA = {
         },
         {
             id: "event_shimonoseki",
+            act: 1,
             title: "下関海峡、攘夷の砲火",
             desc: "海峡を封鎖した長州の砲台に、四国連合艦隊が迫る。異国船を撃つか、いったん砲を下ろして国力を蓄えるか。",
             choices: [
@@ -2264,6 +2273,7 @@ const GAME_DATA = {
         },
         {
             id: "event_satsuma_decision",
+            act: 2,
             title: "薩摩藩、討幕への転回",
             desc: "朝廷からの密使が薩摩藩邸を訪れた。幕府と手を結ぶか、長州と共に新たな政を目指すか、藩の未来を決める夜だ。",
             choices: [
@@ -2300,6 +2310,7 @@ const GAME_DATA = {
         },
         {
             id: "event_katsu_saigo",
+            act: 2,
             title: "江戸城無血開城の談判",
             desc: "勝海舟と西郷隆盛が向かい合い、江戸の町を戦火から救う最後の話し合いが始まった。誇りと人命、そのどちらを優先するか。",
             choices: [
@@ -2348,6 +2359,7 @@ const GAME_DATA = {
         },
         {
             id: "event_hakodate_assault",
+            act: 3,
             title: "箱館総攻撃、最後の朝",
             desc: "海からの艦砲射撃が五稜郭を揺らす。残された兵力を一気に燃やすか、守りを固めて一日でも長く持ちこたえるか。",
             choices: [
@@ -2392,6 +2404,7 @@ const GAME_DATA = {
         },
         {
             id: "event_yokohama_opening",
+            act: 1,
             title: "横浜開港、異国船の波止場",
             desc: "開港場に異国の商人と新しい品々が集まり始めた。富と知識を取り込む好機だが、町には見慣れぬ病と不安も広がっている。",
             choices: [
@@ -2426,6 +2439,7 @@ const GAME_DATA = {
         },
         {
             id: "event_kiheitai_formation",
+            act: 1,
             title: "奇兵隊、身分を越えた軍勢",
             desc: "農民や町人までが銃を手に取り、身分に縛られない新たな隊が結成されようとしている。古い秩序を守るか、力を借りるか。",
             choices: [
@@ -2461,6 +2475,7 @@ const GAME_DATA = {
         },
         {
             id: "event_aizu_defense_council",
+            act: 3,
             title: "会津若松、籠城評議",
             desc: "城下に迫る新政府軍を前に、会津の重臣たちは籠城か撤退かを議論している。民を守るには、決断を急がねばならない。",
             choices: [
@@ -2497,6 +2512,7 @@ const GAME_DATA = {
         },
         {
             id: "event_satsuma_reform",
+            act: 2,
             title: "薩摩の軍制改革",
             desc: "西郷や大久保のもとに、新式銃の扱いを学ぶ兵たちが集まった。改革には金が要るが、旧来の誇りを捨てる覚悟も必要だ。",
             choices: [
@@ -2533,6 +2549,7 @@ const GAME_DATA = {
         },
         {
             id: "event_andei_purge",
+            act: 1,
             title: "安政の大獄、弾圧の影",
             desc: "幕府の大規模な弾圧が始まり、志士たちは身を隠している。沈黙して難を逃れるか、仲間を救うため動くか。",
             choices: [
@@ -2570,6 +2587,7 @@ const GAME_DATA = {
         },
         {
             id: "event_namugi_incident",
+            act: 1,
             title: "生麦事件、外交の火種",
             desc: "街道で起きた衝突が、薩摩と英国の緊張を一気に高めた。謝罪か強硬姿勢か、国の威信を賭けた判断を迫られる。",
             choices: [
@@ -2607,6 +2625,7 @@ const GAME_DATA = {
         },
         {
             id: "event_restoration_council",
+            act: 2,
             title: "王政復古、朝廷の決断",
             desc: "朝廷に政権を戻す大号令が発せられた。新しい国の形を急いで整えるか、旧勢力との対話を残すか。",
             choices: [
@@ -2644,6 +2663,7 @@ const GAME_DATA = {
         },
         {
             id: "event_aizu_war",
+            act: 3,
             title: "会津戦争、白虎の決意",
             desc: "城下に砲声が響き、若い兵たちが守備についた。最後まで戦うか、命を残すため撤退するか、重い決断の時だ。",
             choices: [
@@ -2678,6 +2698,7 @@ const GAME_DATA = {
         },
         {
             id: "event_hamaguri_gate",
+            act: 1,
             title: "禁門の変、御所前の激戦",
             desc: "長州軍が御所へ迫り、門前はたちまち戦場となった。撤退の道を確保するか、火線を押し返すか。",
             choices: [
@@ -2712,6 +2733,7 @@ const GAME_DATA = {
         },
         {
             id: "event_tenchu_revolt",
+            act: 1,
             title: "天誅組の変、山中の旗",
             desc: "大和の山中で、討幕を掲げた若者たちが決起した。大義に応じるか、無謀な蜂起を止めるか。",
             choices: [
@@ -2750,6 +2772,7 @@ const GAME_DATA = {
         },
         {
             id: "event_shinsengumi_formation",
+            act: 1,
             title: "新選組結成、京の守護",
             desc: "京都の治安を守るため、浪士たちが一つの旗の下に集まった。厳しい規律か、仲間を信じる柔軟さか。",
             choices: [
@@ -2785,6 +2808,7 @@ const GAME_DATA = {
         },
         {
             id: "event_satsuma_residence",
+            act: 2,
             title: "江戸薩摩藩邸焼討、決裂の夜",
             desc: "薩摩藩邸に集まった浪士たちをめぐり、幕府側との緊張が限界に達した。報復か、交渉か、夜明け前の決断を迫られる。",
             choices: [
@@ -2819,6 +2843,7 @@ const GAME_DATA = {
         },
         {
             id: "event_harris_treaty",
+            act: 1,
             title: "日米修好通商条約、開国の署名",
             desc: "港を開き、異国との交易を認める条約が差し出された。国力を蓄える好機か、主権を削る危険な一歩か。",
             choices: [
@@ -2853,6 +2878,7 @@ const GAME_DATA = {
         },
         {
             id: "event_satsuma_british_war",
+            act: 1,
             title: "薩英戦争、砲火の教訓",
             desc: "鹿児島湾に英国艦隊が現れ、砲声が城下を揺るがした。力で抗うか、敗北から新しい軍制を学ぶか。",
             choices: [
@@ -2887,6 +2913,7 @@ const GAME_DATA = {
         },
         {
             id: "event_choshu_expedition",
+            act: 1,
             title: "第一次長州征討、進軍の命",
             desc: "幕府は長州へ大軍を送り、諸藩にも出兵を命じた。正面から戦うか、裏で停戦の道を探るか。",
             choices: [
@@ -2922,6 +2949,7 @@ const GAME_DATA = {
         },
         {
             id: "event_boshin_war",
+            act: 2,
             title: "戊辰戦争、時代の分水嶺",
             desc: "錦旗を掲げた軍勢と旧幕府軍が各地で衝突した。新時代へ進むか、旧き秩序を守るか、国の形が決まろうとしている。",
             choices: [
@@ -2956,6 +2984,7 @@ const GAME_DATA = {
         },
         {
             id: "event_uraga_arrival",
+            act: 1,
             title: "浦賀沖、黒船来航",
             desc: "蒸気船の巨体が浦賀沖に現れ、町は大騒ぎとなった。国を閉ざすか、異国の技術を学ぶか、幕府は決断を迫られる。",
             choices: [
@@ -2991,6 +3020,7 @@ const GAME_DATA = {
         },
         {
             id: "event_manen_embassy",
+            act: 1,
             title: "万延遣米使節、海の彼方へ",
             desc: "条約批准書を携えた使節団が、太平洋を越えて米国へ向かう。異国の制度を学ぶ旅には、危険と大きな成果が待っている。",
             choices: [
@@ -3026,6 +3056,7 @@ const GAME_DATA = {
         },
         {
             id: "event_seven_nobles_exile",
+            act: 1,
             title: "七卿落ち、雨中の逃避行",
             desc: "政変によって都を追われた公卿たちが、長州を目指して夜道を進む。追手を振り切り、次の策を立てなければならない。",
             choices: [
@@ -3062,6 +3093,7 @@ const GAME_DATA = {
         },
         {
             id: "event_europe_mission",
+            act: 3,
             title: "岩倉使節団、世界視察",
             desc: "新政府は欧米諸国へ使節を送り、近代国家の仕組みを学ぼうとしている。国の未来への投資か、目の前の戦力か。",
             choices: [
@@ -3099,6 +3131,7 @@ const GAME_DATA = {
         },
         {
             id: "event_nagasaki_naval_school",
+            act: 1,
             title: "長崎海軍伝習所、蒸気の学び",
             desc: "長崎に集まった若き志士たちが、航海術と砲術を学び始めた。古い身分にこだわるか、実力ある人材を育てるか。",
             choices: [
@@ -3134,6 +3167,7 @@ const GAME_DATA = {
         },
         {
             id: "event_kobe_training",
+            act: 1,
             title: "神戸海軍操練所、海援隊の夢",
             desc: "勝海舟の構想のもと、身分を越えた若者たちが海軍術を学ぶ。幕府の枠内に留めるか、新しい航路へ出るか。",
             choices: [
@@ -3177,6 +3211,7 @@ const GAME_DATA = {
         },
         {
             id: "event_charter_oath",
+            act: 2,
             title: "五箇条の御誓文、新政の誓い",
             desc: "新政府の基本方針を示す誓文が掲げられた。広く議論を集めるか、強い指導力で改革を急ぐか。",
             choices: [
@@ -3211,6 +3246,7 @@ const GAME_DATA = {
         },
         {
             id: "event_han_reform",
+            act: 3,
             title: "廃藩置県、藩を越える国",
             desc: "各地の藩を廃し、中央政府のもとに新しい行政区を置く改革が始まった。抵抗を抑え、国を一つにまとめる必要がある。",
             choices: [
@@ -3246,6 +3282,7 @@ const GAME_DATA = {
         },
         {
             id: "event_ii_successor",
+            act: 1,
             title: "桜田門外後、揺れる幕府",
             desc: "大老を失った幕府では、次の政権をめぐる議論が割れている。公武合体か、強権的な統制か、政局の針路を選ぶ時だ。",
             choices: [
@@ -3280,6 +3317,7 @@ const GAME_DATA = {
         },
         {
             id: "event_satcho_protocol",
+            act: 2,
             title: "薩長盟約、倒幕の密議",
             desc: "薩摩と長州の代表が、互いの疑念を越えて密かに手を結ぼうとしている。連携を急ぐか、兵力を蓄えるか。",
             choices: [
@@ -3315,6 +3353,7 @@ const GAME_DATA = {
         },
         {
             id: "event_edo_opening",
+            act: 2,
             title: "江戸開城前夜、最後の評議",
             desc: "江戸の町を戦火に巻き込むか、城を明け渡して人々を救うか。夜更けの評議で、最後の決断が迫られている。",
             choices: [
@@ -3352,6 +3391,7 @@ const GAME_DATA = {
         },
         {
             id: "event_hokkaido_development",
+            act: 3,
             title: "北海道開拓、北の新天地",
             desc: "戦乱の後、北の大地を開き新しい国力を築く計画が持ち上がった。軍備・交易・民の暮らし、どこへ投資するか。",
             choices: [
@@ -3387,6 +3427,7 @@ const GAME_DATA = {
         },
         {
             id: "event_teradaya_conflict",
+            act: 1,
             title: "寺田屋騒動、同士討ちの夜",
             desc: "寺田屋に集まった志士たちの意見が割れ、刀を抜く者まで現れた。仲間をまとめるか、決起を急ぐか。",
             choices: [
@@ -3424,6 +3465,7 @@ const GAME_DATA = {
         },
         {
             id: "event_nagasaki_magistrate",
+            act: 1,
             title: "長崎奉行所、異国との窓口",
             desc: "長崎奉行所に異国船の報告と交易の要求が届いた。情報を集めて備えるか、港を閉じて緊張を高めるか。",
             choices: [
@@ -3459,6 +3501,7 @@ const GAME_DATA = {
         },
         {
             id: "event_hanseki_hokan",
+            act: 3,
             title: "版籍奉還、藩主たちの決断",
             desc: "諸藩の土地と人民を朝廷へ返す構想が示された。新しい統一国家を急ぐか、各地の事情に配慮するか。",
             choices: [
@@ -3494,6 +3537,7 @@ const GAME_DATA = {
         },
         {
             id: "event_seikanron_debate",
+            act: 3,
             title: "征韓論政変、割れる新政府",
             desc: "海外派兵をめぐって新政府の重鎮たちが激しく対立した。武力で威信を示すか、国内の改革を優先するか。",
             choices: [
@@ -3531,6 +3575,7 @@ const GAME_DATA = {
         },
         {
             id: "event_satsuma_trade",
+            act: 1,
             title: "薩摩藩の密貿易、黒糖の財源",
             desc: "南国の産物を密かに運び、洋式武器を買う資金にする計画が持ち上がった。国力を増す一手か、危険な交易か。",
             choices: [
@@ -3566,6 +3611,7 @@ const GAME_DATA = {
         },
         {
             id: "event_yokoi_reform",
+            act: 2,
             title: "横井小楠、国是の建白",
             desc: "実学を重んじる改革案が評議の場に提出された。諸藩の利害を越えて、国全体の仕組みを作れるか。",
             choices: [
@@ -3601,6 +3647,7 @@ const GAME_DATA = {
         },
         {
             id: "event_byakkotai_sortie",
+            act: 3,
             title: "白虎隊、飯盛山の出陣",
             desc: "若い兵たちが城下を守るために出陣する。彼らを前線へ送るか、守備に残して町を支えるか。",
             choices: [
@@ -3638,6 +3685,7 @@ const GAME_DATA = {
         },
         {
             id: "event_hakodate_government",
+            act: 3,
             title: "箱館政権、北辺の評議",
             desc: "五稜郭に集まった旧幕府軍が、新しい政権の形を議論している。海軍を頼るか、陸の守りを固めるか。",
             choices: [
@@ -3676,6 +3724,7 @@ const GAME_DATA = {
         },
         {
             id: "event_tenpo_reform",
+            act: 1,
             title: "天保の改革、倹約の号令",
             desc: "幕府が倹約と統制を掲げ、改革の号令を発した。厳しい規律で国を立て直すか、商いの力を活かすか。",
             choices: [
@@ -3712,6 +3761,7 @@ const GAME_DATA = {
         },
         {
             id: "event_foreign_ship_edict",
+            act: 1,
             title: "異国船打払令、海防の決断",
             desc: "異国船を追い払う命令が出され、沿岸の緊張が高まった。強硬策か、情報収集か、海防の方針を選ぶ。",
             choices: [
@@ -3746,6 +3796,7 @@ const GAME_DATA = {
         },
         {
             id: "event_satsuma_after_teradaya",
+            act: 1,
             title: "寺田屋騒動後、薩摩の粛清",
             desc: "藩内の急進派を抑えるため、薩摩では厳しい処分が検討されている。秩序を守るか、志士をかばうか。",
             choices: [
@@ -3783,6 +3834,7 @@ const GAME_DATA = {
         },
         {
             id: "event_tokyo_capital",
+            act: 3,
             title: "東京遷都、新しい都の建設",
             desc: "新政府は都を東へ移し、国の中心を作り直そうとしている。政治の集中か、各地との均衡か。",
             choices: [
@@ -3820,6 +3872,7 @@ const GAME_DATA = {
         },
         {
             id: "event_kanagawa_treaty",
+            act: 1,
             title: "日米和親条約、開港の選択",
             desc: "鎖国の扉をわずかに開く条約が提示された。港を開いて国力を蓄えるか、異国の圧力に抗うか。",
             choices: [
@@ -3855,6 +3908,7 @@ const GAME_DATA = {
         },
         {
             id: "event_ansei_earthquake",
+            act: 1,
             title: "安政江戸地震、復興の灯",
             desc: "大地震で江戸の町が大きな被害を受けた。兵を救援へ回すか、蓄えを守るか、混乱の中で判断を迫られる。",
             choices: [
@@ -3892,6 +3946,7 @@ const GAME_DATA = {
         },
         {
             id: "event_sanjo_council",
+            act: 1,
             title: "参与会議、諸侯の評議",
             desc: "朝廷と諸侯が集まり、幕府と列強への対応を話し合う。強硬策か、合議による安定か。",
             choices: [
@@ -3926,6 +3981,7 @@ const GAME_DATA = {
         },
         {
             id: "event_nagaoka_defense",
+            act: 3,
             title: "長岡城攻防、ガトリングの轟音",
             desc: "長岡城をめぐる攻防で、最新兵器と旧来の武士道がぶつかる。城を守るか、反撃のために兵を温存するか。",
             choices: [
@@ -3963,6 +4019,7 @@ const GAME_DATA = {
         },
         {
             id: "event_satsuma_students",
+            act: 2,
             title: "薩摩藩英国留学生、海を越える",
             desc: "若き藩士たちを密かに英国へ送り、造船や砲術を学ばせる計画が立てられた。目先の兵力か、未来への投資か。",
             choices: [
@@ -3998,6 +4055,7 @@ const GAME_DATA = {
         },
         {
             id: "event_kobe_incident",
+            act: 2,
             title: "神戸事件、外交の緊張",
             desc: "新政府軍と外国人の間で衝突が起き、港町に緊張が走った。謝罪して事態を収めるか、国の威信を示すか。",
             choices: [
@@ -4034,6 +4092,7 @@ const GAME_DATA = {
         },
         {
             id: "event_shinchogumi",
+            act: 1,
             title: "新徴組、江戸の治安維持",
             desc: "江戸の町を守るため、新たな治安組織の編成が進められている。厳しい規律か、町人との協力か。",
             choices: [
@@ -4069,6 +4128,7 @@ const GAME_DATA = {
         },
         {
             id: "event_aizu_surrender",
+            act: 3,
             title: "会津藩降伏、城下の朝",
             desc: "長い籠城の末、会津は降伏を決断する。戦いを終わらせるか、最後まで抗うか。",
             choices: [
@@ -4106,6 +4166,7 @@ const GAME_DATA = {
         },
         {
             id: "event_august_coup",
+            act: 1,
             title: "八月十八日の政変、都の転換",
             desc: "朝廷内の主導権が一夜にして入れ替わり、長州勢は京を追われた。政変に抗うか、次の機会を待つか。",
             choices: [
@@ -4141,6 +4202,7 @@ const GAME_DATA = {
         },
         {
             id: "event_omiya_assassination",
+            act: 2,
             title: "近江屋事件、盟友の喪失",
             desc: "京都の宿で、時代を動かした志士が襲撃を受けた。悲しみを力に変えるか、身を隠して計画を守るか。",
             choices: [
@@ -4175,6 +4237,7 @@ const GAME_DATA = {
         },
         {
             id: "event_kaiyo_maru",
+            act: 3,
             title: "開陽丸沈没、海軍の試練",
             desc: "最新鋭の艦が海に沈み、北辺の戦力が大きく揺らいだ。残った船を守るか、陸上の防衛へ力を移すか。",
             choices: [
@@ -4210,6 +4273,7 @@ const GAME_DATA = {
         },
         {
             id: "event_dajo_system",
+            act: 3,
             title: "太政官制度、行政の再編",
             desc: "新政府の役所を整え、複雑な政務を分担する制度が議論されている。中央集権か、現場の裁量か。",
             choices: [
@@ -4245,6 +4309,7 @@ const GAME_DATA = {
         },
         {
             id: "event_sword_ban",
+            act: 3,
             title: "廃刀令、武士の時代の終わり",
             desc: "帯刀を禁じる新しい法が公布され、武士の誇りと生活が大きく揺らいだ。古い誇りを守るか、新時代へ適応するか。",
             choices: [
@@ -4279,6 +4344,7 @@ const GAME_DATA = {
         },
         {
             id: "event_conscription",
+            act: 3,
             title: "徴兵令、国民皆兵の布告",
             desc: "身分を越えて兵を集める新しい軍制が発表された。近代軍を作るか、旧来の武士団を守るか。",
             choices: [
@@ -4316,6 +4382,7 @@ const GAME_DATA = {
         },
         {
             id: "event_satsuma_rebellion",
+            act: 3,
             title: "西南戦争、士族の決起",
             desc: "不満を募らせた士族が故郷で兵を挙げた。反乱に加わるか、政府軍として鎮めるか。",
             choices: [
@@ -4351,6 +4418,7 @@ const GAME_DATA = {
         },
         {
             id: "event_okubo_assassination",
+            act: 3,
             title: "大久保利通暗殺、政局の空白",
             desc: "改革を進めた政府要人が襲撃され、政局に大きな空白が生まれた。改革を続けるか、対話を優先するか。",
             choices: [
@@ -4387,6 +4455,7 @@ const GAME_DATA = {
         },
         {
             id: "event_civilization_enlightenment",
+            act: 3,
             title: "文明開化、街灯の夜",
             desc: "街に洋装や鉄道、ガス灯が現れ、人々の暮らしが急速に変わり始めた。新しい技術を受け入れるか、伝統を守るか。",
             choices: [
@@ -4422,6 +4491,7 @@ const GAME_DATA = {
         },
         {
             id: "event_yokohama_settlement",
+            act: 3,
             title: "横浜居留地、異文化の交差点",
             desc: "港の居留地に外国商人や通詞が集まり、商取引と情報が行き交う。利益を取るか、摩擦を避けるか。",
             choices: [
@@ -4456,6 +4526,7 @@ const GAME_DATA = {
         },
         {
             id: "event_samurai_livelihood",
+            act: 3,
             title: "士族授産、失われた禄への道",
             desc: "禄を失った士族たちに、新しい生業を与える政策が必要になった。農業・商業・軍務のどれに道を作るか。",
             choices: [
@@ -4493,6 +4564,7 @@ const GAME_DATA = {
         },
         {
             id: "event_army_ministry",
+            act: 3,
             title: "陸軍省設置、軍政の整備",
             desc: "陸軍を統括する新たな役所が設置され、軍の指揮系統が整えられようとしている。中央集権か、地方軍の裁量か。",
             choices: [
@@ -4528,6 +4600,7 @@ const GAME_DATA = {
         },
         {
             id: "event_railway_opening",
+            act: 3,
             title: "鉄道開通、文明の蒸気",
             desc: "新橋と横浜を結ぶ鉄道が開通し、人と物の流れが変わろうとしている。交通網を広げるか、軍事輸送を優先するか。",
             choices: [
@@ -4563,6 +4636,7 @@ const GAME_DATA = {
         },
         {
             id: "event_gakusei_system",
+            act: 3,
             title: "学制公布、知識の門",
             desc: "全国に学校を設ける新しい制度が示された。軍学を優先するか、広く学びを届けるか。",
             choices: [
@@ -4597,6 +4671,7 @@ const GAME_DATA = {
         },
         {
             id: "event_postal_system",
+            act: 3,
             title: "郵便制度、情報の道",
             desc: "全国へ手紙を届ける新しい仕組みが整えられている。密書を守るか、広く情報を行き渡らせるか。",
             choices: [
@@ -4631,6 +4706,7 @@ const GAME_DATA = {
         },
         {
             id: "event_ryukyu_annexation",
+            act: 3,
             title: "琉球処分、海の国境",
             desc: "琉球をめぐる外交問題が持ち上がり、新政府は国境と自治のあり方を決めようとしている。強硬策か、対話か。",
             choices: [
@@ -4665,6 +4741,7 @@ const GAME_DATA = {
         },
         {
             id: "event_meiji_political_crisis",
+            act: 3,
             title: "明治六年政変、割れる元勲",
             desc: "海外派遣と国内改革をめぐり、新政府の中心で意見が真っ二つに割れた。政権を守るか、主張を貫くか。",
             choices: [
@@ -4702,6 +4779,7 @@ const GAME_DATA = {
         },
         {
             id: "event_first_newspaper",
+            act: 3,
             title: "新聞創刊、世論の力",
             desc: "新しい新聞が創刊され、事件や政治の情報が町へ広がり始めた。世論を味方につけるか、情報を管理するか。",
             choices: [
@@ -4736,6 +4814,7 @@ const GAME_DATA = {
         },
         {
             id: "event_tonden_soldiers",
+            act: 3,
             title: "屯田兵制度、北辺の守り",
             desc: "北海道の開拓と防衛を担う屯田兵の制度が整えられた。農地を開くか、軍事拠点を築くか。",
             choices: [
@@ -4771,6 +4850,7 @@ const GAME_DATA = {
         },
         {
             id: "event_stipend_reform",
+            act: 3,
             title: "秩禄処分、士族の岐路",
             desc: "旧藩士への秩禄を整理する政策が進み、長年の暮らしが変わろうとしている。補償か、軍務への転換か。",
             choices: [
@@ -4810,6 +4890,7 @@ const GAME_DATA = {
         },
         {
             id: "event_hokkaido_agency",
+            act: 3,
             title: "北海道開拓使、北の実験場",
             desc: "開拓使が設けられ、北海道に新しい産業と町を作る計画が始まった。農地・工場・防衛のどこへ資金を回すか。",
             choices: [
@@ -4846,6 +4927,7 @@ const GAME_DATA = {
         },
         {
             id: "event_land_tax",
+            act: 3,
             title: "地租改正、税の新しい形",
             desc: "土地の価値に基づいて税を集める制度が始まった。安定した財源を得るか、民の負担を軽くするか。",
             choices: [
@@ -4880,6 +4962,7 @@ const GAME_DATA = {
         },
         {
             id: "event_rokumeikan",
+            act: 3,
             title: "鹿鳴館、社交外交の舞台",
             desc: "洋館の舞踏会に外国の要人が集まり、不平等条約改正を見据えた社交外交が始まった。華やかさか、実務か。",
             choices: [
@@ -4916,6 +4999,7 @@ const GAME_DATA = {
         },
         {
             id: "event_treaty_qing",
+            act: 3,
             title: "日清修好条規、東アジアの外交",
             desc: "清との間に対等な条約を結び、東アジアの秩序を探る機会が訪れた。協調か、軍備競争か。",
             choices: [
@@ -4950,6 +5034,7 @@ const GAME_DATA = {
         },
         {
             id: "event_freedom_rights",
+            act: 3,
             title: "自由民権運動、演説の波",
             desc: "各地で政治参加を求める演説会が開かれ、政府のあり方をめぐる声が高まった。弾圧か、議論か。",
             choices: [
@@ -4985,6 +5070,7 @@ const GAME_DATA = {
         },
         {
             id: "event_tomioka_silk",
+            act: 3,
             title: "富岡製糸場、工場の鐘",
             desc: "西洋式の製糸工場が稼働し、輸出産業の柱を作ろうとしている。利益を急ぐか、働く者の環境を整えるか。",
             choices: [
@@ -5022,6 +5108,7 @@ const GAME_DATA = {
         },
         {
             id: "event_hokkaido_village",
+            act: 3,
             title: "北海道開拓村、雪原の暮らし",
             desc: "北の大地に開拓村が生まれ、厳しい冬を越すための仕組みが必要になった。軍事か、生活基盤か。",
             choices: [
@@ -5059,6 +5146,7 @@ const GAME_DATA = {
         },
         {
             id: "event_treaty_revision",
+            act: 3,
             title: "条約改正交渉、主権の回復",
             desc: "不平等条約の改正をめぐり、外国公使との交渉が続いている。時間をかけるか、強い姿勢で臨むか。",
             choices: [
@@ -5093,6 +5181,7 @@ const GAME_DATA = {
         },
         {
             id: "event_iba_hachiro",
+            act: 2,
             title: "箱根山崎の激闘、隻腕の小天狗",
             desc: "心形刀流の美剣士・伊庭八郎率いる幕府遊撃隊が、箱根の天険にて立ち塞がる。左手に重傷を負いながらも白刃を閃かせるその凄絶な気魄に、何を託すか。",
             choices: [

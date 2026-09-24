@@ -247,8 +247,16 @@ class MapSystem {
     }
 
     launchEvent() {
-        const events = GAME_DATA.events;
-        const randomEvent = events[Math.floor(Math.random() * events.length)];
+        const currentAct = this.currentAct || 1;
+        // 現在の幕に対応する歴史事件を抽出
+        let availableEvents = GAME_DATA.events.filter(e => {
+            if (Array.isArray(e.act)) return e.act.includes(currentAct);
+            return e.act === currentAct;
+        });
+        if (availableEvents.length === 0) {
+            availableEvents = GAME_DATA.events;
+        }
+        const randomEvent = availableEvents[Math.floor(Math.random() * availableEvents.length)];
         this.app.currentEvent = randomEvent;
         this.app.switchScreen('screen-event');
         this.app.ui.renderEvent(randomEvent);
