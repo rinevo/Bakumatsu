@@ -40,22 +40,49 @@ class MapSystem {
 
         let nodeIdCounter = 1;
 
-        // Floor 0
+        // Floor 0:
+        // 第一幕: 志士を入手できる歴史事件（開始地点 3分岐）
+        // 第二幕・終幕: 戦場（開始地点 3分岐）
         const f0Nodes = [];
         const f0Count = 3;
-        for (let i = 0; i < f0Count; i++) {
-            const id = `act${actNumber}_f0_n${i}`;
-            const node = {
-                id,
-                floor: 0,
-                col: i,
-                type: 'battle',
-                title: '戦場（街道の衝突）',
-                icon: '⚔️',
-                completed: false
-            };
-            this.nodes.push(node);
-            f0Nodes.push(node);
+
+        if (actNumber === 1) {
+            const shishiEvents = this.getShishiEventsForAct(actNumber);
+            const selectedEvents = this.shuffleArray([...shishiEvents]).slice(0, f0Count);
+
+            for (let i = 0; i < f0Count; i++) {
+                const ev = selectedEvents[i] || shishiEvents[0];
+                const id = `act${actNumber}_f0_n${i}`;
+                const node = {
+                    id,
+                    floor: 0,
+                    col: i,
+                    type: 'event',
+                    title: ev ? ev.title : '歴史事件（志士との邂逅）',
+                    icon: '📜',
+                    eventId: ev ? ev.id : null,
+                    completed: false
+                };
+                this.nodes.push(node);
+                f0Nodes.push(node);
+            }
+        } else {
+            // 第二幕、終幕の最初に選択するコマは戦場
+            for (let i = 0; i < f0Count; i++) {
+                const id = `act${actNumber}_f0_n${i}`;
+                const node = {
+                    id,
+                    floor: 0,
+                    col: i,
+                    type: 'battle',
+                    title: '戦場',
+                    icon: '⚔️',
+                    eventId: null,
+                    completed: false
+                };
+                this.nodes.push(node);
+                f0Nodes.push(node);
+            }
         }
 
         let prevFloorNodes = f0Nodes;
@@ -206,7 +233,7 @@ class MapSystem {
                 this.launchBattle(node);
                 break;
             case 'event':
-                this.launchEvent();
+                this.launchEvent(node);
                 break;
             case 'shop':
                 this.app.shop.openShop();
@@ -215,6 +242,43 @@ class MapSystem {
                 this.app.shop.openRestSite();
                 break;
         }
+    }
+
+    shuffleArray(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    getShishiEventsForAct(actNumber) {
+        const actEvents = GAME_DATA.events.filter(e => {
+            if (Array.isArray(e.act)) return e.act.includes(actNumber);
+            return e.act === actNumber;
+        });
+
+        // 志士を入手できる選択肢を持つイベントを抽出
+        const shishiEvents = actEvents.filter(e => {
+            return (e.choices || []).some(c => {
+                if (!c.action) return false;
+                const code = c.action.toString();
+                return code.includes('addCardToDeck');
+            });
+        });
+
+        // 自陣営向け選択肢を含むものを優先ソート
+        const faction = this.app.faction;
+        if (faction) {
+            shishiEvents.sort((a, b) => {
+                const aFav = (a.choices || []).some(c => c.faction === faction || !c.faction);
+                const bFav = (b.choices || []).some(c => c.faction === faction || !c.faction);
+                return (bFav ? 1 : 0) - (aFav ? 1 : 0);
+            });
+        }
+
+        return shishiEvents.length > 0 ? shishiEvents : actEvents;
     }
 
     launchBattle(node) {
@@ -246,20 +310,29 @@ class MapSystem {
         }
     }
 
-    launchEvent() {
-        const currentAct = this.currentAct || 1;
-        // 現在の幕に対応する歴史事件を抽出
-        let availableEvents = GAME_DATA.events.filter(e => {
-            if (Array.isArray(e.act)) return e.act.includes(currentAct);
-            return e.act === currentAct;
-        });
-        if (availableEvents.length === 0) {
-            availableEvents = GAME_DATA.events;
+    launchEvent(node) {
+        let eventToTrigger = null;
+        if (node && node.eventId) {
+            eventToTrigger = GAME_DATA.events.find(e => e.id === node.eventId);
         }
-        const randomEvent = availableEvents[Math.floor(Math.random() * availableEvents.length)];
-        this.app.currentEvent = randomEvent;
+
+        if (!eventToTrigger) {
+            const currentAct = this.currentAct || 1;
+            // 現在の幕に対応する志士入手可能イベントを優先抽出
+            const shishiEvents = this.getShishiEventsForAct(currentAct);
+            let availableEvents = shishiEvents.length > 0 ? shishiEvents : GAME_DATA.events.filter(e => {
+                if (Array.isArray(e.act)) return e.act.includes(currentAct);
+                return e.act === currentAct;
+            });
+            if (availableEvents.length === 0) {
+                availableEvents = GAME_DATA.events;
+            }
+            eventToTrigger = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+        }
+
+        this.app.currentEvent = eventToTrigger;
         this.app.switchScreen('screen-event');
-        this.app.ui.renderEvent(randomEvent);
+        this.app.ui.renderEvent(eventToTrigger);
     }
 
     onActCompleted() {

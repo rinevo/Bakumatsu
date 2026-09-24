@@ -146,11 +146,10 @@ class BakumatsuApp {
             this.maxHp = 75;
             this.hp = 75;
             this.gold = 100;
-            // 初期デッキ（スターターカードのみで構成：計10枚）
+            // 初期デッキ（スターターカードのみで構成：計10枚、志士カードなし）
             this.deck = [
-                "tobaku_strike", "tobaku_strike", "tobaku_strike", "tobaku_strike",
+                "tobaku_strike", "tobaku_strike", "tobaku_strike", "tobaku_strike", "tobaku_strike",
                 "tobaku_defend", "tobaku_defend", "tobaku_defend", "tobaku_defend",
-                "ryoma_kaiwentai",
                 "satcho_secret"
             ];
             this.obtainRelic("kaientai_log");
@@ -159,11 +158,10 @@ class BakumatsuApp {
             this.maxHp = 85;
             this.hp = 85;
             this.gold = 120;
-            // 初期デッキ（スターターカードのみで構成：計10枚）
+            // 初期デッキ（スターターカードのみで構成：計10枚、志士カードなし）
             this.deck = [
-                "sabaku_strike", "sabaku_strike", "sabaku_strike", "sabaku_strike",
+                "sabaku_strike", "sabaku_strike", "sabaku_strike", "sabaku_strike", "sabaku_strike",
                 "sabaku_defend", "sabaku_defend", "sabaku_defend", "sabaku_defend",
-                "hijikata_fukucho",
                 "kyokuchu_hatto"
             ];
             this.obtainRelic("makoto_haori");
