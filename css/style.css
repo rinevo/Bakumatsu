@@ -548,69 +548,85 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 24px 0;
+    padding: 20px 0;
     box-sizing: border-box;
 }
 
 .title-wrapper {
+    position: relative;
     margin: auto;
-    max-width: 900px;
+    max-width: 880px;
     width: 90%;
-    padding: 28px 36px;
+    padding: 24px 32px;
     background: rgba(14, 16, 21, 0.85);
     border: 2px solid var(--color-border);
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(223, 177, 91, 0.1);
     border-radius: 8px;
 }
 
+.top-link {
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    font-size: 12px;
+}
+.top-link a {
+    color: #8c8f99;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.top-link a:hover {
+    color: var(--color-gold);
+}
+
 .title-crest-top {
     color: var(--color-gold);
     letter-spacing: 6px;
-    font-size: 16px;
-    margin-bottom: 10px;
+    font-size: 15px;
+    margin-bottom: 8px;
 }
 
 .main-title {
-    font-size: 48px;
+    font-size: 44px;
     font-weight: 900;
     letter-spacing: 8px;
     color: var(--color-washi);
     text-shadow: 0 0 20px rgba(223, 177, 91, 0.5), 0 4px 10px #000;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 .title-sub {
-    font-size: 28px;
+    font-size: 26px;
     display: block;
     color: #dfb15b;
     letter-spacing: 12px;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 .title-genre {
     color: #8c8f99;
     letter-spacing: 4px;
-    font-size: 14px;
-    margin-bottom: 12px;
+    font-size: 13px;
+    margin-bottom: 10px;
     font-family: var(--font-sans);
 }
 
 .title-flavor {
     font-size: 14px;
     color: #b0a89b;
-    line-height: 1.7;
-    margin-bottom: 20px;
+    line-height: 1.6;
+    margin-bottom: 16px;
 }
 
 .select-heading {
-    font-size: 19px;
+    font-size: 18px;
     color: var(--color-gold);
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     letter-spacing: 4px;
 }
 
 .faction-cards-grid {
     display: flex;
-    gap: 24px;
+    gap: 22px;
     justify-content: center;
 }
 
@@ -619,7 +635,7 @@ body {
     background: linear-gradient(180deg, #181d26 0%, #101217 100%);
     border: 2px solid #333d4d;
     border-radius: 8px;
-    padding: 20px;
+    padding: 18px 20px;
     text-align: left;
     display: flex;
     flex-direction: column;
@@ -641,32 +657,32 @@ body {
 }
 
 .faction-crest {
-    font-size: 28px;
-    margin-bottom: 6px;
+    font-size: 26px;
+    margin-bottom: 4px;
 }
 
 .faction-name {
-    font-size: 20px;
-    margin-bottom: 6px;
+    font-size: 19px;
+    margin-bottom: 4px;
     letter-spacing: 2px;
 }
 .tobaku-card .faction-name { color: #ff6b6b; }
 .sabaku-card .faction-name { color: #58a6ff; }
 
 .faction-leader {
-    font-size: 13px;
+    font-size: 12px;
     color: #a8a299;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
     border-bottom: 1px dashed #3a3226;
 }
 
 .faction-traits {
     list-style: none;
-    font-size: 13px;
-    line-height: 1.7;
+    font-size: 12px;
+    line-height: 1.6;
     color: #ccc;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
 }
 
 .btn-faction {
