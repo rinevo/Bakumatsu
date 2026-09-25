@@ -14,20 +14,16 @@ class UIManager {
     updateHeader() {
         const hpBar = document.getElementById('header-hp-fill');
         const hpText = document.getElementById('header-hp-text');
-        const shieldText = document.getElementById('header-shield-text');
         const goldText = document.getElementById('header-gold-text');
         const factionBadge = document.getElementById('header-faction-badge');
         const imperialFill = document.getElementById('header-imperial-fill');
         const imperialText = document.getElementById('header-imperial-text');
-        const trendBadge = document.getElementById('header-trend-badge');
-        const menuTrendBadge = document.getElementById('menu-trend-badge');
 
         if (hpBar) {
             const hpRatio = Math.max(0, Math.min(1, this.app.hp / this.app.maxHp));
             hpBar.style.width = `${hpRatio * 100}%`;
         }
         if (hpText) hpText.textContent = `${this.app.hp} / ${this.app.maxHp}`;
-        if (shieldText) shieldText.textContent = this.app.battle ? this.app.battle.playerShield : 0;
         if (goldText) goldText.textContent = `${this.app.gold} 両`;
 
         if (factionBadge) {
@@ -105,58 +101,39 @@ class UIManager {
 
                 opinionContainer.title = `世論動乱（天下の大勢）: ${phase.name} (${sign}${this.app.publicOpinion}%)\n${phase.desc}\n自陣営状況: ${situationDesc}`;
             }
-
-            // トレンドバッジ（旧トレンド表示スロットにも世論フェーズを連動）
-            if (trendBadge) {
-                trendBadge.className = `trend-badge ${phase.badgeClass}`;
-                trendBadge.textContent = `天下の大勢: ${phase.name}`;
-                trendBadge.title = `${phase.desc}`;
-            }
-            if (menuTrendBadge) {
-                menuTrendBadge.className = `trend-badge ${phase.badgeClass}`;
-                menuTrendBadge.textContent = `天下の大勢: ${phase.name} (${sign}${this.app.publicOpinion}%)`;
-                menuTrendBadge.title = `${phase.desc}`;
-            }
         }
 
         // レリック表示の更新（単一アイコン＋所持数＆プルダウンリスト）
         const relicCountEl = document.getElementById('header-relic-count');
         const relicDropdownList = document.getElementById('header-relic-dropdown-list');
         const relicDropdownCountBadge = document.getElementById('relic-dropdown-count-badge');
-        const menuRelicCount = document.getElementById('menu-relic-count');
-        const menuRelicList = document.getElementById('menu-relic-list');
 
         const totalRelics = this.app.relics.length;
         if (relicCountEl) relicCountEl.textContent = totalRelics;
         if (relicDropdownCountBadge) relicDropdownCountBadge.textContent = `${totalRelics}個`;
-        if (menuRelicCount) menuRelicCount.textContent = `${totalRelics}個`;
 
-        const renderRelicItems = (targetContainer) => {
-            if (!targetContainer) return;
-            targetContainer.innerHTML = '';
+        if (relicDropdownList) {
+            relicDropdownList.innerHTML = '';
             if (totalRelics === 0) {
-                targetContainer.innerHTML = '<div class="relic-empty-message">所持している遺物はありません</div>';
-                return;
+                relicDropdownList.innerHTML = '<div class="relic-empty-message">所持している遺物はありません</div>';
+            } else {
+                this.app.relics.forEach(relicId => {
+                    const r = GAME_DATA.relics[relicId];
+                    if (r) {
+                        const item = document.createElement('div');
+                        item.className = 'relic-dropdown-item';
+                        item.innerHTML = `
+                            <span class="relic-item-icon">🏮</span>
+                            <div class="relic-item-info">
+                                <div class="relic-item-name">${r.name}</div>
+                                <div class="relic-item-desc">${r.desc}</div>
+                            </div>
+                        `;
+                        relicDropdownList.appendChild(item);
+                    }
+                });
             }
-            this.app.relics.forEach(relicId => {
-                const r = GAME_DATA.relics[relicId];
-                if (r) {
-                    const item = document.createElement('div');
-                    item.className = 'relic-dropdown-item';
-                    item.innerHTML = `
-                        <span class="relic-item-icon">🏮</span>
-                        <div class="relic-item-info">
-                            <div class="relic-item-name">${r.name}</div>
-                            <div class="relic-item-desc">${r.desc}</div>
-                        </div>
-                    `;
-                    targetContainer.appendChild(item);
-                }
-            });
-        };
-
-        renderRelicItems(relicDropdownList);
-        renderRelicItems(menuRelicList);
+        }
     }
 
     // --- カードHTML要素の生成 ---

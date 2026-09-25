@@ -109,7 +109,6 @@ body {
 .main-header.title-mode .header-left,
 .main-header.title-mode .header-center,
 .main-header.title-mode .header-right-meta,
-.main-header.title-mode #header-trend-badge,
 .main-header.title-mode #header-relic-wrapper,
 .main-header.title-mode #btn-view-deck {
     display: none !important;
@@ -164,14 +163,7 @@ body {
     gap: 8px;
     font-size: 13px;
 }
-.header-stat-row.sub-row {
-    gap: 12px;
-}
-.header-stat-inline {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
+
 
 /* ヘッダー右側：世論＆遺物（縦スタック） ＆ アクションボタングループ */
 .header-right {
@@ -182,15 +174,8 @@ body {
 }
 .header-right-meta {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
+    align-items: center;
     justify-content: center;
-}
-.header-right-meta .trend-badge {
-    font-size: 11px;
-    padding: 2px 8px;
-    line-height: 1.2;
 }
 
 /* 通常（PC）表示アクションボタン群 */
@@ -311,34 +296,6 @@ body {
     margin: 2px 4px;
 }
 
-/* ドロップダウンメニュー内ステータス情報（狭小画面時） */
-.dropdown-info-box {
-    display: none; /* デフォルト（デスクトップ）では非表示 */
-    flex-direction: column;
-    gap: 8px;
-    padding: 6px 8px;
-    background: rgba(12, 16, 24, 0.6);
-    border-radius: 4px;
-    border: 1px dashed rgba(223, 177, 91, 0.35);
-    margin-bottom: 4px;
-}
-.dropdown-info-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-}
-.dropdown-info-row .info-label {
-    font-size: 11px;
-    color: var(--color-gold);
-    font-family: var(--font-serif);
-    letter-spacing: 1px;
-}
-.empty-relic-hint {
-    font-size: 11px;
-    color: #7d8494;
-}
-
 /* --- ヘッダー・所持遺物バッジ＆プルダウンメニュー --- */
 .header-relic-wrapper {
     position: relative;
@@ -391,8 +348,8 @@ body {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    width: min(300px, calc(100vw - 24px));
-    max-height: 380px;
+    width: min(320px, calc(100vw - 24px));
+    max-height: min(480px, calc(100dvh - var(--header-height, 84px) - 20px));
     background: rgba(14, 18, 26, 0.97);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -407,6 +364,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    touch-action: pan-y; /* 親要素（.main-header）の touch-action: none を上書きし、iPad/タッチ端末でスクロールを許可 */
 }
 
 .header-relic-dropdown.active {
@@ -427,6 +385,7 @@ body {
     color: var(--color-gold);
     font-weight: bold;
     letter-spacing: 1px;
+    flex-shrink: 0;
 }
 
 .relic-dropdown-count-badge {
@@ -441,18 +400,31 @@ body {
 .relic-dropdown-list {
     padding: 6px 8px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
     gap: 6px;
-    max-height: 320px;
+    min-height: 0; /* WebKit/Safariでflex子要素がスクロールしないバグを解消 */
+    flex: 1 1 auto;
+    max-height: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(223, 177, 91, 0.5) rgba(10, 14, 20, 0.3);
 }
 
 .relic-dropdown-list::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
+}
+.relic-dropdown-list::-webkit-scrollbar-track {
+    background: rgba(10, 14, 20, 0.3);
 }
 .relic-dropdown-list::-webkit-scrollbar-thumb {
-    background: rgba(223, 177, 91, 0.4);
+    background: rgba(223, 177, 91, 0.45);
     border-radius: 3px;
+}
+.relic-dropdown-list::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold);
 }
 
 .relic-dropdown-item {
@@ -506,9 +478,7 @@ body {
     font-family: var(--font-serif);
 }
 
-.menu-relic-list-container {
-    max-height: 180px;
-}
+
 
 .header-center {
     flex: 1;
@@ -3186,13 +3156,7 @@ body {
         max-width: 170px;
     }
 
-    /* ゲーム中：画面幅に収まらなくなった世論をヘッダーからプルダウンメニューへ移管 */
-    .main-header:not(.title-mode) #header-trend-badge {
-        display: none !important;
-    }
-    .main-header:not(.title-mode) #menu-info-box {
-        display: flex !important;
-    }
+
 
     /* 戦闘中央操作バー（帯）の幅狭画面・スマホ向けスリム化レイアウト */
     .battle-middle-bar {
@@ -3523,10 +3487,7 @@ body {
         width: 45px;
         height: 8px;
     }
-    .stat-badge-small.def {
-        padding: 1px 4px;
-        font-size: 10px;
-    }
+
     .header-center {
         margin: 0 4px;
         min-width: 110px;

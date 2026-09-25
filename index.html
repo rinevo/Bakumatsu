@@ -16,7 +16,7 @@
             <div id="header-faction-badge" class="faction-badge">
                 <span class="badge-full">陣営未選択</span><span class="badge-short">未選択</span>
             </div>
-            <!-- 体力（上段）と防・資金（下段）の縦2段グループ -->
+            <!-- 体力（上段）と資金（下段）の縦2段グループ -->
             <div class="header-stat-group">
                 <div class="header-stat-row hp-row">
                     <span class="stat-label"><span class="stat-label-full">体力</span><span class="stat-label-short">体</span></span>
@@ -25,15 +25,9 @@
                     </div>
                     <span id="header-hp-text" class="stat-value">75 / 75</span>
                 </div>
-                <div class="header-stat-row sub-row">
-                    <div class="header-stat-inline def-item">
-                        <span class="stat-label">防</span>
-                        <span id="header-shield-text" class="stat-badge-small def">0</span>
-                    </div>
-                    <div class="header-stat-inline gold-item">
-                        <span class="stat-label"><span class="stat-label-full">資金</span><span class="stat-label-short">金</span></span>
-                        <span id="header-gold-text" class="stat-gold">100 両</span>
-                    </div>
+                <div class="header-stat-row gold-row">
+                    <span class="stat-label"><span class="stat-label-full">資金</span><span class="stat-label-short">金</span></span>
+                    <span id="header-gold-text" class="stat-gold">100 両</span>
                 </div>
             </div>
         </div>
@@ -65,10 +59,8 @@
         </div>
 
         <div class="header-right">
-            <!-- 世論フェーズバッジ＆所持遺物の縦スタック -->
+            <!-- 所持遺物（レリック）アイコン＆プルダウンメニュー -->
             <div class="header-right-meta">
-                <div id="header-trend-badge" class="trend-badge" title="世論トレンド">世論: 平穏</div>
-
                 <!-- レリックバッジ＆プルダウンメニュー -->
                 <div class="header-relic-wrapper" id="header-relic-wrapper">
                     <button id="btn-header-relics" class="btn-relic-badge" title="所持遺物一覧を表示" aria-expanded="false">
@@ -102,20 +94,6 @@
                     <span class="menu-icon">☰</span> <span class="menu-label">メニュー</span>
                 </button>
                 <div id="header-dropdown-menu" class="header-dropdown-menu" role="menu">
-                    <!-- 画面幅狭小時に収まらない情報（世論・遺物） -->
-                    <div class="dropdown-info-box" id="menu-info-box">
-                        <div class="dropdown-info-row">
-                            <span class="info-label">世論趨勢</span>
-                            <div id="menu-trend-badge" class="trend-badge">世論: 平穏</div>
-                        </div>
-                        <div class="dropdown-info-row" id="menu-relic-row">
-                            <span class="info-label">所持遺物</span>
-                            <span id="menu-relic-count" class="relic-dropdown-count-badge">0個</span>
-                        </div>
-                        <div id="menu-relic-list" class="relic-dropdown-list menu-relic-list-container"></div>
-                        <div class="dropdown-divider"></div>
-                    </div>
-
                     <button id="btn-menu-view-deck" class="dropdown-item" role="menuitem">📜 帖（山札確認）</button>
                     <div class="dropdown-divider"></div>
                     <button id="btn-menu-toggle-bgm" class="dropdown-item" role="menuitem">🎵 BGM: 鳴</button>
