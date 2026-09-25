@@ -254,6 +254,29 @@ stateDiagram-v2
     screen_gamewin --> screen_title: 新規挑戦
 ```
 
+#### 4.1.3 途中セーブ＆再開仕様（Auto-Save / Continue）
+長時間のランでも安全に中断・再開できるよう、Webブラウザ標準の `localStorage`（キー: `bakumatsu_saved_run`）を利用した自動セーブ・ロード機構を搭載。
+- **保存データ構成**:
+  - `faction`: 選択陣営（`tobaku` / `sabaku`）
+  - `hp`, `maxHp`, `gold`, `imperialGauge`: プレイヤー主ステータス
+  - `deck`: 所持カードID配列
+  - `relics`: 所持レリックID配列
+  - `trendId`: 現在の幕の世論トレンド識別子
+  - `map`: 幕（`currentAct`）、フロア（`currentFloor`）、現在地（`currentNodeId`）、全ノード状態（`completed` フラグ含む）、結線構造（`connections`）
+  - `savedScene`: 保存時の画面状態（`map`, `battle`, `shop`, `rest`, `event`）
+- **保存トリガー**:
+  - ノード進入時（`MapSystem.prototype.visitNode`）
+  - 戦闘勝利後のマップ帰還時（`BakumatsuApp.prototype.returnToMap`）
+  - 歴史事件選択後のマップ帰還時
+  - 洋行商人・本陣休息の利用および退出時
+  - 次幕への進行時（`MapSystem.prototype.onActCompleted`）
+- **消去トリガー**:
+  - ゲームオーバー時（HP 0 または 列強介入度100%到達）
+  - ゲームクリア時（終幕最終ボス撃破）
+- **データ保護・UX**:
+  - タイトル画面表示時にセーブデータの存在を自動判定し、データが存在する場合は「📜 続きから再開」ボタンと進行状況（陣営・幕・階層・体力・資金）を表示。
+  - セーブデータが存在する状態で「新規出陣」を選択した場合は、確認ダイアログを表示して誤操作によるデータ消失を防止。
+
 ---
 
 ### 4.2 戦闘システム (`BattleSystem`)

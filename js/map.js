@@ -225,6 +225,11 @@ class MapSystem {
 
         window.soundSystem.playTaiko(false);
 
+        // ノード突入時の進行状況自動セーブ
+        if (this.app.saveRun) {
+            this.app.saveRun(node.type);
+        }
+
         // ノード種別に応じたシーン起動
         switch (node.type) {
             case 'battle':
@@ -340,6 +345,9 @@ class MapSystem {
             this.generateAct(this.currentAct + 1);
             this.app.switchScreen('screen-map');
             this.app.ui.renderMap();
+            if (this.app.saveRun) {
+                this.app.saveRun('map');
+            }
         } else {
             this.app.handleGameClear();
         }

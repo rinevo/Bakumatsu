@@ -146,6 +146,12 @@ class BakumatsuApp {
             });
         }
 
+        // 中断セーブデータの再開ボタン
+        const btnContinueRun = document.getElementById('btn-continue-run');
+        if (btnContinueRun) {
+            btnContinueRun.addEventListener('click', () => this.loadRun());
+        }
+
         // 陣営選択（PCクリックおよびタッチデバイスで確実に反応するよう強化）
         // 陣営選択
         const btnTobaku = document.getElementById('btn-select-tobaku');
@@ -247,6 +253,12 @@ class BakumatsuApp {
     }
 
     startNewRun(faction) {
+        if (this.hasSavedRun()) {
+            const confirmed = confirm("進行中のセーブデータが存在します。現在の進行を破棄して、新たな乱世へ出陣しますか？");
+            if (!confirmed) return;
+            this.clearSavedRun();
+        }
+
         this.faction = faction;
         this.imperialGauge = 0;
         this.relics = [];
@@ -284,6 +296,9 @@ class BakumatsuApp {
 
         // Act 1 生成
         this.map.generateAct(1);
+
+        // 新規開始時のセーブ
+        this.saveRun('map');
 
         // マップ画面へ遷移
         this.switchScreen('screen-map');
@@ -334,6 +349,7 @@ class BakumatsuApp {
             switch (screenId) {
                 case 'screen-title':
                     window.soundSystem.playBgm('title');
+                    this.checkSavedRun();
                     break;
                 case 'screen-map':
                     window.soundSystem.playBgm('map');
@@ -429,6 +445,7 @@ class BakumatsuApp {
     returnToMap() {
         this.switchScreen('screen-map');
         this.ui.renderMap();
+        this.saveRun('map');
     }
 
     checkActProgressOrReturnMap() {
@@ -442,12 +459,14 @@ class BakumatsuApp {
     }
 
     handleGameOver(reason) {
+        this.clearSavedRun(); // 敗北時に中断セーブを消去
         const reasonEl = document.getElementById('gameover-reason');
         if (reasonEl) reasonEl.textContent = reason;
         this.switchScreen('screen-gameover');
     }
 
     handleGameClear() {
+        this.clearSavedRun(); // 乱世平定・クリア時に中断セーブを消去
         window.soundSystem.playVictory();
         const clearMsg = document.getElementById('gamewin-message');
         if (clearMsg) {
@@ -464,6 +483,186 @@ class BakumatsuApp {
             }
         }
         this.switchScreen('screen-gamewin');
+    }
+
+    // ==========================================
+    // 途中セーブ＆再開（Auto-Save / Continue）
+    // ==========================================
+
+    static get SAVE_KEY() {
+        return 'bakumatsu_saved_run';
+    }
+
+    hasSavedRun() {
+        try {
+            const raw = localStorage.getItem(BakumatsuApp.SAVE_KEY);
+            if (!raw) return false;
+            const data = JSON.parse(raw);
+            return !!(data && data.faction && data.map && Array.isArray(data.deck));
+        } catch (e) {
+            console.error('[セーブ検証エラー]', e);
+            return false;
+        }
+    }
+
+    getSavedRunData() {
+        try {
+            const raw = localStorage.getItem(BakumatsuApp.SAVE_KEY);
+            if (!raw) return null;
+            return JSON.parse(raw);
+        } catch (e) {
+            console.error('[セーブ取得エラー]', e);
+            return null;
+        }
+    }
+
+    checkSavedRun() {
+        const continueBox = document.getElementById('continue-game-box');
+        if (!continueBox) return;
+
+        if (!this.hasSavedRun()) {
+            continueBox.classList.add('hidden');
+            return;
+        }
+
+        const data = this.getSavedRunData();
+        if (!data) {
+            continueBox.classList.add('hidden');
+            return;
+        }
+
+        continueBox.classList.remove('hidden');
+
+        const iconEl = document.getElementById('continue-faction-icon');
+        const nameEl = document.getElementById('continue-faction-name');
+        const actEl = document.getElementById('continue-act');
+        const floorEl = document.getElementById('continue-floor');
+        const hpEl = document.getElementById('continue-hp');
+        const goldEl = document.getElementById('continue-gold');
+
+        if (iconEl) iconEl.textContent = data.faction === 'tobaku' ? '🔴' : '🔵';
+        if (nameEl) nameEl.textContent = data.faction === 'tobaku' ? '薩長同盟（討幕派）' : '幕府・会津藩（佐幕派）';
+        if (actEl) {
+            const actNames = {
+                1: "第一幕：京洛動乱",
+                2: "第二幕：東海道進撃",
+                3: "終幕：天下分け目"
+            };
+            actEl.textContent = actNames[data.map?.currentAct] || "幕末行路";
+        }
+        if (floorEl) {
+            const floorNum = (data.map?.currentFloor !== undefined) ? data.map.currentFloor + 1 : 1;
+            floorEl.textContent = `第${floorNum}階`;
+        }
+        if (hpEl) hpEl.textContent = `体力 ${data.hp} / ${data.maxHp}`;
+        if (goldEl) goldEl.textContent = `${data.gold}両`;
+    }
+
+    saveRun(savedScene = 'map') {
+        // 死亡時または植民地化敗北時は保存しない
+        if (this.hp <= 0 || this.imperialGauge >= 100) return;
+
+        try {
+            const saveData = {
+                version: "1.0",
+                savedAt: Date.now(),
+                savedScene: savedScene,
+                faction: this.faction,
+                hp: this.hp,
+                maxHp: this.maxHp,
+                gold: this.gold,
+                imperialGauge: this.imperialGauge,
+                deck: [...this.deck],
+                relics: [...this.relics],
+                trendId: this.currentTrend ? this.currentTrend.id : null,
+                nextBattleStrengthBuff: this.nextBattleStrengthBuff || 0,
+                map: {
+                    currentAct: this.map.currentAct,
+                    currentFloor: this.map.currentFloor,
+                    currentNodeId: this.map.currentNodeId,
+                    nodes: this.map.nodes,
+                    connections: this.map.connections,
+                    visitedEventIds: this.map.visitedEventIds || []
+                }
+            };
+            localStorage.setItem(BakumatsuApp.SAVE_KEY, JSON.stringify(saveData));
+        } catch (e) {
+            console.error('[セーブ保存エラー]', e);
+        }
+    }
+
+    loadRun() {
+        const data = this.getSavedRunData();
+        if (!data) {
+            alert("セーブデータが見つかりませんでした。");
+            this.checkSavedRun();
+            return;
+        }
+
+        try {
+            // ステータス復元
+            this.faction = data.faction;
+            this.hp = data.hp;
+            this.maxHp = data.maxHp;
+            this.gold = data.gold;
+            this.imperialGauge = data.imperialGauge || 0;
+            this.deck = Array.isArray(data.deck) ? [...data.deck] : [];
+            this.relics = Array.isArray(data.relics) ? [...data.relics] : [];
+            this.nextBattleStrengthBuff = data.nextBattleStrengthBuff || 0;
+
+            // トレンド復元
+            if (data.trendId && typeof GAME_DATA !== 'undefined' && GAME_DATA.trends) {
+                this.currentTrend = GAME_DATA.trends.find(t => t.id === data.trendId) || null;
+            } else {
+                this.currentTrend = null;
+            }
+
+            // マップ復元
+            if (data.map) {
+                this.map.currentAct = data.map.currentAct || 1;
+                this.map.currentFloor = data.map.currentFloor || 0;
+                this.map.currentNodeId = data.map.currentNodeId || null;
+                this.map.nodes = data.map.nodes || [];
+                this.map.connections = data.map.connections || [];
+                this.map.visitedEventIds = data.map.visitedEventIds || [];
+            }
+
+            // 音声アンロック＆効果音
+            if (window.soundSystem) {
+                window.soundSystem.init();
+                window.soundSystem.playTaiko(true);
+            }
+
+            // シーン再開
+            const savedScene = data.savedScene || 'map';
+            const currentNode = this.map.nodes.find(n => n.id === this.map.currentNodeId);
+
+            if ((savedScene === 'battle' || savedScene === 'elite' || savedScene === 'boss') && currentNode) {
+                this.map.launchBattle(currentNode);
+            } else if (savedScene === 'shop') {
+                this.shop.openShop();
+            } else if (savedScene === 'rest') {
+                this.shop.openRestSite();
+            } else if (savedScene === 'event' && currentNode) {
+                this.map.launchEvent(currentNode);
+            } else {
+                this.switchScreen('screen-map');
+                this.ui.renderMap();
+            }
+        } catch (e) {
+            console.error('[セーブロードエラー]', e);
+            alert("セーブデータの復元中にエラーが発生しました。新しくゲームを開始してください。");
+            this.clearSavedRun();
+        }
+    }
+
+    clearSavedRun() {
+        try {
+            localStorage.removeItem(BakumatsuApp.SAVE_KEY);
+        } catch (e) {
+            console.error('[セーブ削除エラー]', e);
+        }
+        this.checkSavedRun();
     }
 }
 

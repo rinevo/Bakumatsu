@@ -101,6 +101,35 @@
                     天下を覆す志士となるか、幕威を貫く武士となるか。
                 </p>
 
+                <!-- 中断セーブデータ再開ボックス（セーブ存在時のみ表示） -->
+                <div id="continue-game-box" class="continue-game-box hidden">
+                    <div class="continue-card">
+                        <div class="continue-badge">✦ 保存された前回の行路 ✦</div>
+                        <div class="continue-content">
+                            <div class="continue-faction-icon" id="continue-faction-icon">🔴</div>
+                            <div class="continue-details">
+                                <div class="continue-faction-name" id="continue-faction-name">薩長同盟（討幕派）</div>
+                                <div class="continue-stats" id="continue-stats">
+                                    <span id="continue-act">第一幕：京洛動乱</span>
+                                    <span class="continue-divider-dot">・</span>
+                                    <span id="continue-floor">第1階</span>
+                                    <span class="continue-divider-dot">・</span>
+                                    <span id="continue-hp">体力 75/75</span>
+                                    <span class="continue-divider-dot">・</span>
+                                    <span id="continue-gold">100両</span>
+                                </div>
+                            </div>
+                            <button id="btn-continue-run" class="btn-continue">
+                                <span class="btn-continue-icon">📜</span>
+                                <span class="btn-continue-text">続きから再開</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="continue-divider">
+                        <span>または 新たな乱世へ出陣（陣営選択）</span>
+                    </div>
+                </div>
+
                 <div class="faction-selection-box">
                     <h2 class="select-heading">【出陣する陣営を選択せよ】</h2>
                     <div class="faction-cards-grid">

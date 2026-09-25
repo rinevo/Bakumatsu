@@ -91,6 +91,7 @@ class ShopSystem {
 
         window.soundSystem.playCoin();
         this.app.ui.renderShop();
+        if (this.app.saveRun) this.app.saveRun('shop');
     }
 
     buyRelic(index) {
@@ -109,6 +110,7 @@ class ShopSystem {
 
         window.soundSystem.playCoin();
         this.app.ui.renderShop();
+        if (this.app.saveRun) this.app.saveRun('shop');
     }
 
     claimSmuggle() {
@@ -137,6 +139,7 @@ class ShopSystem {
         }
 
         this.app.ui.renderShop();
+        if (this.app.saveRun) this.app.saveRun('shop');
     }
 
     removeCardInShop() {
@@ -153,6 +156,7 @@ class ShopSystem {
             this.app.gold -= actualPrice;
             this.cardRemovalPrice += 25; // 使うたびに値上がり
             this.app.ui.renderShop();
+            if (this.app.saveRun) this.app.saveRun('shop');
         });
     }
 
