@@ -2204,9 +2204,14 @@ body {
         font-size: 13px;
         flex-shrink: 1;
     }
-    /* 体力バーを非表示にし数値のみで省スペース化 */
+    /* 幅が狭い画面では数値を非表示にし、体力メーター（バー）を表示 */
     .header-stat-box .header-bar {
-        display: none;
+        display: block;
+        width: 70px;
+        height: 10px;
+    }
+    #header-hp-text {
+        display: none !important;
     }
     .imperial-title {
         max-width: 130px;
@@ -2264,6 +2269,15 @@ body {
         font-size: 12px;
         white-space: nowrap;
     }
+    /* スマホ画面でも体力メーター（バー）を維持表示 */
+    .header-stat-box .header-bar {
+        display: block;
+        width: 55px;
+        height: 10px;
+    }
+    #header-hp-text {
+        display: none !important;
+    }
 
     /* 介入メーターはタイトルを非表示にしてアイコン＋数値バーのみ */
     .header-center {
@@ -2314,6 +2328,10 @@ body {
     .header-stat-box {
         gap: 2px;
         font-size: 11px;
+    }
+    .header-stat-box .header-bar {
+        width: 45px;
+        height: 8px;
     }
     .stat-badge-small.def {
         padding: 1px 4px;
