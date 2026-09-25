@@ -225,11 +225,19 @@ class BakumatsuApp {
         if (btnCloseDeck) {
             btnCloseDeck.addEventListener('click', () => this.ui.closeDeckModal());
         }
+        const deckBackdrop = document.querySelector('#modal-deck .modal-backdrop');
+        if (deckBackdrop) {
+            deckBackdrop.addEventListener('click', () => this.ui.closeDeckModal());
+        }
 
         // 削除モーダルキャンセル
         const btnCloseRemoval = document.getElementById('btn-close-removal');
         if (btnCloseRemoval) {
             btnCloseRemoval.addEventListener('click', () => this.ui.closeRemovalModal());
+        }
+        const removalBackdrop = document.querySelector('#modal-removal .modal-backdrop');
+        if (removalBackdrop) {
+            removalBackdrop.addEventListener('click', () => this.ui.closeRemovalModal());
         }
 
         // 報酬スキップ
