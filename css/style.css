@@ -2927,9 +2927,17 @@ body {
 }
 
 /* 山札ポップウィンドウ（所持デッキ一覧モーダル・カード破棄モーダル）
-   上下中央ではなくヘッダーの下に配置し、カード多数時も上部や閉じるボタンがヘッダーに隠れないようにする */
-#modal-deck,
+   上下中央ではなくヘッダーの下に配置し、戦果確認など他のポップウィンドウよりも最上位に表示する */
+#modal-deck {
+    z-index: 950;
+    align-items: flex-start;
+    padding-top: calc(var(--header-height, 84px) + 12px);
+    padding-bottom: 16px;
+    box-sizing: border-box;
+}
+
 #modal-removal {
+    z-index: 85;
     align-items: flex-start;
     padding-top: calc(var(--header-height, 84px) + 12px);
     padding-bottom: 16px;
