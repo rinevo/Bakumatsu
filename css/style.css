@@ -754,13 +754,14 @@ body {
     min-height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 0 24px;
+    padding: 0;
     box-sizing: border-box;
 }
 
 .map-header-bar {
     position: sticky;
     top: 0;
+    width: 100%;
     background: rgba(12, 14, 18, 0.95);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -769,7 +770,8 @@ body {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--color-border);
-    padding: 12px 0;
+    padding: 12px 24px;
+    box-sizing: border-box;
     flex-shrink: 0;
 }
 .map-act-title {
@@ -787,7 +789,8 @@ body {
 .map-scroll-area {
     width: 100%;
     position: relative;
-    padding: 24px 0 60px 0;
+    padding: 24px 16px 60px 16px;
+    box-sizing: border-box;
     display: block;
 }
 
@@ -2304,11 +2307,25 @@ body {
     .btn-header-menu .menu-label {
         display: none;
     }
-    .btn-header-menu {
-        padding: 6px 8px;
-    }
     .btn-header-menu .menu-icon {
         font-size: 17px;
+    }
+
+    /* マップヘッダーバーのモバイル最適化（左右端まで塗りつぶし維持） */
+    .map-header-bar {
+        padding: 8px 12px;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+    }
+    .map-act-title {
+        font-size: 18px;
+    }
+    .map-legend {
+        gap: 10px;
+        font-size: 11px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
 
