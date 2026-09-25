@@ -471,12 +471,20 @@ class UIManager {
             actTitle.textContent = mapSystem.actNames[mapSystem.currentAct] || "幕末行路";
         }
 
+        const floorProgress = document.getElementById('map-floor-progress');
+
         if (!nodesContainer || !svgLines) return;
         nodesContainer.innerHTML = '';
         svgLines.innerHTML = '';
 
         const selectableNodes = mapSystem.getSelectableNodes();
         const maxFloor = Math.max(...mapSystem.nodes.map(n => n.floor));
+
+        if (floorProgress) {
+            const currentFloorNum = (mapSystem.currentFloor !== undefined) ? mapSystem.currentFloor + 1 : 1;
+            const totalFloorNum = maxFloor + 1;
+            floorProgress.textContent = `（第${currentFloorNum}階 / ${totalFloorNum}階）`;
+        }
 
         // フロアごとに縦並びで配置
         const floorRows = {};
@@ -527,7 +535,7 @@ class UIManager {
         scheduleDraw(() => {
             setTimeout(() => {
                 this.drawMapConnections();
-                // マップ初期表示時に現在選択可能なフロア（開始地点 Floor 0）が見えるようスクロール位置を調整
+                // マップ初期表示時に現在選択可能なフロアが見えるようスクロール位置を調整
                 const mapScreen = document.getElementById('screen-map');
                 const targetNode = document.querySelector('.map-node.selectable, .map-node.current');
                 if (targetNode) {
@@ -547,6 +555,11 @@ class UIManager {
         svg.innerHTML = '';
         const containerRect = gridContainer.getBoundingClientRect();
         if (containerRect.width === 0 || containerRect.height === 0) return;
+
+        const containerHeight = gridContainer.offsetHeight || containerRect.height;
+        svg.setAttribute('width', containerRect.width);
+        svg.setAttribute('height', containerHeight);
+        svg.setAttribute('viewBox', `0 0 ${containerRect.width} ${containerHeight}`);
 
         const connections = this.app.map.connections;
         connections.forEach(([fromId, toId]) => {

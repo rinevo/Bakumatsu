@@ -11,6 +11,7 @@ class MapSystem {
         this.currentNodeId = null;
         this.nodes = [];
         this.connections = []; // [[fromId, toId]]
+        this.visitedEventIds = [];
 
         this.actNames = {
             1: "第一幕：京洛動乱（京都・伏見）",
@@ -30,18 +31,14 @@ class MapSystem {
         const trend = GAME_DATA.trends[Math.floor(Math.random() * GAME_DATA.trends.length)];
         this.app.currentTrend = trend;
 
-        // フロア数定義 (Act 1: 5フロア+ボス, Act 2: 5フロア+ボス, Act 3: 4フロア+最終ボス)
-        const floorCount = actNumber === 3 ? 4 : 5;
-
-        // フロアごとのノード生成
-        // Floor 0: 戦場固定（開始地点 2〜3分岐）
-        // Floor 1〜floorCount-1: バトル、イベント、商人、エリート、休息
-        // Floor floorCount: ボスノード固定 (1つ)
-
-        let nodeIdCounter = 1;
+        // 長編ローグライト階層数定義:
+        // Act 1: 14階層 ＋ 幕ボス（Floor 14） = 全15階層 (Floor 0〜14)
+        // Act 2: 14階層 ＋ 幕ボス（Floor 14） = 全15階層 (Floor 0〜14)
+        // Act 3: 13階層 ＋ 最終ボス（Floor 13） = 全14階層 (Floor 0〜13)
+        const floorCount = actNumber === 3 ? 13 : 14;
 
         // Floor 0:
-        // 第一幕: 志士を入手できる歴史事件（開始地点 3分岐）
+        // 第一幕: 志士を入手できる歴史事件（開始地点 3分岐確定）
         // 第二幕・終幕: 戦場（開始地点 3分岐）
         const f0Nodes = [];
         const f0Count = 3;
@@ -87,19 +84,27 @@ class MapSystem {
 
         let prevFloorNodes = f0Nodes;
 
-        // Floor 1 〜 floorCount - 1
+        // Floor 1 〜 floorCount - 1 の戦略的長編ノード網生成
         for (let f = 1; f < floorCount; f++) {
             const fNodes = [];
-            const colCount = (f === floorCount - 1) ? 2 : (Math.random() < 0.5 ? 3 : 2);
+            // ボス直前フロアは2分岐（休息＆商人）、中盤山場（f=6）は3分岐、他は2〜3分岐
+            let colCount = 2;
+            if (f === floorCount - 1) {
+                colCount = 2;
+            } else if (f === 6) {
+                colCount = 3;
+            } else {
+                colCount = (Math.random() < 0.6) ? 3 : 2;
+            }
 
             for (let c = 0; c < colCount; c++) {
                 let type = 'battle';
                 let icon = '⚔️';
                 let title = '戦場';
 
-                // フロアに応じたノードタイプ決定
+                // --- 階層設計（Slay the Spire級の洗練されたペース配分） ---
                 if (f === floorCount - 1) {
-                    // ボス直前フロアは休息または商人
+                    // ボス直前フロア: 本陣休息または洋行商人
                     if (c === 0) {
                         type = 'rest';
                         icon = '🍵';
@@ -109,8 +114,34 @@ class MapSystem {
                         icon = '💰';
                         title = '洋行商人';
                     }
-                } else if (f === 2) {
-                    // 中盤にエリートまたはイベント
+                } else if (f === 6) {
+                    // 中盤の山場: 武器庫（宝箱）または 強敵（エリート）
+                    if (c === 0) {
+                        type = 'treasure';
+                        icon = '🎁';
+                        title = '武器庫';
+                    } else if (c === 1) {
+                        type = 'elite';
+                        icon = '👹';
+                        title = '強敵（刺客）';
+                    } else {
+                        type = 'event';
+                        icon = '📜';
+                        title = '歴史事件';
+                    }
+                } else if (f === 7) {
+                    // 武器庫・エリート直後の休息または事件
+                    if (c === 0) {
+                        type = 'rest';
+                        icon = '🍵';
+                        title = '茶屋休息';
+                    } else {
+                        type = 'event';
+                        icon = '📜';
+                        title = '歴史事件';
+                    }
+                } else if (f === 11) {
+                    // 終盤の難所: 強敵（エリート）または歴史事件・商人
                     if (c === 0) {
                         type = 'elite';
                         icon = '👹';
@@ -122,26 +153,62 @@ class MapSystem {
                     } else {
                         type = 'shop';
                         icon = '💰';
-                        title = '商人';
+                        title = '洋行商人';
                     }
-                } else {
-                    const rand = Math.random();
-                    if (rand < 0.35) {
-                        type = 'event';
-                        icon = '📜';
-                        title = '歴史事件';
-                    } else if (rand < 0.55) {
+                } else if (f === 4 || f === 12) {
+                    // 商人・休息・事件の寄り道フロア
+                    if (c === 0) {
                         type = 'shop';
                         icon = '💰';
                         title = '洋行商人';
-                    } else if (rand < 0.75) {
-                        type = 'rest';
-                        icon = '🍵';
-                        title = '茶屋休息';
+                    } else if (c === 1) {
+                        type = 'event';
+                        icon = '📜';
+                        title = '歴史事件';
                     } else {
                         type = 'battle';
                         icon = '⚔️';
                         title = '戦場';
+                    }
+                } else if (f <= 3) {
+                    // 序盤フロア (f === 1, 2, 3): デッキの基盤を作る戦場主体
+                    const rand = Math.random();
+                    if (rand < 0.65) {
+                        type = 'battle';
+                        icon = '⚔️';
+                        title = '戦場';
+                    } else if (rand < 0.90) {
+                        type = 'event';
+                        icon = '📜';
+                        title = '歴史事件';
+                    } else {
+                        type = 'rest';
+                        icon = '🍵';
+                        title = '茶屋休息';
+                    }
+                } else {
+                    // 中盤一般フロア (f === 5, 8, 9, 10): 多彩な分岐網
+                    const rand = Math.random();
+                    if (rand < 0.40) {
+                        type = 'battle';
+                        icon = '⚔️';
+                        title = '戦場';
+                    } else if (rand < 0.65) {
+                        type = 'event';
+                        icon = '📜';
+                        title = '歴史事件';
+                    } else if (rand < 0.82) {
+                        type = 'shop';
+                        icon = '💰';
+                        title = '洋行商人';
+                    } else if (rand < 0.92) {
+                        type = 'rest';
+                        icon = '🍵';
+                        title = '茶屋休息';
+                    } else {
+                        type = 'elite';
+                        icon = '👹';
+                        title = '強敵（刺客）';
                     }
                 }
 
@@ -159,21 +226,21 @@ class MapSystem {
                 fNodes.push(node);
             }
 
-            // 前フロアからの接続（必ず1本以上繋がるように）
+            // 前フロアからの接続（必ず1本以上繋がり、交差・孤立を避ける）
             prevFloorNodes.forEach((pn, pIndex) => {
                 fNodes.forEach((fn, fIndex) => {
-                    // 物理的に近い列同士を接続
-                    if (Math.abs(pIndex - fIndex) <= 1 || (fNodes.length === 1)) {
+                    if (Math.abs(pIndex - fIndex) <= 1 || fNodes.length === 1 || prevFloorNodes.length === 1) {
                         this.connections.push([pn.id, fn.id]);
                     }
                 });
             });
 
-            // 孤立したfNodesがないか確認
-            fNodes.forEach(fn => {
+            // 孤立したfNodesがないか確認し、あれば最も近いノードに接続
+            fNodes.forEach((fn, fIndex) => {
                 const connected = this.connections.some(c => c[1] === fn.id);
                 if (!connected) {
-                    this.connections.push([prevFloorNodes[0].id, fn.id]);
+                    const nearestPrev = prevFloorNodes[Math.min(fIndex, prevFloorNodes.length - 1)];
+                    this.connections.push([nearestPrev.id, fn.id]);
                 }
             });
 
@@ -237,6 +304,9 @@ class MapSystem {
             case 'boss':
                 this.launchBattle(node);
                 break;
+            case 'treasure':
+                this.launchTreasure(node);
+                break;
             case 'event':
                 this.launchEvent(node);
                 break;
@@ -247,6 +317,70 @@ class MapSystem {
                 this.app.shop.openRestSite();
                 break;
         }
+    }
+
+    launchTreasure(node) {
+        const modal = document.getElementById('modal-treasure');
+        const container = document.getElementById('treasure-rewards-container');
+        const claimBtn = document.getElementById('btn-claim-treasure');
+
+        if (!modal || !container || !claimBtn) {
+            this.app.obtainRandomRelic();
+            this.app.returnToMap();
+            return;
+        }
+
+        container.innerHTML = '';
+
+        // 獲得報酬の決定: レリック（未所持があれば優先）＋ 資金 40〜70両
+        const availableRelicId = this.app.getAvailableRandomRelic();
+        let relicObtained = null;
+        if (availableRelicId) {
+            relicObtained = GAME_DATA.relics[availableRelicId];
+            this.app.obtainRelic(availableRelicId);
+        }
+
+        const goldBonus = 40 + Math.floor(Math.random() * 31);
+        this.app.gold += goldBonus;
+        this.app.ui.updateHeader();
+
+        if (window.soundSystem) {
+            window.soundSystem.playVictory();
+        }
+
+        if (relicObtained) {
+            const relicEl = document.createElement('div');
+            relicEl.className = 'treasure-reward-item';
+            relicEl.innerHTML = `
+                <div class="treasure-reward-icon">🏮</div>
+                <div class="treasure-reward-info">
+                    <div class="treasure-reward-title">【秘蔵遺物】${relicObtained.name}</div>
+                    <div class="treasure-reward-desc">${relicObtained.desc}</div>
+                </div>
+            `;
+            container.appendChild(relicEl);
+        }
+
+        const goldEl = document.createElement('div');
+        goldEl.className = 'treasure-reward-item';
+        goldEl.innerHTML = `
+            <div class="treasure-reward-icon">💰</div>
+            <div class="treasure-reward-info">
+                <div class="treasure-reward-title">軍資金 ${goldBonus} 両</div>
+                <div class="treasure-reward-desc">葛篭の底から小判の包みを発見した！</div>
+            </div>
+        `;
+        container.appendChild(goldEl);
+
+        modal.classList.add('active');
+
+        // 退出ハンドラー
+        const handleClaim = () => {
+            modal.classList.remove('active');
+            claimBtn.removeEventListener('click', handleClaim);
+            this.app.returnToMap();
+        };
+        claimBtn.addEventListener('click', handleClaim);
     }
 
     shuffleArray(arr) {
@@ -316,6 +450,10 @@ class MapSystem {
     }
 
     launchEvent(node) {
+        if (!this.visitedEventIds) {
+            this.visitedEventIds = [];
+        }
+
         let eventToTrigger = null;
         if (node && node.eventId) {
             eventToTrigger = GAME_DATA.events.find(e => e.id === node.eventId);
@@ -332,7 +470,15 @@ class MapSystem {
             if (availableEvents.length === 0) {
                 availableEvents = GAME_DATA.events;
             }
-            eventToTrigger = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+
+            // 未遭遇イベントを優先選出（長編化での重複防止）
+            const unvisited = availableEvents.filter(e => !this.visitedEventIds.includes(e.id));
+            const pool = unvisited.length > 0 ? unvisited : availableEvents;
+            eventToTrigger = pool[Math.floor(Math.random() * pool.length)];
+        }
+
+        if (eventToTrigger) {
+            this.visitedEventIds.push(eventToTrigger.id);
         }
 
         this.app.currentEvent = eventToTrigger;

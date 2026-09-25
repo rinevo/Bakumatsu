@@ -945,10 +945,21 @@ body {
     box-sizing: border-box;
     flex-shrink: 0;
 }
+.map-title-group {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
 .map-act-title {
     font-size: 24px;
     color: var(--color-gold);
     letter-spacing: 2px;
+}
+.map-floor-progress {
+    font-size: 14px;
+    color: var(--color-washi-dim);
+    letter-spacing: 1px;
+    font-family: var(--font-serif);
 }
 .map-legend {
     display: flex;
@@ -1065,6 +1076,99 @@ body {
     margin-top: 2px;
     text-align: center;
     white-space: nowrap;
+}
+
+/* ノード種別ごとの固有アクセント */
+.map-node.treasure {
+    background: radial-gradient(circle, #2d2616 0%, #15130f 100%);
+    border-color: #d4a044;
+}
+.map-node.treasure.selectable {
+    border-color: #ffd700;
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.6);
+}
+.map-node.elite {
+    background: radial-gradient(circle, #2d1616 0%, #170d0d 100%);
+    border-color: #9e2a2b;
+}
+.map-node.elite.selectable {
+    border-color: #e63946;
+    box-shadow: 0 0 16px rgba(230, 57, 70, 0.6);
+}
+.map-node.boss {
+    background: radial-gradient(circle, #2d162b 0%, #170d16 100%);
+    border-color: #9c27b0;
+    width: 82px;
+    height: 82px;
+}
+.map-node.boss.selectable {
+    border-color: #ba68c8;
+    box-shadow: 0 0 20px rgba(186, 104, 200, 0.7);
+}
+
+/* 武器庫（宝箱）モーダル */
+.treasure-box {
+    max-width: 640px;
+    background: linear-gradient(135deg, rgba(24, 20, 16, 0.96) 0%, rgba(14, 12, 10, 0.98) 100%);
+    border: 2px solid var(--color-gold);
+    box-shadow: 0 0 30px rgba(223, 177, 91, 0.3), 0 8px 32px rgba(0, 0, 0, 0.85);
+}
+.treasure-content {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+.treasure-flavor {
+    font-size: 14px;
+    color: var(--color-washi-dim);
+    line-height: 1.6;
+    text-align: center;
+    max-width: 520px;
+    margin: 0;
+}
+.treasure-rewards-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+.treasure-reward-item {
+    background: rgba(30, 26, 20, 0.85);
+    border: 1px solid var(--color-gold);
+    border-radius: 8px;
+    padding: 14px 20px;
+    width: 90%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.4s ease;
+}
+.treasure-reward-icon {
+    font-size: 36px;
+    line-height: 1;
+}
+.treasure-reward-info {
+    flex: 1;
+    text-align: left;
+}
+.treasure-reward-title {
+    font-size: 17px;
+    font-weight: bold;
+    color: var(--color-gold-bright);
+    margin-bottom: 4px;
+    font-family: var(--font-serif);
+}
+.treasure-reward-desc {
+    font-size: 13px;
+    color: var(--color-washi);
+    line-height: 1.4;
+}
+.treasure-action-box {
+    margin-top: 10px;
 }
 
 /* ==========================================

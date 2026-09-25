@@ -73,7 +73,7 @@ const GAME_DATA = {
             attack: 0,
             shield: 0,
             desc: "手札の志士カード1枚を除外し、山札からカードを2枚引く。連鎖+1。",
-            rarity: "starter",
+            rarity: "common",
             onPlay: (b, self) => {
                 const shishiIdx = b.hand.findIndex(c => c.type === 'shishi');
                 if (shishiIdx !== -1) {
@@ -864,7 +864,7 @@ const GAME_DATA = {
             attack: 0,
             shield: 10,
             desc: "シールド 10 獲得。次ターンに受けるダメージを 4 軽減。",
-            rarity: "starter",
+            rarity: "common",
             onPlay: (b, self) => {
                 b.gainPlayerShield(10);
                 b.applyPlayerBuff("damage_reduction", 4);

@@ -172,10 +172,14 @@
         <section id="screen-map" class="game-screen">
             <div class="map-view-wrapper">
                 <div class="map-header-bar">
-                    <h2 id="map-act-title" class="map-act-title">第一幕：京洛動乱</h2>
+                    <div class="map-title-group">
+                        <h2 id="map-act-title" class="map-act-title">第一幕：京洛動乱</h2>
+                        <span id="map-floor-progress" class="map-floor-progress">（第1階 / 14階）</span>
+                    </div>
                     <div class="map-legend">
                         <span>⚔️ 戦場</span>
                         <span>👹 強敵</span>
+                        <span>🎁 武器庫</span>
                         <span>📜 歴史事件</span>
                         <span>💰 洋行商人</span>
                         <span>🍵 休息</span>
@@ -428,6 +432,27 @@
                 <div id="reward-cards-container" class="reward-cards-grid"></div>
                 <div class="reward-skip-box">
                     <button id="btn-skip-reward" class="btn-wood">札を受け取らず立ち去る</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 武器庫（宝箱）獲得モーダル -->
+    <div id="modal-treasure" class="game-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content-box treasure-box">
+            <div class="modal-header">
+                <h2>🎁 武器庫・秘蔵の葛篭を発見！</h2>
+            </div>
+            <div class="treasure-content">
+                <p class="treasure-flavor">
+                    街道脇の隠し武器庫に踏み入った。厳重に封じられた葛篭の中には、幕末の動乱を生き抜く貴重な品が眠っている。
+                </p>
+                <div id="treasure-rewards-container" class="treasure-rewards-container">
+                    <!-- レリックまたはカード・資金が動的表示 -->
+                </div>
+                <div class="treasure-action-box">
+                    <button id="btn-claim-treasure" class="btn-wood large">品を受領して進軍を再開する</button>
                 </div>
             </div>
         </div>
