@@ -237,45 +237,13 @@ class BakumatsuApp {
             }
         });
 
-        // iOS / iPad Safari での親ウィンドウへのスクロール伝播・ヘッダーズレを完全防止
-        let touchStartY = 0;
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches && e.touches.length === 1) {
-                touchStartY = e.touches[0].clientY;
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchmove', (e) => {
-            // タッチされた要素から上位へ探索して、スクロール可能なコンテナを探す
-            let target = e.target;
-            let scrollable = null;
-            while (target && target !== document.body && target !== document.documentElement) {
-                const style = window.getComputedStyle(target);
-                if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && target.scrollHeight > target.clientHeight) {
-                    scrollable = target;
-                    break;
-                }
-                target = target.parentElement;
-            }
-
-            if (!scrollable) {
-                // スクロール可能要素以外（ヘッダーや画面枠など）でのドラッグは画面全体を動かさないよう阻止
+        // ヘッダー部でのタッチドラッグを完全防止（ヘッダー位置を画面上部に永久固定）
+        const header = document.getElementById('main-header');
+        if (header) {
+            header.addEventListener('touchmove', (e) => {
                 if (e.cancelable) e.preventDefault();
-                return;
-            }
-
-            // スクロール可能要素の場合でも、上端でさらに下スワイプ、または下端でさらに上スワイプしたときは画面全体のバウンスを阻止
-            if (e.touches && e.touches.length === 1) {
-                const currentY = e.touches[0].clientY;
-                const deltaY = currentY - touchStartY;
-                const atTop = scrollable.scrollTop <= 0 && deltaY > 0;
-                const atBottom = (scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1) && deltaY < 0;
-
-                if (atTop || atBottom) {
-                    if (e.cancelable) e.preventDefault();
-                }
-            }
-        }, { passive: false });
+            }, { passive: false });
+        }
     }
 
     startNewRun(faction) {

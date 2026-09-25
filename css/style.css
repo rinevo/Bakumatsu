@@ -465,7 +465,6 @@ body {
     position: relative;
     padding-top: 0;
     overflow: hidden;
-    touch-action: none;
 }
 
 .game-screen {
@@ -477,8 +476,30 @@ body {
     display: none;
     opacity: 0;
     transition: opacity 0.3s ease;
-    overflow: hidden;
-    touch-action: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    box-sizing: border-box;
+
+    /* スクロールバー装飾（参考サイト準拠） */
+    scrollbar-width: thin;
+    scrollbar-color: #5a4b36 rgba(10, 14, 20, 0.4);
+}
+
+.game-screen::-webkit-scrollbar {
+    width: 8px;
+}
+.game-screen::-webkit-scrollbar-track {
+    background: rgba(10, 14, 20, 0.4);
+}
+.game-screen::-webkit-scrollbar-thumb {
+    background: #5a4b36;
+    border-radius: 4px;
+}
+.game-screen::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold-dark);
 }
 
 .game-screen.active {
@@ -716,37 +737,36 @@ body {
    2. マップ画面
    ========================================== */
 #screen-map {
-    top: 0;
-    height: 100%;
     background-image: linear-gradient(rgba(10, 11, 14, 0.84), rgba(10, 11, 14, 0.95)), url('../img/nippon.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    justify-content: stretch;
-    align-items: stretch;
-    overflow: hidden;
-    touch-action: none;
+    display: flex;
+    flex-direction: column;
 }
 
 .map-view-wrapper {
     width: 100%;
-    height: 100%;
+    min-height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 16px 24px;
-    min-height: 0;
-    overflow: hidden;
-    touch-action: none;
+    padding: 0 24px;
+    box-sizing: border-box;
 }
 
 .map-header-bar {
+    position: sticky;
+    top: 0;
+    background: rgba(12, 14, 18, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 10;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--color-border);
-    padding-bottom: 12px;
+    padding: 12px 0;
     flex-shrink: 0;
-    touch-action: none;
 }
 .map-act-title {
     font-size: 24px;
@@ -760,18 +780,12 @@ body {
     color: #a8a299;
 }
 
-/* 参考サイト（watashi.xyz/css-scrollbar-guide/）準拠：特定div内スクロール */
 .map-scroll-area {
-    flex: 1;
-    min-height: 0;
+    width: 100%;
     position: relative;
-    overflow-y: auto;
-    overflow-x: hidden;
     padding: 24px 0 60px 0;
     display: block;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    touch-action: pan-y;
+}
 
     /* Firefox用 */
     scrollbar-width: thin;
@@ -937,11 +951,12 @@ body {
 
 .battle-arena {
     width: 100%;
-    height: 100%;
+    min-height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     padding: 16px 24px 20px 24px;
+    box-sizing: border-box;
 }
 
 /* 敵エリア */
@@ -1613,11 +1628,16 @@ body {
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
+    padding: 24px 0 40px 0;
+    box-sizing: border-box;
 }
 
 .event-parchment-box {
+    margin: auto;
     max-width: 780px;
     width: 90%;
     background: linear-gradient(180deg, #1b2029 0%, #10131a 100%);
@@ -1703,21 +1723,24 @@ body {
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
+    padding: 24px 0 40px 0;
+    box-sizing: border-box;
 }
 
 .shop-wrapper {
+    margin: auto;
     width: 90%;
     max-width: 1100px;
-    height: 90%;
     background: rgba(18, 21, 28, 0.95);
     border: 2px solid var(--color-gold-dark);
     border-radius: 8px;
     padding: 24px 32px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
 }
 
@@ -1882,11 +1905,16 @@ body {
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
+    padding: 24px 0 40px 0;
+    box-sizing: border-box;
 }
 
 .rest-wrapper {
+    margin: auto;
     max-width: 850px;
     width: 90%;
     background: rgba(18, 20, 26, 0.95);
@@ -1954,10 +1982,12 @@ body {
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    top: 0;
-    height: 100%;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
+    padding: 24px 0 40px 0;
+    box-sizing: border-box;
 }
 
 #screen-gameover {
@@ -1965,13 +1995,16 @@ body {
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    top: 0;
-    height: 100%;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
+    padding: 24px 0 40px 0;
+    box-sizing: border-box;
 }
 
 .result-box {
+    margin: auto;
     max-width: 650px;
     width: 90%;
     border-radius: 8px;
