@@ -45,7 +45,6 @@ html {
     overflow: hidden;
     overscroll-behavior: none;
     -webkit-text-size-adjust: 100%;
-    touch-action: none;
 }
 
 body {
@@ -60,7 +59,6 @@ body {
     display: flex;
     flex-direction: column;
     overscroll-behavior: none;
-    touch-action: none;
     background-color: var(--color-bg-dark);
     color: var(--color-washi);
     font-family: var(--font-serif);
@@ -426,6 +424,8 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(223, 177, 91, 0.3);
 }
 .btn-wood:hover {
     background: linear-gradient(180deg, #4d392b 0%, #2d2118 100%);
@@ -663,6 +663,8 @@ body {
 }
 
 .btn-faction {
+    position: relative;
+    z-index: 10;
     width: 100%;
     padding: 12px;
     font-family: var(--font-serif);
@@ -672,6 +674,8 @@ body {
     cursor: pointer;
     border: none;
     transition: all 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
 }
 .select-tobaku {
     background: linear-gradient(180deg, #b3261e 0%, #6e110b 100%);
@@ -856,6 +860,8 @@ body {
     opacity: 0.5;
     position: relative;
     z-index: 3;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(223, 177, 91, 0.3);
 }
 
 .map-node.selectable {
