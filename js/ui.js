@@ -833,6 +833,14 @@ class UIManager {
 
         if (cardsContainer) {
             cardsContainer.innerHTML = '';
+            cardsContainer.scrollLeft = 0; // スクロール位置を左端（先頭カード）に初期化
+
+            const scrollHint = document.getElementById('reward-scroll-hint');
+            if (scrollHint) {
+                // 4枚以上の選択肢がある場合にスクロール案内を有効化
+                scrollHint.style.display = (rewardData.cards && rewardData.cards.length >= 4) ? '' : 'none';
+            }
+
             rewardData.cards.forEach(cardId => {
                 const card = GAME_DATA.cards[cardId];
                 if (!card) return;

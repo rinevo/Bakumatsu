@@ -2622,17 +2622,72 @@ body {
 
 /* 報酬モーダル */
 .reward-box {
-    max-width: 750px;
+    max-width: 860px;
+    width: 94%;
+}
+.reward-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 .reward-gold-line {
     font-size: 18px;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
+}
+.reward-scroll-hint {
+    display: none;
+    text-align: center;
+    font-size: 12px;
+    color: var(--color-gold);
+    letter-spacing: 1px;
+    margin: 4px 0 8px;
+    font-family: var(--font-serif);
+    opacity: 0.9;
+}
+@media (max-width: 820px) {
+    .reward-scroll-hint {
+        display: block;
+    }
 }
 .reward-cards-grid {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 16px;
-    margin: 20px 0;
+    margin: 10px 0 16px;
+    padding: 14px 16px 18px;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(223, 177, 91, 0.5) rgba(0, 0, 0, 0.3);
+}
+/* 収まる場合は中央配置、溢れる場合は左端からスクロール可能にする安全アライメント */
+.reward-cards-grid::before,
+.reward-cards-grid::after {
+    content: '';
+    margin: auto;
+}
+.reward-cards-grid::-webkit-scrollbar {
+    height: 6px;
+}
+.reward-cards-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 3px;
+}
+.reward-cards-grid::-webkit-scrollbar-thumb {
+    background: rgba(223, 177, 91, 0.5);
+    border-radius: 3px;
+}
+.reward-cards-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold);
+}
+.reward-cards-grid .card-frame {
+    flex-shrink: 0;
+    scroll-snap-align: center;
 }
 .reward-card-choice:hover {
     border-color: #ffd700 !important;
