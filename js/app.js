@@ -147,27 +147,15 @@ class BakumatsuApp {
         }
 
         // 陣営選択（PCクリックおよびタッチデバイスで確実に反応するよう強化）
-        const bindFactionButton = (btn, faction) => {
-            if (!btn) return;
-            let lastTrigger = 0;
-            const trigger = (e) => {
-                const now = Date.now();
-                if (now - lastTrigger < 350) return;
-                lastTrigger = now;
-                this.startNewRun(faction);
-            };
-            btn.addEventListener('click', trigger);
-            btn.addEventListener('pointerup', (e) => {
-                if (e.pointerType === 'touch') {
-                    trigger(e);
-                }
-            });
-        };
-
+        // 陣営選択
         const btnTobaku = document.getElementById('btn-select-tobaku');
         const btnSabaku = document.getElementById('btn-select-sabaku');
-        bindFactionButton(btnTobaku, 'tobaku');
-        bindFactionButton(btnSabaku, 'sabaku');
+        if (btnTobaku) {
+            btnTobaku.addEventListener('click', () => this.startNewRun('tobaku'));
+        }
+        if (btnSabaku) {
+            btnSabaku.addEventListener('click', () => this.startNewRun('sabaku'));
+        }
 
         // デッキ確認モーダル（PC用 & ドロップダウン用）
         const btnViewDeck = document.getElementById('btn-view-deck');
