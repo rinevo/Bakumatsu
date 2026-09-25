@@ -1496,6 +1496,21 @@ body {
     box-shadow: none;
 }
 
+.node-title .node-period {
+    display: block;
+    font-size: 9.5px;
+    font-weight: bold;
+    color: var(--color-gold-bright);
+    letter-spacing: 0.3px;
+    margin-bottom: 1px;
+    line-height: 1.15;
+}
+
+.node-title .node-name {
+    display: block;
+    line-height: 1.25;
+}
+
 /* ノード種別ごとの固有アクセント */
 .map-node.treasure {
     background: radial-gradient(circle, #2d2616 0%, #15130f 100%);
@@ -3359,6 +3374,9 @@ body {
         padding: 2px 3px;
         top: calc(100% + 4px);
     }
+    .node-title .node-period {
+        font-size: 8.5px;
+    }
 }
 
 /* 最小幅（360px〜400pxクラスのAndroid端末等）向けの最適化 */
@@ -3459,5 +3477,8 @@ body {
         line-height: 1.15;
         padding: 1px 2px;
         top: calc(100% + 3px);
+    }
+    .node-title .node-period {
+        font-size: 8px;
     }
 }

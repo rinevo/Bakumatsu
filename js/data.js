@@ -8527,3 +8527,136 @@ const GAME_DATA = {
 ]
 };
 
+// ==========================================
+// 全103件 歴史事件の史実メタデータ定義
+// （発生年、月、表示期間、マップ用短縮タイトル）
+// ==========================================
+GAME_DATA.eventMeta = {
+    // === 第一幕（京洛動乱期：〜1864年）全34件 ===
+    "event_foreign_ship_edict": { year: 1825, month: 2, period: "1825年", shortTitle: "異国船打払令" },
+    "event_satsuma_trade": { year: 1840, month: 1, period: "1840年頃", shortTitle: "薩摩の密貿易" },
+    "event_tenpo_reform": { year: 1841, month: 5, period: "1841年", shortTitle: "天保の改革" },
+    "event_uraga_arrival": { year: 1853, month: 6, period: "1853年6月", shortTitle: "黒船来航" },
+    "event_kanagawa_treaty": { year: 1854, month: 3, period: "1854年3月", shortTitle: "日米和親条約" },
+    "event_nagasaki_naval_school": { year: 1855, month: 8, period: "1855年", shortTitle: "海軍伝習所" },
+    "event_ansei_earthquake": { year: 1855, month: 10, period: "1855年10月", shortTitle: "安政江戸地震" },
+    "event_nagasaki_magistrate": { year: 1856, month: 7, period: "1856年", shortTitle: "長崎奉行所" },
+    "event_harris_treaty": { year: 1858, month: 6, period: "1858年6月", shortTitle: "修好通商条約" },
+    "event_andei_purge": { year: 1858, month: 9, period: "1858年", shortTitle: "安政の大獄" },
+    "event_yokohama_opening": { year: 1859, month: 6, period: "1859年6月", shortTitle: "横浜開港" },
+    "event_glover": { year: 1859, month: 9, period: "1859年", shortTitle: "グラバー商会" },
+    "event_manen_embassy": { year: 1860, month: 1, period: "1860年1月", shortTitle: "万延遣米使節" },
+    "event_sakuradamon": { year: 1860, month: 3, period: "1860年3月", shortTitle: "桜田門外の変" },
+    "event_ii_successor": { year: 1860, month: 4, period: "1860年4月", shortTitle: "揺れる幕府" },
+    "event_teradaya_conflict": { year: 1862, month: 4, period: "1862年4月", shortTitle: "寺田屋騒動" },
+    "event_satsuma_after_teradaya": { year: 1862, month: 5, period: "1862年5月", shortTitle: "薩摩の粛清" },
+    "event_namugi_incident": { year: 1862, month: 8, period: "1862年8月", shortTitle: "生麦事件" },
+    "event_mibu_drill": { year: 1863, month: 3, period: "1863年3月", shortTitle: "壬生屯所の練" },
+    "event_shinsengumi_formation": { year: 1863, month: 3, period: "1863年3月", shortTitle: "新選組結成" },
+    "event_shinchogumi": { year: 1863, month: 4, period: "1863年4月", shortTitle: "新徴組" },
+    "event_shimonoseki": { year: 1863, month: 5, period: "1863年5月", shortTitle: "下関攘夷砲火" },
+    "event_kiheitai_formation": { year: 1863, month: 6, period: "1863年6月", shortTitle: "奇兵隊結成" },
+    "event_satsuma_british_war": { year: 1863, month: 7, period: "1863年7月", shortTitle: "薩英戦争" },
+    "event_august_coup": { year: 1863, month: 8, period: "1863年8月", shortTitle: "八月十八政変" },
+    "event_seven_nobles_exile": { year: 1863, month: 8, period: "1863年8月", shortTitle: "七卿落ち" },
+    "event_tenchu_revolt": { year: 1863, month: 8, period: "1863年8月", shortTitle: "天誅組の変" },
+    "event_okita_dojo": { year: 1863, month: 9, period: "1863年9月", shortTitle: "沖田総司指南" },
+    "event_sanjo_council": { year: 1864, month: 1, period: "1864年1月", shortTitle: "参与会議" },
+    "event_kyoto_shugoshoku_office": { year: 1864, month: 4, period: "1864年4月", shortTitle: "京都守護職" },
+    "event_kobe_training": { year: 1864, month: 5, period: "1864年5月", shortTitle: "神戸海軍操練" },
+    "event_ikedaya": { year: 1864, month: 6, period: "1864年6月", shortTitle: "池田屋事件" },
+    "event_hamaguri_gate": { year: 1864, month: 7, period: "1864年7月", shortTitle: "禁門の変" },
+    "event_choshu_expedition": { year: 1864, month: 8, period: "1864年8月", shortTitle: "長州征討" },
+
+    // === 第二幕（東海道進撃期：1865年〜1868年春）全23件 ===
+    "event_satsuma_reform": { year: 1865, month: 1, period: "1865年", shortTitle: "薩摩軍制改革" },
+    "event_satsuma_students": { year: 1865, month: 3, period: "1865年3月", shortTitle: "英国留学生" },
+    "event_satcho_alliance": { year: 1866, month: 1, period: "1866年1月", shortTitle: "薩長同盟" },
+    "event_teradaya": { year: 1866, month: 1, period: "1866年1月", shortTitle: "寺田屋の遭難" },
+    "event_satsuma_decision": { year: 1866, month: 5, period: "1866年5月", shortTitle: "討幕への転回" },
+    "event_satcho_protocol": { year: 1866, month: 6, period: "1866年6月", shortTitle: "薩長盟約密議" },
+    "event_yokoi_reform": { year: 1867, month: 5, period: "1867年5月", shortTitle: "横井小楠建白" },
+    "event_taisei_hokan": { year: 1867, month: 10, period: "1867年10月", shortTitle: "大政奉還" },
+    "event_aburakoji": { year: 1867, month: 11, period: "1867年11月", shortTitle: "油小路の変" },
+    "event_omiya_assassination": { year: 1867, month: 11, period: "1867年11月", shortTitle: "近江屋事件" },
+    "event_restoration_council": { year: 1867, month: 12, period: "1867年12月", shortTitle: "王政復古" },
+    "event_satsuma_residence": { year: 1867, month: 12, period: "1867年12月", shortTitle: "薩摩邸焼討" },
+    "event_toba_fushimi": { year: 1868, month: 1, period: "1868年1月", shortTitle: "鳥羽伏見の戦" },
+    "event_boshin_war": { year: 1868, month: 1, period: "1868年1月", shortTitle: "戊辰戦争開戦" },
+    "event_kobe_incident": { year: 1868, month: 1, period: "1868年1月", shortTitle: "神戸事件" },
+    "event_koshu_katsunuma": { year: 1868, month: 3, period: "1868年3月", shortTitle: "甲州勝沼の戦" },
+    "event_charter_oath": { year: 1868, month: 3, period: "1868年3月", shortTitle: "五箇条御誓文" },
+    "event_edo_opening": { year: 1868, month: 3, period: "1868年3月", shortTitle: "江戸開城前夜" },
+    "event_katsu_saigo": { year: 1868, month: 3, period: "1868年3月", shortTitle: "江戸城無血開城" },
+    "event_seiheitai": { year: 1868, month: 3, period: "1868年3月", shortTitle: "靖兵隊結成" },
+    "event_iba_hachiro": { year: 1868, month: 4, period: "1868年4月", shortTitle: "箱根山崎激闘" },
+    "event_kuwana_kashiwazaki": { year: 1868, month: 4, period: "1868年4月", shortTitle: "桑名藩の決断" },
+    "event_ueno_war": { year: 1868, month: 5, period: "1868年5月", shortTitle: "上野戦争" },
+
+    // === 終幕（決戦〜明治期：1868年夏以降）全46件 ===
+    "event_jousai_rebellion": { year: 1868, month: 4, period: "1868年4月", shortTitle: "請西藩の義挙" },
+    "event_ouetsu_alliance": { year: 1868, month: 5, period: "1868年5月", shortTitle: "奥羽越同盟" },
+    "event_nagaoka_defense": { year: 1868, month: 5, period: "1868年5月", shortTitle: "長岡城攻防" },
+    "event_tokyo_capital": { year: 1868, month: 7, period: "1868年7月", shortTitle: "東京遷都" },
+    "event_byakkotai_sortie": { year: 1868, month: 8, period: "1868年8月", shortTitle: "白虎隊出陣" },
+    "event_aizu_defense_council": { year: 1868, month: 8, period: "1868年8月", shortTitle: "会津籠城評議" },
+    "event_aizu_war": { year: 1868, month: 8, period: "1868年8月", shortTitle: "会津戦争" },
+    "event_aizu_higan_jishi": { year: 1868, month: 9, period: "1868年9月", shortTitle: "彼岸獅子入場" },
+    "event_aizu_surrender": { year: 1868, month: 9, period: "1868年9月", shortTitle: "会津藩降伏" },
+    "event_kaiyo_maru": { year: 1868, month: 11, period: "1868年11月", shortTitle: "開陽丸沈没" },
+    "event_hakodate_government": { year: 1868, month: 12, period: "1868年12月", shortTitle: "箱館政権" },
+    "event_miyako_bay": { year: 1869, month: 3, period: "1869年3月", shortTitle: "宮古湾海戦" },
+    "event_hakodate_hospital": { year: 1869, month: 4, period: "1869年4月", shortTitle: "箱館病院赤十字" },
+    "event_ippongi_kanmon": { year: 1869, month: 5, period: "1869年5月", shortTitle: "一本木関門" },
+    "event_goryokaku": { year: 1869, month: 5, period: "1869年5月", shortTitle: "五稜郭の決断" },
+    "event_hakodate_assault": { year: 1869, month: 5, period: "1869年5月", shortTitle: "箱館総攻撃" },
+    "event_hanseki_hokan": { year: 1869, month: 6, period: "1869年6月", shortTitle: "版籍奉還" },
+    "event_dajo_system": { year: 1869, month: 7, period: "1869年7月", shortTitle: "太政官制度" },
+    "event_hokkaido_development": { year: 1869, month: 7, period: "1869年7月", shortTitle: "北海道開拓" },
+    "event_hokkaido_agency": { year: 1869, month: 8, period: "1869年8月", shortTitle: "開拓使設置" },
+    "event_yokohama_settlement": { year: 1870, month: 1, period: "1870年", shortTitle: "横浜居留地" },
+    "event_postal_system": { year: 1871, month: 3, period: "1871年3月", shortTitle: "郵便制度確立" },
+    "event_han_reform": { year: 1871, month: 7, period: "1871年7月", shortTitle: "廃藩置県" },
+    "event_treaty_qing": { year: 1871, month: 9, period: "1871年9月", shortTitle: "日清修好条規" },
+    "event_europe_mission": { year: 1871, month: 11, period: "1871年11月", shortTitle: "岩倉使節団" },
+    "event_army_ministry": { year: 1872, month: 2, period: "1872年2月", shortTitle: "陸軍省設置" },
+    "event_first_newspaper": { year: 1872, month: 2, period: "1872年2月", shortTitle: "日刊新聞創刊" },
+    "event_gakusei_system": { year: 1872, month: 8, period: "1872年8月", shortTitle: "学制公布" },
+    "event_railway_opening": { year: 1872, month: 9, period: "1872年9月", shortTitle: "鉄道開通" },
+    "event_tomioka_silk": { year: 1872, month: 10, period: "1872年10月", shortTitle: "富岡製糸場" },
+    "event_conscription": { year: 1873, month: 1, period: "1873年1月", shortTitle: "徴兵令公布" },
+    "event_civilization_enlightenment": { year: 1873, month: 3, period: "1873年", shortTitle: "文明開化" },
+    "event_land_tax": { year: 1873, month: 7, period: "1873年7月", shortTitle: "地租改正" },
+    "event_seikanron_debate": { year: 1873, month: 10, period: "1873年10月", shortTitle: "征韓論論争" },
+    "event_meiji_political_crisis": { year: 1873, month: 10, period: "1873年10月", shortTitle: "明治六年政変" },
+    "event_freedom_rights": { year: 1874, month: 1, period: "1874年1月", shortTitle: "自由民権運動" },
+    "event_tonden_soldiers": { year: 1874, month: 10, period: "1874年10月", shortTitle: "屯田兵制度" },
+    "event_hokkaido_village": { year: 1875, month: 5, period: "1875年", shortTitle: "開拓農村建設" },
+    "event_sword_ban": { year: 1876, month: 3, period: "1876年3月", shortTitle: "廃刀令公布" },
+    "event_stipend_reform": { year: 1876, month: 8, period: "1876年8月", shortTitle: "秩禄処分" },
+    "event_samurai_livelihood": { year: 1876, month: 12, period: "1876年", shortTitle: "士族授産" },
+    "event_satsuma_rebellion": { year: 1877, month: 2, period: "1877年2月", shortTitle: "西南戦争" },
+    "event_okubo_assassination": { year: 1878, month: 5, period: "1878年5月", shortTitle: "紀尾井坂変" },
+    "event_ryukyu_annexation": { year: 1879, month: 3, period: "1879年3月", shortTitle: "琉球処分" },
+    "event_rokumeikan": { year: 1883, month: 11, period: "1883年11月", shortTitle: "鹿鳴館外交" },
+    "event_treaty_revision": { year: 1886, month: 5, period: "1886年", shortTitle: "条約改正交渉" }
+};
+
+// 全イベントに史実メタデータとソートキー（sortKey = year * 100 + month）を自動付与
+if (Array.isArray(GAME_DATA.events)) {
+    GAME_DATA.events.forEach(ev => {
+        const meta = GAME_DATA.eventMeta[ev.id];
+        if (meta) {
+            Object.assign(ev, meta);
+            ev.sortKey = meta.year * 100 + (meta.month || 0);
+        } else {
+            ev.year = 1860;
+            ev.month = 1;
+            ev.period = "1860年頃";
+            ev.shortTitle = ev.title;
+            ev.sortKey = 186001;
+        }
+    });
+}
+
+

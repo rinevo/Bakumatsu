@@ -44,20 +44,16 @@ class MapSystem {
         const f0Count = 3;
 
         if (actNumber === 1) {
-            const shishiEvents = this.getShishiEventsForAct(actNumber);
-            const selectedEvents = this.shuffleArray([...shishiEvents]).slice(0, f0Count);
-
             for (let i = 0; i < f0Count; i++) {
-                const ev = selectedEvents[i] || shishiEvents[0];
                 const id = `act${actNumber}_f0_n${i}`;
                 const node = {
                     id,
                     floor: 0,
                     col: i,
                     type: 'event',
-                    title: ev ? ev.title : '歴史事件（志士との邂逅）',
+                    title: '歴史事件',
                     icon: '📜',
-                    eventId: ev ? ev.id : null,
+                    eventId: null,
                     completed: false
                 };
                 this.nodes.push(node);
@@ -266,6 +262,9 @@ class MapSystem {
         prevFloorNodes.forEach(pn => {
             this.connections.push([pn.id, bossId]);
         });
+
+        // 全歴史イベントノードを時系列順（発生年月の昇順）に割り当て
+        this.assignChronologicalEvents(actNumber);
     }
 
     getSelectableNodes() {
@@ -418,6 +417,73 @@ class MapSystem {
         }
 
         return shishiEvents.length > 0 ? shishiEvents : actEvents;
+    }
+
+    getChronologicalEventsForAct(actNumber) {
+        const actEvents = GAME_DATA.events.filter(e => {
+            if (Array.isArray(e.act)) return e.act.includes(actNumber);
+            return e.act === actNumber;
+        });
+        // 史実発生年月順（sortKey = year * 100 + month）に昇順ソート
+        actEvents.sort((a, b) => (a.sortKey || 0) - (b.sortKey || 0));
+        return actEvents;
+    }
+
+    assignChronologicalEvents(actNumber) {
+        const actEvents = this.getChronologicalEventsForAct(actNumber);
+        if (actEvents.length === 0) return;
+
+        const maxFloor = actNumber === 3 ? 13 : 14;
+        const faction = this.app ? this.app.faction : null;
+
+        // マップ上の全イベントノードを floor 昇順、col 昇順に抽出
+        const eventNodes = this.nodes
+            .filter(n => n.type === 'event')
+            .sort((a, b) => a.floor - b.floor || a.col - b.col);
+
+        const assignedIds = new Set();
+        let lastSortKey = 0;
+
+        eventNodes.forEach(node => {
+            let candidates;
+
+            if (node.floor === 0) {
+                // 第一幕 Floor 0: 幕の黎明期（最初の5件）から選択
+                candidates = actEvents.slice(0, 5).filter(e => !assignedIds.has(e.id));
+                if (candidates.length === 0) candidates = actEvents.slice(0, 5);
+            } else {
+                // 道中フロア: 直前の事件の年代以降から抽出
+                candidates = actEvents.filter(e => !assignedIds.has(e.id) && (e.sortKey || 0) >= lastSortKey);
+                if (candidates.length === 0) {
+                    candidates = actEvents.filter(e => !assignedIds.has(e.id));
+                }
+                if (candidates.length === 0) {
+                    candidates = actEvents;
+                }
+            }
+
+            // 年代順（sortKey）を最優先としつつ、同年代内では自陣営向け選択肢を持つものを優先
+            candidates.sort((a, b) => {
+                const diff = (a.sortKey || 0) - (b.sortKey || 0);
+                if (diff !== 0) return diff;
+                if (faction) {
+                    const aFav = (a.choices || []).some(c => c.faction === faction || !c.faction);
+                    const bFav = (b.choices || []).some(c => c.faction === faction || !c.faction);
+                    return (bFav ? 1 : 0) - (aFav ? 1 : 0);
+                }
+                return 0;
+            });
+
+            const selected = candidates[0] || actEvents[0];
+            assignedIds.add(selected.id);
+            lastSortKey = selected.sortKey || lastSortKey;
+
+            node.eventId = selected.id;
+            node.period = selected.period || `${selected.year || 1860}年`;
+            node.shortTitle = selected.shortTitle || selected.title;
+            node.title = `${node.period}\n${node.shortTitle}`;
+            node.sortKey = selected.sortKey || 0;
+        });
     }
 
     launchBattle(node) {

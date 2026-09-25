@@ -540,9 +540,15 @@ class UIManager {
             const nodeDiv = document.createElement('div');
             nodeDiv.className = `map-node ${node.type}`;
             nodeDiv.id = `node-${node.id}`;
+
+            let titleContent = node.title;
+            if (node.period && node.shortTitle) {
+                titleContent = `<span class="node-period">${node.period}</span><span class="node-name">${node.shortTitle}</span>`;
+            }
+
             nodeDiv.innerHTML = `
                 <div class="node-icon">${node.icon}</div>
-                <div class="node-title">${node.title}</div>
+                <div class="node-title">${titleContent}</div>
             `;
 
             const isSelectable = selectableNodes.some(sn => sn.id === node.id);
@@ -633,7 +639,10 @@ class UIManager {
         const descEl = document.getElementById('event-desc');
         const choicesContainer = document.getElementById('event-choices-container');
 
-        if (titleEl) titleEl.textContent = eventData.title;
+        if (titleEl) {
+            const periodPrefix = eventData.period ? `【${eventData.period}】` : '';
+            titleEl.textContent = `${periodPrefix}${eventData.title}`;
+        }
         if (descEl) descEl.textContent = eventData.desc;
 
         if (choicesContainer) {
