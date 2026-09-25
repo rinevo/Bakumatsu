@@ -540,7 +540,7 @@ body {
    1. タイトル＆陣営選択画面
    ========================================== */
 #screen-title {
-    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/nippon.jpg');
+    background-image: linear-gradient(rgba(10, 11, 14, 0.55), rgba(10, 11, 14, 0.72)), url('../img/nippon.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -911,7 +911,7 @@ body {
     background-image:
         linear-gradient(rgba(255, 30, 20, var(--battle-hit-flash)), rgba(80, 0, 0, var(--battle-hit-flash))),
         linear-gradient(rgba(150, 0, 0, var(--battle-danger)), rgba(70, 0, 0, var(--battle-danger))),
-        linear-gradient(rgba(10, 11, 14, 0.84), rgba(10, 11, 14, 0.95)),
+        linear-gradient(rgba(10, 11, 14, 0.55), rgba(10, 11, 14, 0.75)),
         url('../img/tatakai.jpg');
     background-position: center;
     background-size: cover;
@@ -1650,7 +1650,7 @@ body {
    4. 歴史イベント画面
    ========================================== */
 #screen-event {
-    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/event.jpg');
+    background-image: linear-gradient(rgba(10, 11, 14, 0.55), rgba(10, 11, 14, 0.72)), url('../img/event.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -1744,7 +1744,7 @@ body {
    5. ショップ画面
    ========================================== */
 #screen-shop {
-    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/shop.jpg');
+    background-image: linear-gradient(rgba(10, 11, 14, 0.55), rgba(10, 11, 14, 0.72)), url('../img/shop.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -1925,7 +1925,7 @@ body {
    6. 休息画面
    ========================================== */
 #screen-rest {
-    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/rest.jpg');
+    background-image: linear-gradient(rgba(10, 11, 14, 0.55), rgba(10, 11, 14, 0.72)), url('../img/rest.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -2001,7 +2001,7 @@ body {
    7 & 8. ゲームオーバー ＆ 勝利画面
    ========================================== */
 #screen-gamewin {
-    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/gamewin.jpg');
+    background-image: linear-gradient(rgba(10, 11, 14, 0.45), rgba(10, 11, 14, 0.65)), url('../img/gamewin.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -2013,7 +2013,7 @@ body {
 }
 
 #screen-gameover {
-    background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/gameover.jpg');
+    background-image: linear-gradient(rgba(10, 11, 14, 0.58), rgba(10, 11, 14, 0.75)), url('../img/gameover.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
