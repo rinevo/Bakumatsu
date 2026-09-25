@@ -9,6 +9,8 @@ class SoundSystem {
         this.ctx = null;
         this.isBgmMuted = false;
         this.isSeMuted = false;
+        this.loadSettings(); // 保存されたBGM/効果音設定を復元
+
         this.bgmTimer = null;
         this.isBgmPlaying = false;
         this.initOnFirstGesture = false;
@@ -32,6 +34,36 @@ class SoundSystem {
 
         // タイトル画面BGMを最速で再生可能にするため即時プリロード
         this.preloadTrack("title");
+    }
+
+    // ブラウザ保存設定の自動読み込み
+    loadSettings() {
+        try {
+            if (typeof localStorage !== 'undefined') {
+                const savedBgm = localStorage.getItem('bakumatsu_bgm_muted');
+                if (savedBgm !== null) {
+                    this.isBgmMuted = (savedBgm === 'true');
+                }
+                const savedSe = localStorage.getItem('bakumatsu_se_muted');
+                if (savedSe !== null) {
+                    this.isSeMuted = (savedSe === 'true');
+                }
+            }
+        } catch (e) {
+            // プライベートブラウズ等の制限対策
+        }
+    }
+
+    // ブラウザへの設定自動保存
+    saveSettings() {
+        try {
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('bakumatsu_bgm_muted', this.isBgmMuted ? 'true' : 'false');
+                localStorage.setItem('bakumatsu_se_muted', this.isSeMuted ? 'true' : 'false');
+            }
+        } catch (e) {
+            // ストレージ書き込みエラー対策
+        }
     }
 
     // トラックの事前ロード
@@ -59,6 +91,7 @@ class SoundSystem {
     set isMuted(val) {
         this.isBgmMuted = val;
         this.isSeMuted = val;
+        this.saveSettings();
     }
 
     init() {
@@ -76,6 +109,7 @@ class SoundSystem {
     // --- BGM 個別ON/OFF ---
     toggleBgm() {
         this.isBgmMuted = !this.isBgmMuted;
+        this.saveSettings();
         if (this.isBgmMuted) {
             if (this.bgmAudio) {
                 this.bgmAudio.pause();
@@ -96,6 +130,7 @@ class SoundSystem {
     // --- 効果音 個別ON/OFF ---
     toggleSe() {
         this.isSeMuted = !this.isSeMuted;
+        this.saveSettings();
         if (!this.isSeMuted) {
             this.init();
             this.playHyoshigi(); // ON時の確認用音
@@ -108,6 +143,7 @@ class SoundSystem {
         const nextState = !(this.isBgmMuted && this.isSeMuted);
         this.isBgmMuted = nextState;
         this.isSeMuted = nextState;
+        this.saveSettings();
         if (this.isBgmMuted) {
             if (this.bgmAudio) {
                 this.bgmAudio.pause();

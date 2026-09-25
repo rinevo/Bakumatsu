@@ -38,8 +38,8 @@ class BakumatsuApp {
         // 初期画面はタイトル（陣営選択）
         this.switchScreen('screen-title');
 
-        // 初期画面表示と同時に最速でBGM再生を起動
-        if (window.soundSystem) {
+        // 初期画面表示と同時に最速でBGM再生を起動（BGMがONの場合のみ）
+        if (window.soundSystem && !window.soundSystem.isBgmMuted) {
             window.soundSystem.playBgm('title');
         }
 
