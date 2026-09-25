@@ -122,9 +122,19 @@ class BakumatsuApp {
         // ヘッダー・プルダウンメニューの開閉制御
         const menuBtn = document.getElementById('btn-header-menu');
         const dropdownMenu = document.getElementById('header-dropdown-menu');
+        const relicBtn = document.getElementById('btn-header-relics');
+        const relicDropdown = document.getElementById('header-relic-dropdown');
+
         if (menuBtn && dropdownMenu) {
             menuBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (relicDropdown) {
+                    relicDropdown.classList.remove('active');
+                    if (relicBtn) {
+                        relicBtn.classList.remove('active');
+                        relicBtn.setAttribute('aria-expanded', 'false');
+                    }
+                }
                 const isOpen = dropdownMenu.classList.toggle('active');
                 menuBtn.setAttribute('aria-expanded', isOpen);
             });
@@ -142,6 +152,41 @@ class BakumatsuApp {
                 if (e.key === 'Escape' && dropdownMenu.classList.contains('active')) {
                     dropdownMenu.classList.remove('active');
                     menuBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+        // レリック・プルダウンメニューの開閉制御
+        if (relicBtn && relicDropdown) {
+            relicBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (dropdownMenu) {
+                    dropdownMenu.classList.remove('active');
+                    if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+                }
+                const isOpen = relicDropdown.classList.toggle('active');
+                relicBtn.classList.toggle('active', isOpen);
+                relicBtn.setAttribute('aria-expanded', isOpen);
+                if (isOpen && window.soundSystem) {
+                    window.soundSystem.playHyoshigi();
+                }
+            });
+
+            // メニュー外クリックで閉じる
+            document.addEventListener('click', (e) => {
+                if (!relicDropdown.contains(e.target) && !relicBtn.contains(e.target)) {
+                    relicDropdown.classList.remove('active');
+                    relicBtn.classList.remove('active');
+                    relicBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // ESCキーで閉じる
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && relicDropdown.classList.contains('active')) {
+                    relicDropdown.classList.remove('active');
+                    relicBtn.classList.remove('active');
+                    relicBtn.setAttribute('aria-expanded', 'false');
                 }
             });
         }
@@ -278,7 +323,7 @@ class BakumatsuApp {
                 "tobaku_strike",
                 "tobaku_defend"
             ];
-            this.obtainRelic("kaientai_log");
+            // 初期レリックなし
         } else {
             // 🔵 幕府・会津藩（佐幕派）
             this.maxHp = 85;
@@ -289,7 +334,7 @@ class BakumatsuApp {
                 "sabaku_strike",
                 "sabaku_defend"
             ];
-            this.obtainRelic("makoto_haori");
+            // 初期レリックなし
         }
 
         // Act 1 生成

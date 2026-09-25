@@ -19,7 +19,6 @@ class UIManager {
         const imperialFill = document.getElementById('header-imperial-fill');
         const imperialText = document.getElementById('header-imperial-text');
         const trendBadge = document.getElementById('header-trend-badge');
-        const relicList = document.getElementById('header-relic-list');
 
         if (hpBar) {
             const hpRatio = Math.max(0, Math.min(1, this.app.hp / this.app.maxHp));
@@ -77,36 +76,44 @@ class UIManager {
             }
         }
 
-        // レリックアイコン一覧
+        // レリック表示の更新（単一アイコン＋所持数＆プルダウンリスト）
+        const relicCountEl = document.getElementById('header-relic-count');
+        const relicDropdownList = document.getElementById('header-relic-dropdown-list');
+        const relicDropdownCountBadge = document.getElementById('relic-dropdown-count-badge');
+        const menuRelicCount = document.getElementById('menu-relic-count');
         const menuRelicList = document.getElementById('menu-relic-list');
-        if (relicList) relicList.innerHTML = '';
-        if (menuRelicList) menuRelicList.innerHTML = '';
 
-        if (this.app.relics.length === 0) {
-            if (menuRelicList) {
-                menuRelicList.innerHTML = '<span class="empty-relic-hint">（未所持）</span>';
+        const totalRelics = this.app.relics.length;
+        if (relicCountEl) relicCountEl.textContent = totalRelics;
+        if (relicDropdownCountBadge) relicDropdownCountBadge.textContent = `${totalRelics}個`;
+        if (menuRelicCount) menuRelicCount.textContent = `${totalRelics}個`;
+
+        const renderRelicItems = (targetContainer) => {
+            if (!targetContainer) return;
+            targetContainer.innerHTML = '';
+            if (totalRelics === 0) {
+                targetContainer.innerHTML = '<div class="relic-empty-message">所持している遺物はありません</div>';
+                return;
             }
-        } else {
             this.app.relics.forEach(relicId => {
                 const r = GAME_DATA.relics[relicId];
                 if (r) {
-                    if (relicList) {
-                        const span = document.createElement('span');
-                        span.className = 'relic-icon-item';
-                        span.textContent = '🏮';
-                        span.title = `【${r.name}】\n${r.desc}`;
-                        relicList.appendChild(span);
-                    }
-                    if (menuRelicList) {
-                        const mSpan = document.createElement('span');
-                        mSpan.className = 'relic-icon-item';
-                        mSpan.textContent = '🏮';
-                        mSpan.title = `【${r.name}】\n${r.desc}`;
-                        menuRelicList.appendChild(mSpan);
-                    }
+                    const item = document.createElement('div');
+                    item.className = 'relic-dropdown-item';
+                    item.innerHTML = `
+                        <span class="relic-item-icon">🏮</span>
+                        <div class="relic-item-info">
+                            <div class="relic-item-name">${r.name}</div>
+                            <div class="relic-item-desc">${r.desc}</div>
+                        </div>
+                    `;
+                    targetContainer.appendChild(item);
                 }
             });
-        }
+        };
+
+        renderRelicItems(relicDropdownList);
+        renderRelicItems(menuRelicList);
     }
 
     // --- カードHTML要素の生成 ---

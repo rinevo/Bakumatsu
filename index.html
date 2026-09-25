@@ -46,7 +46,23 @@
 
         <div class="header-right">
             <div id="header-trend-badge" class="trend-badge" title="世論トレンド">世論: 平穏</div>
-            <div id="header-relic-list" class="relic-icon-list" title="所持遺物"></div>
+
+            <!-- レリックバッジ＆プルダウンメニュー -->
+            <div class="header-relic-wrapper" id="header-relic-wrapper">
+                <button id="btn-header-relics" class="btn-relic-badge" title="所持遺物一覧を表示" aria-expanded="false">
+                    <span class="relic-badge-icon">🏮</span>
+                    <span id="header-relic-count" class="relic-badge-count">0</span>
+                </button>
+                <div id="header-relic-dropdown" class="header-relic-dropdown" role="menu">
+                    <div class="relic-dropdown-header">
+                        <span>所持遺物</span>
+                        <span id="relic-dropdown-count-badge" class="relic-dropdown-count-badge">0個</span>
+                    </div>
+                    <div id="header-relic-dropdown-list" class="relic-dropdown-list">
+                        <!-- 動的にレリック項目を描画 -->
+                    </div>
+                </div>
+            </div>
 
             <!-- 通常表示（幅広画面時）のボタングループ -->
             <div class="header-desktop-actions" id="header-desktop-actions">
@@ -69,8 +85,9 @@
                         </div>
                         <div class="dropdown-info-row" id="menu-relic-row">
                             <span class="info-label">所持遺物</span>
-                            <div id="menu-relic-list" class="relic-icon-list"></div>
+                            <span id="menu-relic-count" class="relic-dropdown-count-badge">0個</span>
                         </div>
+                        <div id="menu-relic-list" class="relic-dropdown-list menu-relic-list-container"></div>
                         <div class="dropdown-divider"></div>
                     </div>
 

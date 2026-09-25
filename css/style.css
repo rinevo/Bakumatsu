@@ -105,7 +105,7 @@ body {
 .main-header.title-mode .header-left,
 .main-header.title-mode .header-center,
 .main-header.title-mode #header-trend-badge,
-.main-header.title-mode #header-relic-list,
+.main-header.title-mode #header-relic-wrapper,
 .main-header.title-mode #btn-view-deck {
     display: none !important;
 }
@@ -259,6 +259,177 @@ body {
 .empty-relic-hint {
     font-size: 11px;
     color: #7d8494;
+}
+
+/* --- ヘッダー・所持遺物バッジ＆プルダウンメニュー --- */
+.header-relic-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-relic-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    background: rgba(18, 22, 32, 0.85);
+    border: 1px solid rgba(223, 177, 91, 0.45);
+    border-radius: 4px;
+    color: #e0d8c3;
+    font-size: 13px;
+    font-family: var(--font-serif);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    user-select: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.btn-relic-badge:hover,
+.btn-relic-badge.active {
+    background: rgba(36, 44, 62, 0.95);
+    border-color: var(--color-gold);
+    box-shadow: 0 0 10px rgba(223, 177, 91, 0.35);
+    transform: translateY(-1px);
+}
+
+.relic-badge-icon {
+    font-size: 16px;
+    line-height: 1;
+    filter: drop-shadow(0 0 2px rgba(255, 120, 40, 0.6));
+}
+
+.relic-badge-count {
+    font-weight: bold;
+    color: var(--color-gold);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    font-family: var(--font-sans);
+}
+
+/* プルダウンメニュー本体 */
+.header-relic-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(300px, calc(100vw - 24px));
+    max-height: 380px;
+    background: rgba(14, 18, 26, 0.97);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--color-gold);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85), 0 0 12px rgba(223, 177, 91, 0.2);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.header-relic-dropdown.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.relic-dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(223, 177, 91, 0.12);
+    border-bottom: 1px solid rgba(223, 177, 91, 0.25);
+    font-family: var(--font-serif);
+    font-size: 12px;
+    color: var(--color-gold);
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.relic-dropdown-count-badge {
+    font-size: 11px;
+    color: #e0d8c3;
+    background: rgba(0, 0, 0, 0.45);
+    padding: 1px 7px;
+    border-radius: 10px;
+    border: 1px solid rgba(223, 177, 91, 0.3);
+}
+
+.relic-dropdown-list {
+    padding: 6px 8px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 320px;
+}
+
+.relic-dropdown-list::-webkit-scrollbar {
+    width: 5px;
+}
+.relic-dropdown-list::-webkit-scrollbar-thumb {
+    background: rgba(223, 177, 91, 0.4);
+    border-radius: 3px;
+}
+
+.relic-dropdown-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 8px;
+    background: rgba(24, 30, 44, 0.65);
+    border: 1px solid rgba(223, 177, 91, 0.2);
+    border-radius: 4px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.relic-dropdown-item:hover {
+    background: rgba(35, 45, 65, 0.85);
+    border-color: rgba(223, 177, 91, 0.5);
+}
+
+.relic-item-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.relic-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.relic-item-name {
+    font-family: var(--font-serif);
+    font-size: 12px;
+    font-weight: bold;
+    color: #dfb15b;
+    margin-bottom: 2px;
+    white-space: normal;
+}
+
+.relic-item-desc {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #c8ced8;
+    white-space: normal;
+}
+
+.relic-empty-message {
+    padding: 16px 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #7d8494;
+    font-family: var(--font-serif);
+}
+
+.menu-relic-list-container {
+    max-height: 180px;
 }
 
 .header-center {
@@ -2588,9 +2759,8 @@ body {
         max-width: 170px;
     }
 
-    /* ゲーム中：画面幅に収まらなくなった世論・遺物をヘッダーからプルダウンメニューへ移管 */
-    .main-header:not(.title-mode) #header-trend-badge,
-    .main-header:not(.title-mode) #header-relic-list {
+    /* ゲーム中：画面幅に収まらなくなった世論をヘッダーからプルダウンメニューへ移管 */
+    .main-header:not(.title-mode) #header-trend-badge {
         display: none !important;
     }
     .main-header:not(.title-mode) #menu-info-box {
