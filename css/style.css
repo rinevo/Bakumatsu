@@ -1442,25 +1442,56 @@ body {
 
 /* 手札カードエリア */
 .battle-hand-container {
-    height: 250px;
+    width: 100%;
+    max-width: 100%;
+    min-height: 260px;
     display: flex;
-    justify-content: center;
     align-items: flex-end;
-    padding-bottom: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    padding: 16px 0 8px 0;
+    box-sizing: border-box;
+
+    /* 横スクロールバーのスタイリング（参考サイトガイド準拠） */
+    scrollbar-width: thin;
+    scrollbar-color: #5a4b36 rgba(10, 14, 20, 0.4);
+}
+
+.battle-hand-container::-webkit-scrollbar {
+    height: 6px;
+}
+.battle-hand-container::-webkit-scrollbar-track {
+    background: rgba(10, 14, 20, 0.4);
+    border-radius: 3px;
+}
+.battle-hand-container::-webkit-scrollbar-thumb {
+    background: #5a4b36;
+    border-radius: 3px;
+}
+.battle-hand-container::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold-dark);
 }
 
 .battle-hand {
     display: flex;
-    justify-content: center;
+    justify-content: safe center;
+    align-items: flex-end;
     gap: 14px;
-    width: 100%;
-    max-width: 1200px;
+    width: max-content;
+    min-width: 100%;
+    margin: 0 auto;
+    padding: 8px 16px;
+    box-sizing: border-box;
 }
 
 /* ==========================================
    カードフレーム共通デザイン（和紙×漆塗り風）
    ========================================== */
 .card-frame {
+    flex-shrink: 0;
     width: 160px;
     height: 230px;
     background: linear-gradient(180deg, #f5ede0 0%, #e2d2ba 100%);
@@ -2327,6 +2358,48 @@ body {
         flex-wrap: wrap;
         justify-content: center;
     }
+
+    /* 自軍手札エリアの横スクロール＆スマホ用カードサイズ最適化 */
+    .battle-hand-container {
+        min-height: 220px;
+        padding: 8px 0 6px 0;
+    }
+    .battle-hand {
+        gap: 10px;
+        padding: 4px 12px;
+    }
+    .card-frame {
+        width: 135px;
+        height: 195px;
+        padding: 6px;
+    }
+    .card-inner {
+        padding: 6px;
+    }
+    .card-title {
+        font-size: 13px;
+        margin: 4px 0 2px 0;
+    }
+    .card-cost {
+        width: 22px;
+        height: 22px;
+        font-size: 12px;
+    }
+    .card-type-badge {
+        font-size: 9px;
+        padding: 1px 4px;
+    }
+    .card-faction-tag {
+        font-size: 9px;
+    }
+    .card-desc {
+        font-size: 11px;
+        line-height: 1.35;
+        padding: 4px 6px;
+    }
+    .card-character-tag {
+        font-size: 9px;
+    }
 }
 
 /* 最小幅（360px〜400pxクラスのAndroid端末等）向けの最適化 */
@@ -2366,5 +2439,30 @@ body {
     }
     .btn-header-menu .menu-icon {
         font-size: 15px;
+    }
+
+    /* 最小幅端末でのカード手札調整 */
+    .battle-hand-container {
+        min-height: 200px;
+    }
+    .battle-hand {
+        gap: 8px;
+        padding: 4px 8px;
+    }
+    .card-frame {
+        width: 120px;
+        height: 175px;
+        padding: 5px;
+    }
+    .card-inner {
+        padding: 4px;
+    }
+    .card-title {
+        font-size: 12px;
+    }
+    .card-desc {
+        font-size: 10px;
+        line-height: 1.3;
+        padding: 3px 4px;
     }
 }
