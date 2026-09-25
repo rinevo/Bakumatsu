@@ -911,7 +911,7 @@ body {
     background-image:
         linear-gradient(rgba(255, 30, 20, var(--battle-hit-flash)), rgba(80, 0, 0, var(--battle-hit-flash))),
         linear-gradient(rgba(150, 0, 0, var(--battle-danger)), rgba(70, 0, 0, var(--battle-danger))),
-        linear-gradient(rgba(10, 11, 14, 0.55), rgba(10, 11, 14, 0.75)),
+        linear-gradient(rgba(10, 11, 14, 0.70), rgba(10, 11, 14, 0.86)),
         url('../img/tatakai.jpg');
     background-position: center;
     background-size: cover;
