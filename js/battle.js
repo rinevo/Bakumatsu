@@ -829,6 +829,7 @@ class BattleSystem {
         const availablePool = Object.keys(GAME_DATA.cards).filter(id => {
             const c = GAME_DATA.cards[id];
             if (c.rarity === 'starter' || c.type === 'curse') return false;
+            if (GAME_DATA.canFactionAcquireCard && !GAME_DATA.canFactionAcquireCard(id, this.app.faction)) return false;
             return c.faction === this.app.faction || c.faction === 'neutral';
         });
 

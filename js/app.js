@@ -372,7 +372,16 @@ class BakumatsuApp {
     }
 
     addCardToDeck(cardId) {
+        if (typeof GAME_DATA !== 'undefined' && GAME_DATA.canFactionAcquireCard) {
+            if (!GAME_DATA.canFactionAcquireCard(cardId, this.faction)) {
+                const card = GAME_DATA.cards[cardId];
+                const cardName = card ? card.name : cardId;
+                console.warn(`[歴史的因縁] 『${cardName}』は歴史上相手陣営に討たれたため、${this.faction === 'tobaku' ? '討幕派' : '佐幕派'}のデッキに加えることはできません。`);
+                return false;
+            }
+        }
         this.deck.push(cardId);
+        return true;
     }
 
     obtainRelic(relicId) {

@@ -97,7 +97,7 @@ graph TD
 
 | モジュール | ファイル名 | 主要クラス / オブジェクト | 責務・役割 |
 |---|---|---|---|
-| **マスターデータ** | `js/data.js` | `GAME_DATA` | 全カード（108枚）、レリック（7個）、敵（11体）、歴史事件（89件）、世論トレンド（3種）、志士コネクトリンク（177組）の完全定義。 |
+| **マスターデータ** | `js/data.js` | `GAME_DATA` | 全カード（108枚）、レリック（7個）、敵（11体）、歴史事件（103件）、世論トレンド（3種）、志士コネクトリンク（177組）の完全定義。 |
 | **メイン制御** | `js/app.js` | `BakumatsuApp` | ゲーム全体の統括。プレイヤー基本ステータス（HP・資金・陣営・デッキ・レリック・介入度）、画面遷移（Title/Map/Battle等）、Autoplay解除。 |
 | **戦闘エンジン** | `js/battle.js` | `BattleSystem` | ターン制バトル進行、プレイヤーおよび敵のデッキ/手札管理、AI行動ルーチン、ダメージ・シールド計算、バフ・デバフ、コネクトリンク判定。 |
 | **マップ進行** | `js/map.js` | `MapSystem` | 3幕構成の有向グラフノード自動生成、ルート分岐制御、進行可能ノード判定、第一幕の志士獲得確定イベント選出。 |
@@ -128,9 +128,21 @@ interface CardData {
     shield?: number;          // 基礎防御力
     desc: string;             // カードテキスト
     rarity: "starter" | "common" | "uncommon" | "rare" | "legendary" | "curse";
+    killedByTobaku?: boolean; // 歴史上討幕派により殺害/戦死/処刑（討幕派プレイ時入手不可）
+    killedBySabaku?: boolean; // 歴史上佐幕派により殺害/討死/処刑（佐幕派プレイ時入手不可）
     onPlay?: (battle: BattleSystem, self: CardData) => void; // 特殊効果コールバック
 }
 ```
+
+#### 歴史的因縁による志士入手制限ルール（`canFactionAcquireCard`）
+史実に忠実なゲームプレイを実現するため、敵対勢力の手によって殺害・処刑・討ち取られた志士は、仇敵側の陣営プレイ時には入手不可となる防護レイヤーを実装している。
+- **討幕派プレイ時に入手不可な佐幕派志士（11名）**: 井伊直弼、近藤勇、小栗忠順、河井継之助、佐々木只三郎、甲賀源吾、土方歳三、伊庭八郎、原田左之助、野村左兵衛、原市之進
+- **佐幕派プレイ時に入手不可な討幕派志士（9名）**: 吉田松陰、坂本龍馬、中岡慎太郎、久坂玄瑞、来島又兵衛、入江九一、吉田稔麿、望月亀弥太、真木和泉
+- **制御レイヤー**:
+  1. `GAME_DATA.canFactionAcquireCard(cardId, faction)`: 判定ヘルパー関数
+  2. `BakumatsuApp.prototype.addCardToDeck(cardId)`: デッキ追加時のコアガード（仇敵陣営への加入を遮断）
+  3. `UI.prototype.renderEvent(eventData)`: 歴史事件選択肢描画時に、獲得カードが相手陣営に討たれた志士である選択肢をフィルタ除外
+  4. `BattleSystem.prototype.generateCardRewards()` / `ShopSystem.prototype.generateShopInventory()`: 戦闘報酬および商人販売リストの除外ガード
 
 ### 3.2 志士コネクト・リンク定義 (`GAME_DATA.combos`)
 全177組に及ぶ史実コンボデータ。同一ターン内に手札から特定の志士群を使用することで成立。
@@ -146,12 +158,14 @@ interface ShishiCombo {
 ```
 
 ### 3.3 歴史事件定義 (`GAME_DATA.events`)
-全89件の歴史事件データ。幕ごとの時代設定（Act 1: 〜1864, Act 2: 1865〜1868春, Act 3: 1868夏〜明治）に適合して発生。
+全103件の歴史事件データ。幕ごとの時代設定（Act 1: 〜1864, Act 2: 1865〜1868春, Act 3: 1868夏〜明治）に適合して発生。各選択肢には `faction` 指定が付与され、陣営ごとに適切な歴史体験と志士獲得機会が提供される。
 
 ```typescript
 interface EventChoice {
     text: string;             // 選択肢の表示名
-    desc: string;             // 選択時の結果概要
+    effectDesc: string;       // 選択時の結果概要
+    faction?: "tobaku" | "sabaku"; // 選択肢の表示陣営限定
+    canChoose?: (app: BakumatsuApp) => boolean; // 選択可能条件（資金等）
     action: (app: BakumatsuApp) => void; // 選択肢実行時の効果（カード獲得、HP変動、介入度変動等）
 }
 
@@ -159,10 +173,8 @@ interface EventData {
     id: string;               // 事件識別子 (例: "ikeda_ya")
     title: string;            // 事件タイトル (例: "池田屋事件の急襲")
     act: 1 | 2 | 3;           // 発生対象幕
-    eraYear: number;          // 史実発生年 (ソートおよび幕判定用)
-    factionLimit?: "tobaku" | "sabaku"; // 陣営限定条件
     desc: string;             // 事件の背景解説・導入テキスト
-    choices: EventChoice[];   // プレイヤーが選べる選択肢（最大3〜4つ）
+    choices: EventChoice[];   // プレイヤーが選べる選択肢（陣営フィルター適用後2〜4つ）
 }
 ```
 

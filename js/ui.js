@@ -580,7 +580,20 @@ class UIManager {
         if (choicesContainer) {
             choicesContainer.innerHTML = '';
             eventData.choices
-                .filter(choice => !choice.faction || choice.faction === this.app.faction)
+                .filter(choice => {
+                    if (choice.faction && choice.faction !== this.app.faction) return false;
+                    if (choice.action && typeof GAME_DATA !== 'undefined' && GAME_DATA.canFactionAcquireCard) {
+                        const fnStr = choice.action.toString();
+                        for (const cardId of Object.keys(GAME_DATA.cards)) {
+                            if (!GAME_DATA.canFactionAcquireCard(cardId, this.app.faction)) {
+                                if (fnStr.includes(`'${cardId}'`) || fnStr.includes(`"${cardId}"`)) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    return true;
+                })
                 .forEach(choice => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-event-choice';
