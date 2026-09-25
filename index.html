@@ -214,27 +214,31 @@
                 <!-- プレイヤー情報＆盤面エリア -->
                 <div class="battle-middle-bar">
                     <div class="player-battle-stats">
-                        <div class="energy-orb-box">
-                            <div class="energy-orb">
-                                <span id="battle-player-energy">3 / 3</span>
-                                <span class="energy-unit">文</span>
+                        <div class="player-resource-group">
+                            <div class="energy-orb-box">
+                                <div class="energy-orb">
+                                    <span id="battle-player-energy">3 / 3</span>
+                                    <span class="energy-unit">文</span>
+                                </div>
+                            </div>
+                            <div class="player-shield-box">
+                                <span class="shield-icon">🛡️</span>
+                                <span id="battle-player-shield">0</span>
                             </div>
                         </div>
-                        <div class="player-shield-box">
-                            <span class="shield-icon">🛡️</span>
-                            <span id="battle-player-shield">0</span>
+                        <div class="player-info-group">
+                            <div id="battle-player-buffs" class="battle-buffs-list"></div>
+                            <div class="deck-counts-box">
+                                <span>山札: <strong id="battle-draw-count">10</strong></span>
+                                <span>捨札: <strong id="battle-discard-count">0</strong></span>
+                            </div>
                         </div>
-                        <div id="battle-player-buffs" class="battle-buffs-list"></div>
-                    </div>
-
-                    <div class="deck-counts-box">
-                        <span>山札: <strong id="battle-draw-count">10</strong></span>
-                        <span>捨札: <strong id="battle-discard-count">0</strong></span>
                     </div>
 
                     <div class="battle-action-box">
                         <button id="btn-end-turn" class="btn-end-turn">
-                            <span class="btn-inner-text">太刀を収める<br><small>(ターン終了)</small></span>
+                            <span class="btn-end-turn-full">太刀を収める<br><small>(ターン終了)</small></span>
+                            <span class="btn-end-turn-short">ターン終了</span>
                         </button>
                     </div>
                 </div>

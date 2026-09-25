@@ -1382,7 +1382,13 @@ body {
 .player-battle-stats {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
+}
+
+.player-resource-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
 .energy-orb-box {
@@ -1418,9 +1424,16 @@ body {
     color: #a8d5ff;
 }
 
+.player-info-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
 .battle-buffs-list {
     display: flex;
     gap: 6px;
+    flex-wrap: wrap;
 }
 .buff-tag {
     font-size: 11px;
@@ -1429,6 +1442,7 @@ body {
     color: #d1d8e6;
     padding: 2px 6px;
     border-radius: 3px;
+    white-space: nowrap;
 }
 
 .deck-counts-box {
@@ -1436,6 +1450,7 @@ body {
     color: #a8a299;
     display: flex;
     gap: 16px;
+    white-space: nowrap;
 }
 
 .btn-end-turn {
@@ -1450,6 +1465,14 @@ body {
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.6);
     transition: all 0.2s ease;
+    white-space: nowrap;
+    text-align: center;
+}
+.btn-end-turn-full {
+    display: inline-block;
+}
+.btn-end-turn-short {
+    display: none;
 }
 .btn-end-turn:hover {
     background: linear-gradient(180deg, #ab2e23 0%, #5e1610 100%);
@@ -2325,6 +2348,77 @@ body {
     .main-header:not(.title-mode) #menu-info-box {
         display: flex !important;
     }
+
+    /* 戦闘中央操作バー（帯）の幅狭画面・スマホ向けスリム化レイアウト */
+    .battle-middle-bar {
+        padding: 6px 12px;
+        gap: 8px;
+    }
+    .player-battle-stats {
+        gap: 12px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* 文の円と防御を縦に並べる */
+    .player-resource-group {
+        flex-direction: column;
+        gap: 3px;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    .energy-orb {
+        width: 44px;
+        height: 44px;
+        font-size: 14px;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    }
+    .energy-unit {
+        font-size: 8px;
+    }
+    .player-shield-box {
+        font-size: 14px;
+        gap: 2px;
+    }
+    .player-shield-box .shield-icon {
+        font-size: 14px;
+    }
+
+    /* 腕力＋や山札、捨札を縦に並べる */
+    .player-info-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        min-width: 0;
+        flex: 1;
+    }
+    .battle-buffs-list {
+        gap: 3px;
+    }
+    .buff-tag {
+        font-size: 10px;
+        padding: 1px 4px;
+    }
+    .deck-counts-box {
+        flex-direction: column;
+        gap: 1px;
+        font-size: 11px;
+    }
+
+    /* 「太刀を収める（ターン終了）」は「ターン終了」にする */
+    .battle-action-box {
+        flex-shrink: 0;
+    }
+    .btn-end-turn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    .btn-end-turn-full {
+        display: none !important;
+    }
+    .btn-end-turn-short {
+        display: inline-block !important;
+    }
 }
 
 /* 画面幅が狭い場合（Android / スマートフォン等）の省スペース化 */
@@ -2566,5 +2660,26 @@ body {
         font-size: 10px;
         line-height: 1.3;
         padding: 3px 4px;
+    }
+
+    /* 最小幅端末での戦闘中央操作バー調整 */
+    .battle-middle-bar {
+        padding: 4px 6px;
+        gap: 6px;
+    }
+    .energy-orb {
+        width: 38px;
+        height: 38px;
+        font-size: 12px;
+    }
+    .player-shield-box {
+        font-size: 13px;
+    }
+    .deck-counts-box {
+        font-size: 10px;
+    }
+    .btn-end-turn {
+        padding: 6px 8px;
+        font-size: 12px;
     }
 }
