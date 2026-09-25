@@ -236,6 +236,29 @@ class BakumatsuApp {
                 this.ui.drawMapConnections();
             }
         });
+
+        // iOS / iPad Safari での親ウィンドウへのスクロール伝播・ヘッダーズレを完全防止
+        document.addEventListener('touchmove', (e) => {
+            const scrollContainer = e.target.closest('.map-scroll-area, .modal-cards-grid, .card-detail-content');
+            if (!scrollContainer) {
+                // スクロール可能要素の外側（ヘッダー、余白など）でのドラッグは完全無効化
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // スクロール可能要素の端でのゴムバンド（オーバースクロール）がwindowに伝播するのを防ぐ
+        document.addEventListener('touchstart', (e) => {
+            const scrollContainer = e.target.closest('.map-scroll-area, .modal-cards-grid, .card-detail-content');
+            if (!scrollContainer) return;
+            const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+            if (maxScroll <= 0) return;
+
+            if (scrollContainer.scrollTop === 0) {
+                scrollContainer.scrollTop = 1;
+            } else if (scrollContainer.scrollTop >= maxScroll) {
+                scrollContainer.scrollTop = maxScroll - 1;
+            }
+        }, { passive: true });
     }
 
     startNewRun(faction) {

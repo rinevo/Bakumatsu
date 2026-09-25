@@ -527,6 +527,16 @@ class UIManager {
         scheduleDraw(() => {
             setTimeout(() => {
                 this.drawMapConnections();
+                // マップ初期表示時に現在選択可能なフロア（開始地点 Floor 0）が見えるようスクロール位置を調整
+                const scrollArea = document.querySelector('.map-scroll-area');
+                if (scrollArea) {
+                    const targetNode = document.querySelector('.map-node.selectable, .map-node.current');
+                    if (targetNode) {
+                        targetNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        scrollArea.scrollTop = scrollArea.scrollHeight;
+                    }
+                }
             }, 60);
         });
     }
