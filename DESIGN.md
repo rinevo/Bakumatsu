@@ -97,7 +97,7 @@ graph TD
 
 | モジュール | ファイル名 | 主要クラス / オブジェクト | 責務・役割 |
 |---|---|---|---|
-| **マスターデータ** | `js/data.js` | `GAME_DATA` | 全カード（108枚）、レリック（7個）、敵（11体）、歴史事件（103件）、世論トレンド（3種）、志士コネクトリンク（177組）の完全定義。 |
+| **マスターデータ** | `js/data.js` | `GAME_DATA` | 全カード（108枚）、レリック（16個）、敵（24体）、歴史事件（103件）、世論トレンド（3種）、志士コネクトリンク（177組）の完全定義。 |
 | **メイン制御** | `js/app.js` | `BakumatsuApp` | ゲーム全体の統括。プレイヤー基本ステータス（HP・資金・陣営・デッキ・レリック・介入度）、画面遷移（Title/Map/Battle等）、Autoplay解除。 |
 | **戦闘エンジン** | `js/battle.js` | `BattleSystem` | ターン制バトル進行、プレイヤーおよび敵のデッキ/手札管理、AI行動ルーチン、ダメージ・シールド計算、バフ・デバフ、コネクトリンク判定。 |
 | **マップ進行** | `js/map.js` | `MapSystem` | 3幕構成の有向グラフノード自動生成、ルート分岐制御、進行可能ノード判定、第一幕の志士獲得確定イベント選出。 |
@@ -179,7 +179,7 @@ interface EventData {
 ```
 
 ### 3.4 レリック（遺物）定義 (`GAME_DATA.relics`)
-全7種の常時発動型・特殊パッシブ遺物。
+全16種の常時発動型・特殊パッシブ遺物（錦の御旗、西洋懐中時計、海援隊航海日誌、新選組の浅葱羽織、古銭・和同開珎、蘭方医の手術道具、尊皇不抜の建白書、長州奇兵隊簿、桜文鍔、蘭和辞書、徳川慶喜の親書、備前長船、甲鉄艦装甲板、壬生寺の鐘、志士の煙管、松下村塾の硯筆）。
 
 ```typescript
 interface RelicData {
@@ -187,28 +187,35 @@ interface RelicData {
     name: string;             // 遺物名 (例: "海援隊航海日誌")
     price: number;            // ショップ基本価格 (例: 160)
     desc: string;             // 効果説明
+    onBattleStart?: (battle: BattleSystem) => void;
+    onTurnStart?: (battle: BattleSystem, turn: number) => void;
+    onCardPlayed?: (battle: BattleSystem, card: CardData) => void;
+    onBattleWin?: (app: BakumatsuApp) => void;
 }
 ```
 
 ### 3.5 敵キャラクター定義 (`GAME_DATA.enemies`)
-全11体の敵（雑魚、エリート、幕ボス）。
+全24体の敵（各幕通常敵4体、強敵/エリート2体、幕ボス/最終ボス2体）。
 
 ```typescript
 interface EnemyIntent {
-    type: "attack" | "defend" | "buff" | "debuff" | "western_attack" | "special";
+    type: "attack" | "defend" | "buff" | "curse";
     damage?: number;
     shield?: number;
+    times?: number;           // 連撃回数 (例: 2回攻撃, 3回攻撃)
+    strength?: number;        // 剛力バフ増加量
+    curseId?: string;         // デッキ混入呪詛ID
     desc: string;
 }
 
 interface EnemyData {
-    id: string;               // 敵識別子 (例: "kondo_isami")
-    name: string;             // 敵表示名 (例: "近藤勇：新選組局長")
+    name: string;             // 敵表示名 (例: "新選組局長・近藤勇")
     maxHp: number;            // 最大体力
     isBoss?: boolean;         // ボスフラグ
+    isFinalBoss?: boolean;    // 最終ボスフラグ
     isElite?: boolean;        // エリートフラグ
-    faction: "tobaku" | "sabaku"; // 所属陣営（プレイヤー陣営と対立）
-    deck?: string[];          // 敵の所持デッキ（敵カードバトル用）
+    sprite: string;           // アバター識別名
+    faction?: "tobaku" | "sabaku"; // 所属陣営（プレイヤー陣営と対立）
     intents: EnemyIntent[];   // 行動パターンサイクル
 }
 ```

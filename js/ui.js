@@ -744,9 +744,13 @@ class UIManager {
     // --- 休息画面描画 ---
     renderRestSite() {
         this.updateHeader();
-        const healAmt = Math.floor(this.app.maxHp * 0.35);
+        const hasPipe = this.app.hasRelic("samurai_pipe");
+        const healAmt = Math.floor(this.app.maxHp * (hasPipe ? 0.50 : 0.35));
         const healDesc = document.getElementById('rest-heal-desc');
-        if (healDesc) healDesc.textContent = `HPを ${healAmt} 回復します。`;
+        if (healDesc) {
+            const pipeBonusText = hasPipe ? '（志士の煙管により50%に強化）' : '（最大HPの35%）';
+            healDesc.textContent = `HPを ${healAmt} 回復します。${pipeBonusText}`;
+        }
     }
 
     // --- デッキ一覧モーダル ---

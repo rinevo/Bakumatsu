@@ -422,24 +422,57 @@ class MapSystem {
 
     launchBattle(node) {
         let enemyKey = 'act1_normal_1';
+        const act = Math.min(3, Math.max(1, this.currentAct || 1));
 
         if (node.type === 'boss') {
-            if (this.currentAct === 1) {
+            if (act === 1) {
                 enemyKey = this.app.faction === 'tobaku' ? 'act1_boss_tobaku' : 'act1_boss_sabaku';
-            } else if (this.currentAct === 2) {
+            } else if (act === 2) {
                 enemyKey = this.app.faction === 'tobaku' ? 'act2_boss_katamori' : 'act2_boss_saigo';
             } else {
                 enemyKey = this.app.faction === 'tobaku' ? 'act3_final_yoshinobu' : 'act3_final_kangun';
             }
         } else if (node.type === 'elite') {
-            enemyKey = (this.currentAct === 1) ? 'act1_elite_izo' : 'act2_elite_serizawa';
-        } else {
-            // 通常戦闘
-            if (this.currentAct === 1) {
-                enemyKey = (Math.random() < 0.5) ? 'act1_normal_1' : 'act1_normal_2';
+            const elitePools = {
+                1: ['act1_elite_izo', 'act1_elite_serizawa'],
+                2: ['act2_elite_iba', 'act2_elite_hanjiro'],
+                3: ['act3_elite_battotai', 'act3_elite_sagawa']
+            };
+            const pool = elitePools[act] || elitePools[1];
+            // 敵対陣営のエリートを優先選出（70%）
+            const hostile = pool.filter(id => {
+                const e = GAME_DATA.enemies[id];
+                return e && e.faction && e.faction !== this.app.faction;
+            });
+            if (hostile.length > 0 && Math.random() < 0.7) {
+                enemyKey = hostile[Math.floor(Math.random() * hostile.length)];
             } else {
-                enemyKey = 'act2_normal_1';
+                enemyKey = pool[Math.floor(Math.random() * pool.length)];
             }
+        } else {
+            // 通常戦闘（各幕4体）
+            const normalPools = {
+                1: ['act1_normal_1', 'act1_normal_2', 'act1_normal_choshu_spy', 'act1_normal_shinsengumi'],
+                2: ['act2_normal_1', 'act2_normal_satsuma_samurai', 'act2_normal_denshitai', 'act2_normal_british_marine'],
+                3: ['act3_normal_shogitai', 'act3_normal_ouetsu', 'act3_normal_shinseifu', 'act3_normal_armstrong']
+            };
+            const pool = normalPools[act] || normalPools[1];
+
+            // 敵対陣営の敵を優先（70%）
+            const hostile = pool.filter(id => {
+                const e = GAME_DATA.enemies[id];
+                return e && e.faction && e.faction !== this.app.faction;
+            });
+
+            let candidates = (hostile.length > 0 && Math.random() < 0.7) ? hostile : pool;
+            // 直前の通常敵との連続重複を防止
+            if (this.lastNormalEnemyKey && candidates.length > 1) {
+                const nonRepeat = candidates.filter(id => id !== this.lastNormalEnemyKey);
+                if (nonRepeat.length > 0) candidates = nonRepeat;
+            }
+
+            enemyKey = candidates[Math.floor(Math.random() * candidates.length)];
+            this.lastNormalEnemyKey = enemyKey;
         }
 
         const enemyData = GAME_DATA.enemies[enemyKey];

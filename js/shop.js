@@ -34,8 +34,10 @@ class ShopSystem {
         const shuffledCards = [...candidateCardIds].sort(() => 0.5 - Math.random());
         const selectedCards = shuffledCards.slice(0, 4);
 
-        // レリック「和同開珎」があれば25%割引
-        const discount = this.app.hasRelic("wado_kaichin") ? 0.75 : 1.0;
+        // レリック「和同開珎（25%引）」および「蘭和辞書（20%引）」の効果適用
+        let discount = 1.0;
+        if (this.app.hasRelic("wado_kaichin")) discount *= 0.75;
+        if (this.app.hasRelic("dutch_lexicon")) discount *= 0.80;
 
         this.shopCards = selectedCards.map(cardId => {
             const c = GAME_DATA.cards[cardId];
@@ -143,7 +145,9 @@ class ShopSystem {
     }
 
     removeCardInShop() {
-        const discount = this.app.hasRelic("wado_kaichin") ? 0.75 : 1.0;
+        let discount = 1.0;
+        if (this.app.hasRelic("wado_kaichin")) discount *= 0.75;
+        if (this.app.hasRelic("dutch_lexicon")) discount *= 0.80;
         const actualPrice = Math.round(this.cardRemovalPrice * discount);
 
         if (this.app.gold < actualPrice) {
@@ -168,7 +172,8 @@ class ShopSystem {
     }
 
     restHeal() {
-        const healAmount = Math.floor(this.app.maxHp * 0.35);
+        const healRatio = this.app.hasRelic("samurai_pipe") ? 0.50 : 0.35;
+        const healAmount = Math.floor(this.app.maxHp * healRatio);
         this.app.healPlayer(healAmount);
         window.soundSystem.playTaiko(false);
         this.leaveRestSite();

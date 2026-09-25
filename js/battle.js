@@ -799,14 +799,18 @@ class BattleSystem {
             return;
         }
 
-        // 報酬計算（両 ＋ カード3枚提示）
-        const goldEarned = this.enemy.isElite ? (35 + Math.floor(Math.random() * 20)) :
-                           this.enemy.isBoss ? (60 + Math.floor(Math.random() * 30)) :
-                           (15 + Math.floor(Math.random() * 12));
+        // 報酬計算（両 ＋ カード提示）
+        let goldEarned = this.enemy.isElite ? (35 + Math.floor(Math.random() * 20)) :
+                         this.enemy.isBoss ? (60 + Math.floor(Math.random() * 30)) :
+                         (15 + Math.floor(Math.random() * 12));
+
+        if (this.app.hasRelic("dutch_lexicon")) {
+            goldEarned += 15;
+        }
 
         this.app.gold += goldEarned;
 
-        // カード報酬3枚抽選
+        // カード報酬抽選（通常3枚、松下村塾の硯筆所持で4枚）
         const cardRewards = this.generateCardRewards();
 
         // エリートまたはボスならレリックも追加
@@ -825,7 +829,7 @@ class BattleSystem {
     }
 
     generateCardRewards() {
-        // 自陣営 + 西洋兵器から3枚選定
+        // 自陣営 + 西洋兵器から選定
         const availablePool = Object.keys(GAME_DATA.cards).filter(id => {
             const c = GAME_DATA.cards[id];
             if (c.rarity === 'starter' || c.type === 'curse') return false;
@@ -833,8 +837,9 @@ class BattleSystem {
             return c.faction === this.app.faction || c.faction === 'neutral';
         });
 
+        const rewardCount = this.app.hasRelic("yoshida_shoin_brush") ? 4 : 3;
         const shuffled = this.shuffleArray(availablePool);
-        return shuffled.slice(0, 3);
+        return shuffled.slice(0, rewardCount);
     }
 
     handlePlayerDefeated(reason) {

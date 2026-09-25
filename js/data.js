@@ -1804,6 +1804,97 @@ const GAME_DATA = {
             name: "尊皇不抜の建白書",
             desc: "列強介入メーターの上昇を常時 25% 抑える。",
             price: 190
+        },
+        "choshu_tome": {
+            id: "choshu_tome",
+            name: "長州奇兵隊簿",
+            desc: "志士カードをプレイした時、シールド 4 を獲得し、カードを 1 枚引く。",
+            price: 175,
+            onCardPlayed: (b, card) => {
+                if (card.type === 'shishi') {
+                    b.gainPlayerShield(4);
+                    b.drawCards(1);
+                    if (window.soundSystem) window.soundSystem.playHyoshigi();
+                }
+            }
+        },
+        "sakura_tsuba": {
+            id: "sakura_tsuba",
+            name: "桜文鍔",
+            desc: "1ターン中に3連鎖（参之連）を達成した時、即座にシールド 6 を獲得する。",
+            price: 160,
+            onCardPlayed: (b, card) => {
+                if (b.comboCount === 3) {
+                    b.gainPlayerShield(6);
+                    if (window.soundSystem) window.soundSystem.playShield();
+                }
+            }
+        },
+        "dutch_lexicon": {
+            id: "dutch_lexicon",
+            name: "蘭和辞書",
+            desc: "商人での買い物がさらに 20% 割引され、戦闘勝利時の獲得小判が +15両 増える。",
+            price: 150
+        },
+        "shogunate_charter": {
+            id: "shogunate_charter",
+            name: "徳川慶喜の親書",
+            desc: "各戦闘の第1ターン、追加で 1文（エネルギー）を得る。",
+            price: 180,
+            onTurnStart: (b, turn) => {
+                if (turn === 1) {
+                    b.gainPlayerEnergy(1);
+                }
+            }
+        },
+        "bizen_osafune": {
+            id: "bizen_osafune",
+            name: "備前長船",
+            desc: "各ターン、最初にプレイする攻撃カードのダメージが +4 される。",
+            price: 170,
+            onTurnStart: (b) => {
+                b.bizenUsedThisTurn = false;
+            },
+            onCardPlayed: (b, card) => {
+                if (!b.bizenUsedThisTurn && card.type === 'attack') {
+                    b.bizenUsedThisTurn = true;
+                    b.dealDamageToEnemy(4);
+                }
+            }
+        },
+        "ironclad_plate": {
+            id: "ironclad_plate",
+            name: "甲鉄艦装甲板",
+            desc: "戦闘開始時、シールド 14 を獲得する。",
+            price: 170,
+            onBattleStart: (b) => {
+                b.gainPlayerShield(14);
+                if (window.soundSystem) window.soundSystem.playShield();
+            }
+        },
+        "mibu_bell": {
+            id: "mibu_bell",
+            name: "壬生寺の鐘",
+            desc: "敵の意図が「攻撃」であるターンの開始時、シールド 4 を獲得する。",
+            price: 160,
+            onTurnStart: (b) => {
+                if (b.enemy && b.enemy.intent && b.enemy.intent.type === 'attack') {
+                    b.gainPlayerShield(4);
+                    if (window.soundSystem) window.soundSystem.playShield();
+                }
+            }
+        },
+        "samurai_pipe": {
+            id: "samurai_pipe",
+            name: "志士の煙管",
+            desc: "休息マスで休息した際、HP回復量が最大HPの 35% から 50% に増加する。",
+            price: 140
+        },
+        "yoshida_shoin_brush": {
+            id: "yoshida_shoin_brush",
+            name: "松下村塾の硯筆",
+            desc: "戦闘勝利後のカード獲得報酬の提示枚数が 3枚 から 4枚 に増加する。",
+            price: 175
         }
     },
 
@@ -1849,7 +1940,9 @@ const GAME_DATA = {
     // 4. 敵キャラクター定義
     // ==========================================
     enemies: {
-        // ACT 1: 京洛動乱
+        // ==========================================
+        // 第一幕：京洛動乱（通常4体、エリート2体、ボス2体）
+        // ==========================================
         "act1_normal_1": {
             name: "京都見廻組隊士",
             maxHp: 42,
@@ -1874,115 +1967,300 @@ const GAME_DATA = {
                 { type: "attack", damage: 20, desc: "血煙の乱舞" }
             ]
         },
+        "act1_normal_choshu_spy": {
+            name: "長州密偵武士",
+            maxHp: 36,
+            sprite: "ronin",
+            faction: "tobaku",
+            intents: [
+                { type: "attack", damage: 7, times: 2, desc: "暗器二連投" },
+                { type: "defend", shield: 10, desc: "影身・煙玉散布" },
+                { type: "curse", curseId: "curse_betrayal", damage: 9, desc: "塗毒の刃・陰謀" },
+                { type: "attack", damage: 16, desc: "奇襲・燕返し" }
+            ]
+        },
+        "act1_normal_shinsengumi": {
+            name: "新選組平隊士",
+            maxHp: 44,
+            sprite: "mimarigumi",
+            faction: "sabaku",
+            intents: [
+                { type: "attack", damage: 10, desc: "新選組直伝・平突き" },
+                { type: "defend", shield: 9, desc: "隊列防御陣" },
+                { type: "attack", damage: 8, times: 2, desc: "電光二段突き" },
+                { type: "attack", damage: 15, desc: "誠の突撃" }
+            ]
+        },
         "act1_elite_izo": {
             name: "人斬り以蔵 (岡田以蔵)",
-            maxHp: 78,
+            maxHp: 82,
             isElite: true,
             sprite: "izo",
+            faction: "tobaku",
             intents: [
                 { type: "attack", damage: 10, times: 2, desc: "二連撃" },
-                { type: "attack", damage: 13, desc: "踏み込み" },
-                { type: "curse", curseId: "curse_riot", damage: 8, desc: "天誅の怨嗟" },
-                { type: "attack", damage: 21, desc: "人斬り秘剣" }
+                { type: "attack", damage: 14, desc: "踏み込み" },
+                { type: "curse", curseId: "curse_riot", damage: 9, desc: "天誅の怨嗟" },
+                { type: "attack", damage: 22, desc: "人斬り秘剣" }
+            ]
+        },
+        "act1_elite_serizawa": {
+            name: "芹沢鴨（豪刀の猛威）",
+            maxHp: 98,
+            isElite: true,
+            sprite: "serizawa",
+            faction: "sabaku",
+            intents: [
+                { type: "attack", damage: 18, desc: "豪刀乱舞" },
+                { type: "buff", strength: 4, desc: "酒気狂乱" },
+                { type: "attack", damage: 25, desc: "無慈悲の一閃" },
+                { type: "attack", damage: 12, times: 2, desc: "酔剣二連" }
+            ]
+        },
+        // 互換性エイリアス
+        "act2_elite_serizawa": {
+            name: "芹沢鴨（豪刀の猛威）",
+            maxHp: 98,
+            isElite: true,
+            sprite: "serizawa",
+            faction: "sabaku",
+            intents: [
+                { type: "attack", damage: 18, desc: "豪刀乱舞" },
+                { type: "buff", strength: 4, desc: "酒気狂乱" },
+                { type: "attack", damage: 25, desc: "無慈悲の一閃" },
+                { type: "attack", damage: 12, times: 2, desc: "酔剣二連" }
             ]
         },
         "act1_boss_tobaku": {
             name: "新選組局長・近藤勇",
-            maxHp: 135,
+            maxHp: 140,
             isBoss: true,
             sprite: "kondo_boss",
+            faction: "sabaku",
             intents: [
-                { type: "defend", shield: 14, desc: "不動の構え" },
-                { type: "attack", damage: 20, desc: "虎徹・袈裟斬り" },
-                { type: "buff", strength: 3, desc: "誠の号令" },
-                { type: "attack", damage: 28, desc: "天然理心流・絶技" }
+                { type: "defend", shield: 16, desc: "不動の構え" },
+                { type: "attack", damage: 22, desc: "虎徹・袈裟斬り" },
+                { type: "buff", strength: 4, desc: "誠の号令" },
+                { type: "attack", damage: 30, desc: "天然理心流・絶技" }
             ]
         },
         "act1_boss_sabaku": {
             name: "長州総帥・桂小五郎",
-            maxHp: 130,
+            maxHp: 135,
             isBoss: true,
             sprite: "katsura_boss",
+            faction: "tobaku",
             intents: [
-                { type: "attack", damage: 16, desc: "神道無念流・霞斬り" },
-                { type: "defend", shield: 16, desc: "逃げの小五郎" },
-                { type: "curse", curseId: "curse_betrayal", damage: 11, desc: "革命の扇動" },
-                { type: "attack", damage: 26, desc: "維新の疾風" }
+                { type: "attack", damage: 18, desc: "神道無念流・霞斬り" },
+                { type: "defend", shield: 18, desc: "逃げの小五郎" },
+                { type: "curse", curseId: "curse_betrayal", damage: 12, desc: "革命の扇動" },
+                { type: "attack", damage: 28, desc: "維新の疾風" }
             ]
         },
 
-        // ACT 2: 東海道進軍・関所突破
+        // ==========================================
+        // 第二幕：東海道進撃（通常4体、エリート2体、ボス2体）
+        // ==========================================
         "act2_normal_1": {
             name: "幕府新式歩兵連隊",
-            maxHp: 64,
+            maxHp: 65,
             sprite: "shinsiki",
+            faction: "sabaku",
             intents: [
-                { type: "attack", damage: 14, desc: "小銃一斉射撃" },
-                { type: "attack", damage: 17, desc: "追撃射撃" },
-                { type: "defend", shield: 14, desc: "方陣防御" },
-                { type: "attack", damage: 21, desc: "銃剣突撃" }
+                { type: "attack", damage: 15, desc: "小銃一斉射撃" },
+                { type: "attack", damage: 18, desc: "追撃射撃" },
+                { type: "defend", shield: 15, desc: "方陣防御" },
+                { type: "attack", damage: 22, desc: "銃剣突撃" }
             ]
         },
-        "act2_elite_serizawa": {
-            name: "芹沢鴨（豪剣の猛威）",
-            maxHp: 105,
-            isElite: true,
-            sprite: "serizawa",
+        "act2_normal_satsuma_samurai": {
+            name: "薩摩藩城下士",
+            maxHp: 62,
+            sprite: "ronin",
+            faction: "tobaku",
             intents: [
-                { type: "attack", damage: 21, desc: "豪刀乱舞" },
-                { type: "buff", strength: 5, desc: "酒気狂乱" },
-                { type: "attack", damage: 28, desc: "無慈悲の一閃" },
-                { type: "attack", damage: 18, times: 2, desc: "酔剣二連" }
+                { type: "attack", damage: 22, desc: "示現流・初太刀チェスト！" },
+                { type: "buff", strength: 4, desc: "猿叫の咆哮" },
+                { type: "attack", damage: 26, desc: "捨て身の斬り込み" },
+                { type: "defend", shield: 14, desc: "蜻蛉の構え" }
+            ]
+        },
+        "act2_normal_denshitai": {
+            name: "幕府伝習隊狙撃手",
+            maxHp: 58,
+            sprite: "shinsiki",
+            faction: "sabaku",
+            intents: [
+                { type: "attack", damage: 19, desc: "シャスポー精密狙撃" },
+                { type: "defend", shield: 18, desc: "地形散兵展開" },
+                { type: "attack", damage: 10, times: 2, desc: "鉛弾の雨・二連射" },
+                { type: "attack", damage: 25, desc: "急所狙撃" }
+            ]
+        },
+        "act2_normal_british_marine": {
+            name: "英国式警備陸戦隊",
+            maxHp: 68,
+            sprite: "shinsiki",
+            intents: [
+                { type: "attack", damage: 16, desc: "列強式斉射号令" },
+                { type: "attack", damage: 12, times: 2, desc: "サーベル抜刀突撃" },
+                { type: "defend", shield: 20, desc: "規律ある鉄壁方陣" },
+                { type: "curse", curseId: "curse_extraterritoriality", damage: 14, desc: "砲艦外交の威圧" }
+            ]
+        },
+        "act2_elite_iba": {
+            name: "隻腕の小天狗・伊庭八郎",
+            maxHp: 120,
+            isElite: true,
+            sprite: "mimarigumi",
+            faction: "sabaku",
+            intents: [
+                { type: "attack", damage: 10, times: 3, desc: "心形刀流・神速三段斬り" },
+                { type: "defend", shield: 24, desc: "小天狗の見切り" },
+                { type: "buff", strength: 4, desc: "不撓不屈の気迫" },
+                { type: "attack", damage: 32, desc: "心形刀流奥義・残月" }
+            ]
+        },
+        "act2_elite_hanjiro": {
+            name: "人斬り半次郎 (桐野利秋)",
+            maxHp: 125,
+            isElite: true,
+            sprite: "izo",
+            faction: "tobaku",
+            intents: [
+                { type: "attack", damage: 25, desc: "薬丸自顕流・電光初太刀" },
+                { type: "attack", damage: 13, times: 3, desc: "鬼気迫る怒涛乱撃" },
+                { type: "buff", strength: 5, desc: "隼人の戦慄雄叫び" },
+                { type: "attack", damage: 35, desc: "天誅斬滅の一刀" }
             ]
         },
         "act2_boss_katamori": {
             name: "会津藩主・松平容保",
-            maxHp: 190,
+            maxHp: 200,
             isBoss: true,
             sprite: "katamori_boss",
+            faction: "sabaku",
             intents: [
-                { type: "defend", shield: 22, desc: "会津魂の盾" },
-                { type: "attack", damage: 22, desc: "白虎隊斉射" },
-                { type: "buff", strength: 3, desc: "死守の命" },
-                { type: "attack", damage: 34, desc: "義理不抜の猛撃" }
+                { type: "defend", shield: 24, desc: "会津魂の盾" },
+                { type: "attack", damage: 24, desc: "白虎隊斉射" },
+                { type: "buff", strength: 4, desc: "死守の命" },
+                { type: "attack", damage: 36, desc: "義理不抜の猛撃" }
             ]
         },
         "act2_boss_saigo": {
             name: "薩摩軍総督・西郷隆盛",
-            maxHp: 200,
+            maxHp: 210,
             isBoss: true,
             sprite: "saigo_boss",
+            faction: "tobaku",
             intents: [
-                { type: "attack", damage: 24, desc: "薬丸自顕流・初太刀" },
-                { type: "defend", shield: 20, desc: "薩摩隼人の気迫" },
-                { type: "attack", damage: 36, desc: "桜島大噴火撃" },
-                { type: "buff", strength: 4, desc: "敬天愛人" }
+                { type: "attack", damage: 26, desc: "薬丸自顕流・初太刀" },
+                { type: "defend", shield: 22, desc: "薩摩隼人の気迫" },
+                { type: "attack", damage: 38, desc: "桜島大噴火撃" },
+                { type: "buff", strength: 5, desc: "敬天愛人" }
             ]
         },
 
-        // ACT 3: 江戸城 / 京都御所 決戦
+        // ==========================================
+        // 終幕：天下分け目の決戦（通常4体、エリート2体、最終ボス2体）
+        // ==========================================
+        "act3_normal_shogitai": {
+            name: "上野彰義隊決死隊",
+            maxHp: 85,
+            sprite: "ronin",
+            faction: "sabaku",
+            intents: [
+                { type: "attack", damage: 24, desc: "命知らずの突撃" },
+                { type: "defend", shield: 22, desc: "寛永寺山門防柵" },
+                { type: "attack", damage: 14, times: 2, desc: "徳川恩顧の怨嗟刃" },
+                { type: "attack", damage: 32, desc: "殉節の決死撃" }
+            ]
+        },
+        "act3_normal_ouetsu": {
+            name: "奥羽越列藩同盟精鋭",
+            maxHp: 90,
+            sprite: "mimarigumi",
+            faction: "sabaku",
+            intents: [
+                { type: "attack", damage: 22, desc: "東北武士の剛剣" },
+                { type: "defend", shield: 26, desc: "同盟軍の重盾陣" },
+                { type: "attack", damage: 9, times: 3, desc: "河井継之助の機関砲斉射" },
+                { type: "attack", damage: 28, desc: "不屈の雪国進軍" }
+            ]
+        },
+        "act3_normal_shinseifu": {
+            name: "新政府軍電撃隊",
+            maxHp: 88,
+            sprite: "shinsiki",
+            faction: "tobaku",
+            intents: [
+                { type: "attack", damage: 20, desc: "官軍怒涛の突進" },
+                { type: "attack", damage: 15, times: 2, desc: "スナイドル後装銃斉射" },
+                { type: "defend", shield: 24, desc: "錦旗親衛陣" },
+                { type: "attack", damage: 30, desc: "王政復古の進撃" }
+            ]
+        },
+        "act3_normal_armstrong": {
+            name: "アームストロング砲兵隊",
+            maxHp: 80,
+            sprite: "shinsiki",
+            intents: [
+                { type: "defend", shield: 25, desc: "照準固定・弾薬装填" },
+                { type: "attack", damage: 16, desc: "護衛部隊の牽制散弾" },
+                { type: "attack", damage: 12, times: 2, desc: "旋回榴弾支援射撃" },
+                { type: "attack", damage: 42, desc: "アームストロング巨砲炸裂！" }
+            ]
+        },
+        "act3_elite_battotai": {
+            name: "警視抜刀隊指揮官",
+            maxHp: 150,
+            isElite: true,
+            sprite: "izo",
+            faction: "tobaku",
+            intents: [
+                { type: "attack", damage: 18, times: 2, desc: "神速の二刀斬撃" },
+                { type: "buff", strength: 6, desc: "示現の呼吸・殺気研磨" },
+                { type: "defend", shield: 30, desc: "達人の刀受け・見切り" },
+                { type: "attack", damage: 44, desc: "奥義・天下無双神速居合" }
+            ]
+        },
+        "act3_elite_sagawa": {
+            name: "鬼神・佐川官兵衛",
+            maxHp: 160,
+            isElite: true,
+            sprite: "serizawa",
+            faction: "sabaku",
+            intents: [
+                { type: "attack", damage: 28, desc: "豪刀・鬼の一撃" },
+                { type: "buff", strength: 4, desc: "血塗れの不退転" },
+                { type: "attack", damage: 14, times: 3, desc: "狂乱の怒号三連刃" },
+                { type: "attack", damage: 38, desc: "会津魂・散華の突撃" }
+            ]
+        },
         "act3_final_yoshinobu": {
             name: "征夷大将軍・徳川慶喜",
-            maxHp: 285,
+            maxHp: 300,
             isFinalBoss: true,
             sprite: "yoshinobu_boss",
+            faction: "sabaku",
             intents: [
-                { type: "defend", shield: 25, desc: "徳川三百年の方陣" },
-                { type: "attack", damage: 26, desc: "幕府新鋭砲兵斉射" },
-                { type: "curse", curseId: "curse_extraterritoriality", damage: 13, desc: "列強外交の重圧" },
-                { type: "attack", damage: 40, desc: "双極の終焉・葵の裁き" }
+                { type: "defend", shield: 28, desc: "徳川三百年の方陣" },
+                { type: "attack", damage: 28, desc: "幕府新鋭砲兵斉射" },
+                { type: "curse", curseId: "curse_extraterritoriality", damage: 15, desc: "列強外交の重圧" },
+                { type: "attack", damage: 44, desc: "双極の終焉・葵の裁き" }
             ]
         },
         "act3_final_kangun": {
             name: "新政府官軍総司令部",
-            maxHp: 295,
+            maxHp: 310,
             isFinalBoss: true,
             sprite: "kangun_boss",
+            faction: "tobaku",
             intents: [
-                { type: "attack", damage: 28, desc: "錦旗の下での総進軍" },
-                { type: "defend", shield: 28, desc: "御所親衛陣" },
-                { type: "buff", strength: 5, desc: "討幕の宣誓" },
-                { type: "attack", damage: 42, desc: "新時代への鉄槌" }
+                { type: "attack", damage: 30, desc: "錦旗の下での総進軍" },
+                { type: "defend", shield: 30, desc: "御所親衛陣" },
+                { type: "buff", strength: 6, desc: "討幕の宣誓" },
+                { type: "attack", damage: 45, desc: "新時代への鉄槌" }
             ]
         }
     },
