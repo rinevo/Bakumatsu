@@ -1766,13 +1766,13 @@ body {
     background-repeat: no-repeat;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 24px 0 40px 0;
+    justify-content: center;
+    padding: 24px 0;
     box-sizing: border-box;
 }
 
 .shop-wrapper {
-    margin: 0 auto;
+    margin: auto;
     width: 90%;
     max-width: 1100px;
     background: rgba(18, 21, 28, 0.95);
@@ -2276,11 +2276,20 @@ body {
 /* 縦の長さが短い画面、またはスマートフォン・タブレット表示時：
    画面上下中央揃えによる上部（ヘッダー下）の隠れを防止し、上寄せで表示する */
 @media (max-height: 760px), (max-width: 768px) {
-    #screen-title {
+    #screen-title,
+    #screen-shop,
+    #screen-rest,
+    #screen-event,
+    #screen-gamewin,
+    #screen-gameover {
         justify-content: flex-start !important;
         padding: 16px 0 36px 0 !important;
     }
-    .title-wrapper {
+    .title-wrapper,
+    .shop-wrapper,
+    .rest-wrapper,
+    .event-parchment-box,
+    .result-box {
         margin: 0 auto !important;
     }
 }
@@ -2472,6 +2481,26 @@ body {
     .faction-cards-grid {
         flex-direction: column;
         gap: 14px;
+    }
+
+    /* 商人（ショップ）画面のスマホ向け最適化 */
+    .shop-wrapper {
+        padding: 16px 12px;
+        width: 94%;
+    }
+    .shop-sections-grid {
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    /* 休息（休憩）画面のスマホ向け最適化 */
+    .rest-wrapper {
+        padding: 20px 14px;
+        width: 94%;
+    }
+    .rest-choices-grid {
+        flex-direction: column;
+        gap: 12px;
     }
 }
 
