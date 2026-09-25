@@ -10,6 +10,7 @@ class BakumatsuApp {
         this.maxHp = 75;
         this.gold = 100;
         this.imperialGauge = 0; // 0% 〜 100%
+        this.publicOpinion = -25; // 世論メーター (-100 佐幕極限 〜 +100 討幕極限, 初期値: 佐幕寄り -25%)
         this.deck = [];
         this.relics = [];
         this.currentTrend = null;
@@ -306,6 +307,7 @@ class BakumatsuApp {
 
         this.faction = faction;
         this.imperialGauge = 0;
+        this.publicOpinion = -25; // 幕開けは佐幕優勢（-25%）からスタート
         this.relics = [];
         this.nextBattleStrengthBuff = 0;
 
@@ -422,6 +424,52 @@ class BakumatsuApp {
         // 100%植民地化ゲームオーバー
         if (this.imperialGauge >= 100) {
             this.handleGameOver("列強の要求に屈し、関税自主権および主権を完全喪失…日本は保護領（植民地）と化した…");
+        }
+    }
+
+    modifyPublicOpinion(delta) {
+        const prevPhase = this.getPublicOpinionPhase();
+        this.publicOpinion = Math.max(-100, Math.min(100, this.publicOpinion + delta));
+        const newPhase = this.getPublicOpinionPhase();
+
+        // フェーズが変動した場合の効果音や演出
+        if (prevPhase.id !== newPhase.id) {
+            if (window.soundSystem) {
+                if (newPhase.id === 'bakui_gogo' || newPhase.id === 'kaiten_kangun') {
+                    window.soundSystem.playTaiko && window.soundSystem.playTaiko(true);
+                } else {
+                    window.soundSystem.playKoto && window.soundSystem.playKoto();
+                }
+            }
+        }
+
+        this.ui.updateHeader();
+    }
+
+    getPublicOpinionPhase() {
+        if (typeof GAME_DATA === 'undefined' || !GAME_DATA.opinionPhases) {
+            return { id: "tenka_konmei", name: "天下混迷", subTitle: "情勢拮抗", min: -19, max: 19, badgeClass: "opinion-phase-neutral", color: "#d69e2e", desc: "" };
+        }
+        return GAME_DATA.opinionPhases.find(p => this.publicOpinion >= p.min && this.publicOpinion <= p.max) || GAME_DATA.opinionPhases[2];
+    }
+
+    getFactionSituation() {
+        // 討幕派: 正が有利、負が不利
+        // 佐幕派: 負が有利、正が不利
+        const op = this.publicOpinion;
+        if (this.faction === 'tobaku') {
+            if (op >= 50) return 'super_advantage';     // 絶大優勢（回天官軍）
+            if (op >= 20) return 'advantage';           // やや優勢（討幕高揚）
+            if (op >= -19) return 'neutral';            // 拮抗（天下混迷）
+            if (op >= -49) return 'disadvantage';       // やや劣勢（佐幕優勢）
+            return 'super_disadvantage';                // 強烈劣勢（幕威轟々）
+        } else {
+            // 佐幕派
+            if (op <= -50) return 'super_advantage';    // 絶大優勢（幕威轟々）
+            if (op <= -20) return 'advantage';          // やや優勢（佐幕優勢）
+            if (op <= 19) return 'neutral';             // 拮抗（天下混迷）
+            if (op <= 49) return 'disadvantage';        // やや劣勢（討幕高揚）
+            return 'super_disadvantage';                // 強烈劣勢（回天官軍）
         }
     }
 
@@ -615,6 +663,7 @@ class BakumatsuApp {
                 maxHp: this.maxHp,
                 gold: this.gold,
                 imperialGauge: this.imperialGauge,
+                publicOpinion: typeof this.publicOpinion === 'number' ? this.publicOpinion : -25,
                 deck: [...this.deck],
                 relics: [...this.relics],
                 trendId: this.currentTrend ? this.currentTrend.id : null,
@@ -649,6 +698,7 @@ class BakumatsuApp {
             this.maxHp = data.maxHp;
             this.gold = data.gold;
             this.imperialGauge = data.imperialGauge || 0;
+            this.publicOpinion = typeof data.publicOpinion === 'number' ? data.publicOpinion : -25;
             this.deck = Array.isArray(data.deck) ? [...data.deck] : [];
             this.relics = Array.isArray(data.relics) ? [...data.relics] : [];
             this.nextBattleStrengthBuff = data.nextBattleStrengthBuff || 0;

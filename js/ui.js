@@ -19,6 +19,7 @@ class UIManager {
         const imperialFill = document.getElementById('header-imperial-fill');
         const imperialText = document.getElementById('header-imperial-text');
         const trendBadge = document.getElementById('header-trend-badge');
+        const menuTrendBadge = document.getElementById('menu-trend-badge');
 
         if (hpBar) {
             const hpRatio = Math.max(0, Math.min(1, this.app.hp / this.app.maxHp));
@@ -58,21 +59,51 @@ class UIManager {
             }
         }
 
-        // 世論（トレンド）
-        const menuTrendBadge = document.getElementById('menu-trend-badge');
-        if (this.app.currentTrend) {
-            const trendClass = `trend-badge ${this.app.currentTrend.badgeClass}`;
-            const trendText = `世論: ${this.app.currentTrend.name}`;
-            const trendTitle = this.app.currentTrend.desc;
+        // 世論動乱（天下の大勢・天秤メーター）
+        const opinionPointer = document.getElementById('header-opinion-pointer');
+        const opinionPhaseText = document.getElementById('header-opinion-phase-text');
+        const opinionContainer = document.getElementById('header-opinion-container');
+        if (typeof this.app.publicOpinion === 'number') {
+            const phase = this.app.getPublicOpinionPhase();
+            const situation = this.app.getFactionSituation();
+            const sign = this.app.publicOpinion > 0 ? '+' : '';
+            const leftPercent = Math.max(0, Math.min(100, ((this.app.publicOpinion + 100) / 200) * 100));
+
+            if (opinionPointer) {
+                opinionPointer.style.left = `${leftPercent}%`;
+                if (situation === 'super_disadvantage') {
+                    opinionPointer.classList.add('danger-pulse');
+                } else {
+                    opinionPointer.classList.remove('danger-pulse');
+                }
+            }
+
+            if (opinionPhaseText) {
+                opinionPhaseText.textContent = `【世論：${phase.name} (${sign}${this.app.publicOpinion}%)】`;
+                opinionPhaseText.style.color = phase.color || '#dfb15b';
+            }
+
+            if (opinionContainer) {
+                let situationDesc = "";
+                if (situation === 'super_advantage') situationDesc = "【絶大優勢】全攻撃+4、開幕防+10、敵士気動揺、商人20%引、勝利小判+25両";
+                else if (situation === 'advantage') situationDesc = "【やや優勢】全攻撃+2、開幕防+5、商人10%引、勝利小判+10両";
+                else if (situation === 'neutral') situationDesc = "【情勢拮抗】シールド獲得時+1、標準相場";
+                else if (situation === 'disadvantage') situationDesc = "【やや劣勢】敵剛力+1、商人10%高騰";
+                else if (situation === 'super_disadvantage') situationDesc = "🚨【孤立無援・極度の不利】毎ターン手札-1枚、敵剛力+4、敵開幕防+20、開幕脱力2、商人35%高騰！";
+
+                opinionContainer.title = `世論動乱（天下の大勢）: ${phase.name} (${sign}${this.app.publicOpinion}%)\n${phase.desc}\n自陣営状況: ${situationDesc}`;
+            }
+
+            // トレンドバッジ（旧トレンド表示スロットにも世論フェーズを連動）
             if (trendBadge) {
-                trendBadge.className = trendClass;
-                trendBadge.textContent = trendText;
-                trendBadge.title = trendTitle;
+                trendBadge.className = `trend-badge ${phase.badgeClass}`;
+                trendBadge.textContent = `天下の大勢: ${phase.name}`;
+                trendBadge.title = `${phase.desc}`;
             }
             if (menuTrendBadge) {
-                menuTrendBadge.className = trendClass;
-                menuTrendBadge.textContent = trendText;
-                menuTrendBadge.title = trendTitle;
+                menuTrendBadge.className = `trend-badge ${phase.badgeClass}`;
+                menuTrendBadge.textContent = `天下の大勢: ${phase.name} (${sign}${this.app.publicOpinion}%)`;
+                menuTrendBadge.title = `${phase.desc}`;
             }
         }
 
@@ -629,8 +660,19 @@ class UIManager {
                 const canChoose = choice.canChoose ? choice.canChoose(this.app) : true;
                 btn.disabled = !canChoose;
 
+                let opinionBadgeHtml = '';
+                if (typeof choice.opinionChange === 'number') {
+                    if (choice.opinionChange > 0) {
+                        opinionBadgeHtml = `<span class="badge-opinion badge-opinion-tobaku">🔴 世論: 討幕+${choice.opinionChange}%</span>`;
+                    } else if (choice.opinionChange < 0) {
+                        opinionBadgeHtml = `<span class="badge-opinion badge-opinion-sabaku">🔵 世論: 佐幕+${Math.abs(choice.opinionChange)}%</span>`;
+                    } else {
+                        opinionBadgeHtml = `<span class="badge-opinion badge-opinion-neutral">⚖️ 世論: 変動なし</span>`;
+                    }
+                }
+
                 btn.innerHTML = `
-                    <div class="choice-text">${choice.text}</div>
+                    <div class="choice-text">${opinionBadgeHtml}${choice.text}</div>
                     <div class="choice-effect">${choice.effectDesc}</div>
                 `;
 
@@ -639,6 +681,9 @@ class UIManager {
                         choice.action(this.app);
                     } catch (err) {
                         console.error("Event choice execution error:", err);
+                    }
+                    if (typeof choice.opinionChange === 'number' && choice.opinionChange !== 0) {
+                        this.app.modifyPublicOpinion(choice.opinionChange);
                     }
                     if (window.soundSystem && window.soundSystem.playTaiko) {
                         window.soundSystem.playTaiko(false);

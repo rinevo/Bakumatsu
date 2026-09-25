@@ -24,7 +24,7 @@
 
     --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.6);
     --shadow-gold: 0 0 16px rgba(223, 177, 91, 0.45);
-    --header-height: 60px;
+    --header-height: 84px;
 }
 
 * {
@@ -82,14 +82,14 @@ body {
 .main-header {
     flex-shrink: 0;
     width: 100%;
-    height: var(--header-height, 60px);
+    height: var(--header-height, 84px);
     background: linear-gradient(180deg, rgba(16, 28, 48, 0.96) 0%, rgba(10, 18, 32, 0.92) 100%);
     border-bottom: 2px solid #204068;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
     display: none;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24px;
+    padding: 6px 20px;
     z-index: 1000;
     box-sizing: border-box;
     touch-action: none;
@@ -102,8 +102,13 @@ body {
 }
 
 /* 初期画面でのヘッダー表示スタイル（青色の帯内に音声ボタンのみ表示） */
+.main-header.title-mode {
+    height: 60px;
+    justify-content: flex-end;
+}
 .main-header.title-mode .header-left,
 .main-header.title-mode .header-center,
+.main-header.title-mode .header-right-meta,
 .main-header.title-mode #header-trend-badge,
 .main-header.title-mode #header-relic-wrapper,
 .main-header.title-mode #btn-view-deck {
@@ -117,9 +122,15 @@ body {
 .main-header.title-mode .header-desktop-actions {
     display: flex !important;
 }
-
-.main-header.title-mode {
-    justify-content: flex-end;
+.main-header.title-mode .audio-controls-vertical {
+    flex-direction: row;
+    gap: 8px;
+}
+.main-header.title-mode .btn-audio-stacked {
+    height: 36px;
+    padding: 6px 14px;
+    font-size: 13px;
+    min-width: auto;
 }
 
 /* ヘッダー内の全テキスト折り返し防止 */
@@ -127,29 +138,96 @@ body {
 .header-left,
 .header-center,
 .header-right,
-.header-stat-box,
-.imperial-header {
+.header-stat-group,
+.header-stat-row,
+.imperial-header,
+.opinion-header {
     white-space: nowrap;
 }
 
+/* ヘッダー左側：陣営バッジ ＆ 縦2段ステータス（体力 / 防・金） */
 .header-left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     flex-shrink: 0;
 }
+.header-stat-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+}
+.header-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+.header-stat-row.sub-row {
+    gap: 12px;
+}
+.header-stat-inline {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ヘッダー右側：世論＆遺物（縦スタック） ＆ アクションボタングループ */
 .header-right {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-shrink: 0;
 }
+.header-right-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    justify-content: center;
+}
+.header-right-meta .trend-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    line-height: 1.2;
+}
 
 /* 通常（PC）表示アクションボタン群 */
 .header-desktop-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+}
+.btn-deck-compact {
+    height: 62px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: normal;
+    text-align: center;
+    border-radius: 4px;
+    min-width: 60px;
+}
+.audio-controls-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.btn-audio-stacked {
+    height: 29px;
+    padding: 2px 8px;
+    font-size: 11px;
+    line-height: 1;
+    border-radius: 4px;
+    min-width: 82px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 狭小画面用プルダウンメニュー */
@@ -435,7 +513,12 @@ body {
 .header-center {
     flex: 1;
     max-width: 480px;
-    margin: 0 24px;
+    margin: 0 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
 }
 
 /* 陣営バッジ */
@@ -482,10 +565,10 @@ body {
     color: var(--color-gold);
 }
 .header-bar {
-    width: 110px;
-    height: 12px;
+    width: 95px;
+    height: 10px;
     background: #252830;
-    border-radius: 6px;
+    border-radius: 5px;
     overflow: hidden;
     border: 1px solid #454955;
 }
@@ -531,9 +614,9 @@ body {
 /* 列強介入メーター */
 .imperial-container {
     width: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 4px 10px;
-    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 3px 8px;
+    border-radius: 5px;
     border: 1px solid #4a3e2c;
 }
 .imperial-header {
@@ -568,7 +651,7 @@ body {
 
 .imperial-bar-bg {
     width: 100%;
-    height: 10px;
+    height: 8px;
     background: #222;
     border-radius: 4px;
     overflow: hidden;
@@ -579,6 +662,132 @@ body {
     width: 0%;
     background-color: var(--color-gold);
     transition: width 0.4s ease, background-color 0.4s ease;
+}
+
+/* 世論天秤メーター（天下の大勢） */
+.opinion-container {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid #4a3e2c;
+    margin-top: 0;
+    position: relative;
+}
+.opinion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+.opinion-side-label {
+    font-size: 10px;
+    font-weight: bold;
+}
+.opinion-side-label.sabaku {
+    color: #63b3ed;
+}
+.opinion-side-label.tobaku {
+    color: #fc8181;
+}
+.opinion-phase-text {
+    font-family: var(--font-sans);
+    font-weight: bold;
+    font-size: 11px;
+    color: #dfb15b;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    transition: color 0.3s ease;
+}
+.opinion-bar-track {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #1a365d 0%, #2c5282 25%, #744210 45%, #d69e2e 50%, #744210 55%, #742a2a 75%, #9b2c2c 100%);
+    border-radius: 4px;
+    position: relative;
+    border: 1px solid #333;
+    overflow: visible;
+}
+.opinion-center-marker {
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    bottom: -2px;
+    width: 2px;
+    background: #fff;
+    transform: translateX(-50%);
+    opacity: 0.7;
+    z-index: 1;
+}
+.opinion-pointer {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    background: #ffd700;
+    border: 2px solid #222;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.9);
+    transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 2;
+}
+.opinion-pointer.danger-pulse {
+    background: #ff3333;
+    box-shadow: 0 0 10px #ff3333;
+    animation: opinion-alert-pulse 0.6s infinite alternate;
+}
+@keyframes opinion-alert-pulse {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    100% { transform: translate(-50%, -50%) scale(1.35); }
+}
+
+/* 選択肢ボタン内の世論変動バッジ */
+.badge-opinion {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.badge-opinion-tobaku {
+    background: rgba(197, 48, 48, 0.25);
+    border: 1px solid #e53e3e;
+    color: #feb2b2;
+}
+.badge-opinion-sabaku {
+    background: rgba(43, 108, 176, 0.25);
+    border: 1px solid #3182ce;
+    color: #bee3f8;
+}
+.badge-opinion-neutral {
+    background: rgba(214, 158, 46, 0.2);
+    border: 1px solid #d69e2e;
+    color: #fefcbf;
+}
+
+/* 世論フェーズ別スタイル */
+.opinion-phase-bakui {
+    border-color: #2b6cb0 !important;
+    color: #bee3f8 !important;
+}
+.opinion-phase-sabaku {
+    border-color: #319795 !important;
+    color: #b2f5ea !important;
+}
+.opinion-phase-neutral {
+    border-color: #d69e2e !important;
+    color: #fefcbf !important;
+}
+.opinion-phase-tobaku {
+    border-color: #dd6b20 !important;
+    color: #feebc8 !important;
+}
+.opinion-phase-kangun {
+    border-color: #e53e3e !important;
+    color: #fed7d7 !important;
 }
 
 /* 世論バッジ */
@@ -2892,15 +3101,15 @@ body {
 /* 画面幅が狭い場合（Android / スマートフォン等）の省スペース化 */
 @media (max-width: 640px) {
     :root {
-        --header-height: 52px;
+        --header-height: 76px;
     }
     .main-header {
-        padding: 0 8px;
-        height: var(--header-height, 52px);
+        padding: 4px 8px;
+        height: var(--header-height, 76px);
     }
     .header-left {
         gap: 6px;
-        font-size: 12px;
+        font-size: 11px;
         flex-shrink: 1;
         min-width: 0;
     }
@@ -2924,16 +3133,18 @@ body {
     .stat-label-short {
         display: inline !important;
     }
-    .header-stat-box {
+    .header-stat-group {
+        gap: 2px;
+    }
+    .header-stat-row {
         gap: 4px;
-        font-size: 12px;
-        white-space: nowrap;
+        font-size: 11px;
     }
     /* スマホ画面でも体力メーター（バー）を維持表示 */
-    .header-stat-box .header-bar {
+    .header-stat-row .header-bar {
         display: block;
-        width: 55px;
-        height: 10px;
+        width: 50px;
+        height: 8px;
     }
     #header-hp-text {
         display: none !important;
@@ -2941,10 +3152,14 @@ body {
 
     /* 介入メーターはタイトルを非表示にしてアイコン＋数値バーのみ */
     .header-center {
-        margin: 0 8px;
+        margin: 0 6px;
         min-width: 65px;
-        max-width: 140px;
+        max-width: 160px;
         flex-shrink: 1;
+        gap: 2px;
+    }
+    .imperial-container {
+        padding: 2px 6px;
     }
     .imperial-title {
         display: none !important;
@@ -2954,7 +3169,27 @@ body {
         margin-right: 4px;
     }
     .imperial-percent {
-        font-size: 11px;
+        font-size: 10px;
+    }
+
+    .opinion-container {
+        padding: 2px 6px;
+        margin-top: 0;
+    }
+    .opinion-side-label {
+        display: none !important;
+    }
+    .opinion-phase-text {
+        font-size: 10px;
+        width: 100%;
+        text-align: center;
+    }
+    .opinion-bar-track {
+        height: 6px;
+    }
+    .opinion-pointer {
+        width: 10px;
+        height: 10px;
     }
 
     /* 右端のプルダウンメニューボタンが絶対に画面外に押し出されないよう右端固定 */

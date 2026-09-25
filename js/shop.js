@@ -39,6 +39,9 @@ class ShopSystem {
         if (this.app.hasRelic("wado_kaichin")) discount *= 0.75;
         if (this.app.hasRelic("dutch_lexicon")) discount *= 0.80;
 
+        // 世論（天下の大勢）による価格補正
+        discount *= this.getOpinionPriceMultiplier();
+
         this.shopCards = selectedCards.map(cardId => {
             const c = GAME_DATA.cards[cardId];
             let basePrice = 50;
@@ -144,10 +147,21 @@ class ShopSystem {
         if (this.app.saveRun) this.app.saveRun('shop');
     }
 
+    getOpinionPriceMultiplier() {
+        if (!this.app || !this.app.getFactionSituation) return 1.0;
+        const sit = this.app.getFactionSituation();
+        if (sit === 'super_advantage') return 0.80; // 20%割引（民衆・豪商の全面支援）
+        if (sit === 'advantage') return 0.90;       // 10%割引
+        if (sit === 'disadvantage') return 1.10;    // 10%高騰（警戒・物価高）
+        if (sit === 'super_disadvantage') return 1.35; // 35%高騰（逆賊への物資遮断・買い占め）
+        return 1.0;
+    }
+
     removeCardInShop() {
         let discount = 1.0;
         if (this.app.hasRelic("wado_kaichin")) discount *= 0.75;
         if (this.app.hasRelic("dutch_lexicon")) discount *= 0.80;
+        discount *= this.getOpinionPriceMultiplier();
         const actualPrice = Math.round(this.cardRemovalPrice * discount);
 
         if (this.app.gold < actualPrice) {

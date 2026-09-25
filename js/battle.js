@@ -79,6 +79,10 @@ class BattleSystem {
             damage_reduction: 0,
             auto_gatling: 0
         };
+        this.playerDebuffs = {
+            weak: 0,
+            bleed: 0
+        };
         this.app.nextBattleStrengthBuff = 0;
 
         this.enemyStatus = {
@@ -132,6 +136,61 @@ class BattleSystem {
                 r.onBattleStart(this);
             }
         });
+
+        // ==========================================
+        // 世論（天下の大勢）陣営優劣モディファイア
+        // ==========================================
+        const situation = this.app.getFactionSituation ? this.app.getFactionSituation() : 'neutral';
+        const phase = this.app.getPublicOpinionPhase ? this.app.getPublicOpinionPhase() : null;
+
+        if (situation === 'super_disadvantage') {
+            // 🚨 強烈な劣勢（孤立無援・逆賊）: 手札-1枚、敵剛力+4、敵開幕シールド20、プレイヤー脱力2
+            this.handDrawBonus -= 1;
+            this.enemy.buffStrength = (this.enemy.buffStrength || 0) + 4;
+            this.enemy.shield = 20;
+            this.playerDebuffs.weak = 2;
+            if (window.particleSystem && window.particleSystem.createFloatingText) {
+                setTimeout(() => {
+                    window.particleSystem.createFloatingText("🚨【孤立無援】世論極限劣勢！手札-1 / 敵剛力+4 / 敵防20 / 脱力2", window.innerWidth / 2, window.innerHeight * 0.4, "#e53e3e");
+                }, 500);
+            }
+            if (window.soundSystem && window.soundSystem.playTaiko) {
+                window.soundSystem.playTaiko(true);
+            }
+        } else if (situation === 'disadvantage') {
+            // ⚠️ やや劣勢（逆風）: 敵剛力+1
+            this.enemy.buffStrength = (this.enemy.buffStrength || 0) + 1;
+            if (window.particleSystem && window.particleSystem.createFloatingText) {
+                setTimeout(() => {
+                    window.particleSystem.createFloatingText("⚠️【世論逆風】敵の士気上昇（剛力+1）", window.innerWidth / 2, window.innerHeight * 0.4, "#dd6b20");
+                }, 500);
+            }
+        } else if (situation === 'neutral') {
+            // ⚖️ 拮抗（天下混迷・公武融和）: シールド獲得時+1
+            this.shieldBonus += 1;
+        } else if (situation === 'advantage') {
+            // ✨ やや優勢（追い風）: プレイヤー剛力+2、開幕シールド+5
+            this.applyPlayerBuff('strength', 2);
+            this.playerShield += 5;
+            if (window.particleSystem && window.particleSystem.createFloatingText) {
+                setTimeout(() => {
+                    window.particleSystem.createFloatingText("✨【世論追い風】大義の士気（剛力+2 / 防+5）", window.innerWidth / 2, window.innerHeight * 0.4, "#319795");
+                }, 500);
+            }
+        } else if (situation === 'super_advantage') {
+            // 🌟 絶大優勢（大義名分・官軍・幕威轟々）: プレイヤー剛力+4、開幕シールド+10、敵士気動揺（脱力2）
+            this.applyPlayerBuff('strength', 4);
+            this.playerShield += 10;
+            this.enemyStatus.weak = 2;
+            if (window.particleSystem && window.particleSystem.createFloatingText) {
+                setTimeout(() => {
+                    window.particleSystem.createFloatingText("🌟【大義名分】天下の大勢を掌握！（剛力+4 / 防+10）", window.innerWidth / 2, window.innerHeight * 0.4, "#d69e2e");
+                }, 500);
+            }
+            if (window.soundSystem && window.soundSystem.playKoto) {
+                window.soundSystem.playKoto();
+            }
+        }
 
         // 最初の敵Intent（手札からカード選定）
         this.pickEnemyIntent();
@@ -248,8 +307,8 @@ class BattleSystem {
             }
         });
 
-        // カードドロー (基本5枚 + ボーナス)
-        const drawCount = 5 + this.handDrawBonus;
+        // カードドロー (基本5枚 + ボーナス / 強劣勢時は-1枚のペナルティ)
+        const drawCount = Math.max(2, 5 + this.handDrawBonus);
         this.drawCards(drawCount);
 
         window.soundSystem.playHyoshigi();
@@ -339,6 +398,10 @@ class BattleSystem {
             // 連鎖ボーナス（3連鎖目以降少しダメージUP）
             if (this.comboCount >= 3) {
                 totalAttack += Math.floor((this.comboCount - 2) * 1.5);
+            }
+            // プレイヤー脱力（Weak）デバフ：与ダメージ25%減
+            if (this.playerDebuffs && this.playerDebuffs.weak > 0) {
+                totalAttack = Math.floor(totalAttack * 0.75);
             }
             this.dealDamageToEnemy(totalAttack);
         }
@@ -626,6 +689,11 @@ class BattleSystem {
             this.app.currentTrend.onTurnEnd(this);
         }
 
+        // プレイヤーのデバフ持続ターン減衰
+        if (this.playerDebuffs && this.playerDebuffs.weak > 0) {
+            this.playerDebuffs.weak--;
+        }
+
         // 5. 手札を捨て札へ
         this.discardEntireHand();
 
@@ -806,6 +874,14 @@ class BattleSystem {
 
         if (this.app.hasRelic("dutch_lexicon")) {
             goldEarned += 15;
+        }
+
+        // 世論（天下の大勢）優勢による民衆・豪商からの軍資金支援
+        const victorySituation = this.app.getFactionSituation ? this.app.getFactionSituation() : 'neutral';
+        if (victorySituation === 'super_advantage') {
+            goldEarned += 25; // 絶大優勢ボーナス
+        } else if (victorySituation === 'advantage') {
+            goldEarned += 10; // やや優勢ボーナス
         }
 
         this.app.gold += goldEarned;

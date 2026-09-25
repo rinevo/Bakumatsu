@@ -13,21 +13,28 @@
     <!-- メイン常設ヘッダーバー -->
     <header id="main-header" class="main-header">
         <div class="header-left">
-            <div id="header-faction-badge" class="faction-badge"><span class="badge-full">陣営未選択</span><span class="badge-short">未選択</span></div>
-            <div class="header-stat-box">
-                <span class="stat-label"><span class="stat-label-full">体力</span><span class="stat-label-short">体</span></span>
-                <div class="header-bar hp-bar-bg">
-                    <div id="header-hp-fill" class="header-bar-fill hp-bar-fill"></div>
+            <div id="header-faction-badge" class="faction-badge">
+                <span class="badge-full">陣営未選択</span><span class="badge-short">未選択</span>
+            </div>
+            <!-- 体力（上段）と防・資金（下段）の縦2段グループ -->
+            <div class="header-stat-group">
+                <div class="header-stat-row hp-row">
+                    <span class="stat-label"><span class="stat-label-full">体力</span><span class="stat-label-short">体</span></span>
+                    <div class="header-bar hp-bar-bg">
+                        <div id="header-hp-fill" class="header-bar-fill hp-bar-fill"></div>
+                    </div>
+                    <span id="header-hp-text" class="stat-value">75 / 75</span>
                 </div>
-                <span id="header-hp-text" class="stat-value">75 / 75</span>
-            </div>
-            <div class="header-stat-box">
-                <span class="stat-label">防</span>
-                <span id="header-shield-text" class="stat-badge-small def">0</span>
-            </div>
-            <div class="header-stat-box">
-                <span class="stat-label"><span class="stat-label-full">資金</span><span class="stat-label-short">金</span></span>
-                <span id="header-gold-text" class="stat-gold">100 両</span>
+                <div class="header-stat-row sub-row">
+                    <div class="header-stat-inline def-item">
+                        <span class="stat-label">防</span>
+                        <span id="header-shield-text" class="stat-badge-small def">0</span>
+                    </div>
+                    <div class="header-stat-inline gold-item">
+                        <span class="stat-label"><span class="stat-label-full">資金</span><span class="stat-label-short">金</span></span>
+                        <span id="header-gold-text" class="stat-gold">100 両</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -35,40 +42,58 @@
             <!-- 列強介入メーター（インペリアル・ゲージ） -->
             <div class="imperial-container">
                 <div class="imperial-header">
-                    <span class="imperial-title">⚠️ <span class="imperial-title-full">列強介入メーター（植民地化リスク）</span><span class="imperial-title-short">列強介入メーター</span></span>
+                    <span class="imperial-title">⚠️ <span class="imperial-title-full">列強介入メーター（植民地化リスク）</span><span class="imperial-title-short">列強介入</span></span>
                     <span id="header-imperial-text" class="imperial-percent">0% / 100%</span>
                 </div>
                 <div class="imperial-bar-bg">
                     <div id="header-imperial-fill" class="imperial-bar-fill"></div>
                 </div>
             </div>
+
+            <!-- 世論動乱天秤メーター（天下の大勢） -->
+            <div class="opinion-container" id="header-opinion-container" title="世論動乱（天下の大勢）：歴史事件の決断により左右に傾斜。敵対世論へ振り切ると手札減や敵剛力など極度の不利に直面！">
+                <div class="opinion-header">
+                    <span class="opinion-side-label sabaku">🔵 佐幕</span>
+                    <span id="header-opinion-phase-text" class="opinion-phase-text">【世論：佐幕優勢 (-25%)】</span>
+                    <span class="opinion-side-label tobaku">討幕 🔴</span>
+                </div>
+                <div class="opinion-bar-track">
+                    <div class="opinion-center-marker"></div>
+                    <div id="header-opinion-pointer" class="opinion-pointer" style="left: 37.5%;"></div>
+                </div>
+            </div>
         </div>
 
         <div class="header-right">
-            <div id="header-trend-badge" class="trend-badge" title="世論トレンド">世論: 平穏</div>
+            <!-- 世論フェーズバッジ＆所持遺物の縦スタック -->
+            <div class="header-right-meta">
+                <div id="header-trend-badge" class="trend-badge" title="世論トレンド">世論: 平穏</div>
 
-            <!-- レリックバッジ＆プルダウンメニュー -->
-            <div class="header-relic-wrapper" id="header-relic-wrapper">
-                <button id="btn-header-relics" class="btn-relic-badge" title="所持遺物一覧を表示" aria-expanded="false">
-                    <span class="relic-badge-icon">🏮</span>
-                    <span id="header-relic-count" class="relic-badge-count">0</span>
-                </button>
-                <div id="header-relic-dropdown" class="header-relic-dropdown" role="menu">
-                    <div class="relic-dropdown-header">
-                        <span>所持遺物</span>
-                        <span id="relic-dropdown-count-badge" class="relic-dropdown-count-badge">0個</span>
-                    </div>
-                    <div id="header-relic-dropdown-list" class="relic-dropdown-list">
-                        <!-- 動的にレリック項目を描画 -->
+                <!-- レリックバッジ＆プルダウンメニュー -->
+                <div class="header-relic-wrapper" id="header-relic-wrapper">
+                    <button id="btn-header-relics" class="btn-relic-badge" title="所持遺物一覧を表示" aria-expanded="false">
+                        <span class="relic-badge-icon">🏮</span>
+                        <span id="header-relic-count" class="relic-badge-count">0</span>
+                    </button>
+                    <div id="header-relic-dropdown" class="header-relic-dropdown" role="menu">
+                        <div class="relic-dropdown-header">
+                            <span>所持遺物</span>
+                            <span id="relic-dropdown-count-badge" class="relic-dropdown-count-badge">0個</span>
+                        </div>
+                        <div id="header-relic-dropdown-list" class="relic-dropdown-list">
+                            <!-- 動的にレリック項目を描画 -->
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 通常表示（幅広画面時）のボタングループ -->
+            <!-- 通常表示（幅広画面時）のボタングループ：縦2段レイアウト -->
             <div class="header-desktop-actions" id="header-desktop-actions">
-                <button id="btn-view-deck" class="btn-wood">📜 帖（山札確認）</button>
-                <button id="btn-toggle-bgm" class="btn-wood" title="BGMの再生/停止">🎵 BGM: 鳴</button>
-                <button id="btn-toggle-se" class="btn-wood" title="効果音の再生/停止">🔊 効果音: 鳴</button>
+                <button id="btn-view-deck" class="btn-wood btn-deck-compact" title="所持デッキ・山札一覧を表示">📜 帖（山札）</button>
+                <div class="audio-controls-vertical">
+                    <button id="btn-toggle-bgm" class="btn-wood btn-audio-stacked" title="BGMの再生/停止">🎵 BGM: 鳴</button>
+                    <button id="btn-toggle-se" class="btn-wood btn-audio-stacked" title="効果音の再生/停止">🔊 SE: 鳴</button>
+                </div>
             </div>
 
             <!-- 狭小画面用プルダウンメニュー（ドロップダウン） -->
