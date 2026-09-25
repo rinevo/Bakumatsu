@@ -1467,12 +1467,7 @@ body {
     transition: all 0.2s ease;
     white-space: nowrap;
     text-align: center;
-}
-.btn-end-turn-full {
-    display: inline-block;
-}
-.btn-end-turn-short {
-    display: none;
+    line-height: 1.25;
 }
 .btn-end-turn:hover {
     background: linear-gradient(180deg, #ab2e23 0%, #5e1610 100%);
@@ -2405,19 +2400,14 @@ body {
         font-size: 11px;
     }
 
-    /* 「太刀を収める（ターン終了）」は「ターン終了」にする */
+    /* ターン終了ボタン（スマホでもフルテキスト「太刀を収める（ターン終了）」を維持） */
     .battle-action-box {
         flex-shrink: 0;
     }
     .btn-end-turn {
-        padding: 8px 12px;
+        padding: 6px 12px;
         font-size: 13px;
-    }
-    .btn-end-turn-full {
-        display: none !important;
-    }
-    .btn-end-turn-short {
-        display: inline-block !important;
+        line-height: 1.2;
     }
 }
 
@@ -2679,7 +2669,8 @@ body {
         font-size: 10px;
     }
     .btn-end-turn {
-        padding: 6px 8px;
-        font-size: 12px;
+        padding: 5px 8px;
+        font-size: 11px;
+        line-height: 1.15;
     }
 }
