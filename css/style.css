@@ -37,7 +37,12 @@
 html {
     width: 100%;
     height: 100%;
+    height: 100dvh;
     overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overscroll-behavior: none;
 }
 
 body {
@@ -46,14 +51,11 @@ body {
     font-family: var(--font-serif);
     overflow: hidden;
     height: 100%;
-    height: 100vh;
     height: 100dvh;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-    padding: 0;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
     background-image: 
@@ -74,7 +76,9 @@ body {
 
 /* --- 上部常設ヘッダー（青色の帯） --- */
 .main-header {
-    flex-shrink: 0; /* Flexbox内で最上部に完全固定・絶対に縮まない */
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
     height: var(--header-height, 60px);
     background: linear-gradient(180deg, rgba(16, 28, 48, 0.96) 0%, rgba(10, 18, 32, 0.92) 100%);
@@ -84,8 +88,11 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
-    z-index: 50;
-    box-sizing: border-box;
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 .main-header.visible {
@@ -448,20 +455,21 @@ body {
 
 /* --- 画面コンテナ --- */
 .game-container {
-    flex: 1;
-    min-height: 0;
     width: 100%;
+    height: 100%;
+    height: 100dvh;
     position: relative;
+    padding-top: var(--header-height, 60px);
     overflow: hidden;
-    padding-top: 0;
 }
 
 .game-screen {
     position: absolute;
-    top: 0;
+    top: var(--header-height, 60px);
     left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% - var(--header-height, 60px));
+    height: calc(100dvh - var(--header-height, 60px));
     display: none;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -477,8 +485,9 @@ body {
    1. タイトル＆陣営選択画面
    ========================================== */
 #screen-title {
-    top: 0;
-    height: 100%;
+    top: var(--header-height, 60px);
+    height: calc(100% - var(--header-height, 60px));
+    height: calc(100dvh - var(--header-height, 60px));
     background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/nippon.jpg');
     background-position: center;
     background-size: cover;
@@ -679,8 +688,9 @@ body {
    2. マップ画面
    ========================================== */
 #screen-map {
-    top: 0;
-    height: 100%;
+    top: var(--header-height, 60px);
+    height: calc(100% - var(--header-height, 60px));
+    height: calc(100dvh - var(--header-height, 60px));
     background-image: linear-gradient(rgba(10, 11, 14, 0.84), rgba(10, 11, 14, 0.95)), url('../img/nippon.jpg');
     background-position: center;
     background-size: cover;
