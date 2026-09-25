@@ -281,8 +281,11 @@ class BakumatsuApp {
             btnRestartWin.addEventListener('click', () => this.switchScreen('screen-title'));
         }
 
-        // ウィンドウリサイズ時のマップ線再描画
+        // ウィンドウリサイズ時のマップ線再描画＆ヘッダー再計算
         window.addEventListener('resize', () => {
+            if (this.ui) {
+                this.ui.updateHeader();
+            }
             const mapScreen = document.getElementById('screen-map');
             if (mapScreen && mapScreen.classList.contains('active')) {
                 this.ui.drawMapConnections();

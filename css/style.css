@@ -618,16 +618,24 @@ body {
     padding: 3px 8px;
     border-radius: 5px;
     border: 1px solid #4a3e2c;
+    container-type: inline-size;
 }
 .imperial-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 11px;
     margin-bottom: 2px;
+    width: 100%;
+    white-space: nowrap;
 }
 .imperial-title {
     color: #f77f00;
     font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 .imperial-title-full {
     display: inline;
@@ -639,7 +647,28 @@ body {
     font-family: var(--font-sans);
     font-weight: bold;
     color: #ffd166;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 6px;
 }
+
+/* メーター枠幅が320pxを下回る時は「列強介入メーター（植民地化リスク）」を省略して「列強介入」を表示 */
+@container (max-width: 320px) {
+    .imperial-title-full {
+        display: none !important;
+    }
+    .imperial-title-short {
+        display: inline !important;
+    }
+}
+
+.imperial-container.compact .imperial-title-full {
+    display: none !important;
+}
+.imperial-container.compact .imperial-title-short {
+    display: inline !important;
+}
+
 .danger-pulse {
     color: #ff3333 !important;
     animation: text-pulse 0.8s infinite alternate;
@@ -673,6 +702,7 @@ body {
     border: 1px solid #4a3e2c;
     margin-top: 0;
     position: relative;
+    container-type: inline-size;
 }
 .opinion-header {
     display: flex;
@@ -680,10 +710,12 @@ body {
     align-items: center;
     font-size: 11px;
     margin-bottom: 2px;
+    width: 100%;
 }
 .opinion-side-label {
     font-size: 10px;
     font-weight: bold;
+    flex-shrink: 0;
 }
 .opinion-side-label.sabaku {
     color: #63b3ed;
@@ -698,6 +730,33 @@ body {
     color: #dfb15b;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     transition: color 0.3s ease;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* メーター枠幅が270pxを下回る時は「佐幕」「討幕」を消して中央テキストのみを中央表示 */
+@container (max-width: 270px) {
+    .opinion-side-label {
+        display: none !important;
+    }
+    .opinion-header {
+        justify-content: center;
+    }
+    .opinion-phase-text {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.opinion-container.compact .opinion-side-label {
+    display: none !important;
+}
+.opinion-container.compact .opinion-header {
+    justify-content: center;
+}
+.opinion-container.compact .opinion-phase-text {
+    width: 100%;
+    text-align: center;
 }
 .opinion-bar-track {
     width: 100%;
@@ -3014,6 +3073,16 @@ body {
     .header-bar {
         width: 80px;
     }
+    .opinion-side-label {
+        display: none !important;
+    }
+    .opinion-header {
+        justify-content: center;
+    }
+    .opinion-phase-text {
+        width: 100%;
+        text-align: center;
+    }
 }
 
 @media (max-width: 900px) {
@@ -3211,11 +3280,11 @@ body {
         display: none !important;
     }
 
-    /* 介入メーターはタイトルを非表示にしてアイコン＋数値バーのみ */
+    /* 介入メーターは画面幅が狭くても短縮タイトル「⚠️ 列強介入」を維持表示 */
     .header-center {
         margin: 0 6px;
-        min-width: 65px;
-        max-width: 160px;
+        min-width: 120px;
+        max-width: 190px;
         flex-shrink: 1;
         gap: 2px;
     }
@@ -3223,11 +3292,18 @@ body {
         padding: 2px 6px;
     }
     .imperial-title {
+        display: inline !important;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+    .imperial-title-full {
         display: none !important;
     }
+    .imperial-title-short {
+        display: inline !important;
+    }
     .imperial-header::before {
-        content: "⚠️";
-        margin-right: 4px;
+        display: none !important;
     }
     .imperial-percent {
         font-size: 10px;
@@ -3406,10 +3482,14 @@ body {
     }
     .header-center {
         margin: 0 4px;
-        min-width: 55px;
+        min-width: 110px;
+        max-width: 170px;
+    }
+    .imperial-title {
+        font-size: 9px;
     }
     .imperial-percent {
-        font-size: 10px;
+        font-size: 9px;
     }
     .btn-header-menu {
         padding: 4px 6px;

@@ -7,6 +7,7 @@ class UIManager {
     constructor(app) {
         this.app = app;
         this.selectedRemovalCallback = null;
+        window.addEventListener('resize', () => this.updateHeader());
     }
 
     // --- 上部ステータスバー更新 ---
@@ -59,6 +60,13 @@ class UIManager {
             }
         }
 
+        const imperialContainer = document.querySelector('.imperial-container');
+        if (imperialContainer) {
+            // メーター枠の幅が狭い場合（320px未満）はコンパクトモードにして「列強介入メーター（植民地化リスク）」を省略
+            const isNarrow = imperialContainer.offsetWidth > 0 && imperialContainer.offsetWidth < 320;
+            imperialContainer.classList.toggle('compact', isNarrow);
+        }
+
         // 世論動乱（天下の大勢・天秤メーター）
         const opinionPointer = document.getElementById('header-opinion-pointer');
         const opinionPhaseText = document.getElementById('header-opinion-phase-text');
@@ -79,11 +87,15 @@ class UIManager {
             }
 
             if (opinionPhaseText) {
-                opinionPhaseText.textContent = `【世論：${phase.name} (${sign}${this.app.publicOpinion}%)】`;
+                opinionPhaseText.textContent = `世論：${phase.name} (${sign}${this.app.publicOpinion}%)`;
                 opinionPhaseText.style.color = phase.color || '#dfb15b';
             }
 
             if (opinionContainer) {
+                // メーター枠の幅が狭い場合（270px未満）はコンパクトモードにして「佐幕」「討幕」を自動非表示
+                const isNarrow = opinionContainer.offsetWidth > 0 && opinionContainer.offsetWidth < 270;
+                opinionContainer.classList.toggle('compact', isNarrow);
+
                 let situationDesc = "";
                 if (situation === 'super_advantage') situationDesc = "【絶大優勢】全攻撃+4、開幕防+10、敵士気動揺、商人20%引、勝利小判+25両";
                 else if (situation === 'advantage') situationDesc = "【やや優勢】全攻撃+2、開幕防+5、商人10%引、勝利小判+10両";
