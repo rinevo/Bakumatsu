@@ -540,7 +540,7 @@ body {
    1. タイトル＆陣営選択画面
    ========================================== */
 #screen-title {
-    background-image: linear-gradient(rgba(10, 11, 14, 0.55), rgba(10, 11, 14, 0.72)), url('../img/nippon.jpg');
+    background-image: linear-gradient(rgba(10, 11, 14, 0.84), rgba(10, 11, 14, 0.95)), url('../img/nippon.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
