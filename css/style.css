@@ -556,7 +556,7 @@ body {
     margin: auto;
     max-width: 900px;
     width: 90%;
-    padding: 40px;
+    padding: 28px 36px;
     background: rgba(14, 16, 21, 0.85);
     border: 2px solid var(--color-border);
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(223, 177, 91, 0.1);
@@ -567,11 +567,11 @@ body {
     color: var(--color-gold);
     letter-spacing: 6px;
     font-size: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .main-title {
-    font-size: 52px;
+    font-size: 48px;
     font-weight: 900;
     letter-spacing: 8px;
     color: var(--color-washi);
@@ -579,7 +579,7 @@ body {
     margin-bottom: 4px;
 }
 .title-sub {
-    font-size: 32px;
+    font-size: 28px;
     display: block;
     color: #dfb15b;
     letter-spacing: 12px;
@@ -590,27 +590,27 @@ body {
     color: #8c8f99;
     letter-spacing: 4px;
     font-size: 14px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     font-family: var(--font-sans);
 }
 
 .title-flavor {
-    font-size: 15px;
+    font-size: 14px;
     color: #b0a89b;
-    line-height: 1.8;
-    margin-bottom: 32px;
+    line-height: 1.7;
+    margin-bottom: 20px;
 }
 
 .select-heading {
-    font-size: 20px;
+    font-size: 19px;
     color: var(--color-gold);
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     letter-spacing: 4px;
 }
 
 .faction-cards-grid {
     display: flex;
-    gap: 28px;
+    gap: 24px;
     justify-content: center;
 }
 
@@ -619,7 +619,7 @@ body {
     background: linear-gradient(180deg, #181d26 0%, #101217 100%);
     border: 2px solid #333d4d;
     border-radius: 8px;
-    padding: 24px;
+    padding: 20px;
     text-align: left;
     display: flex;
     flex-direction: column;
@@ -641,13 +641,13 @@ body {
 }
 
 .faction-crest {
-    font-size: 32px;
-    margin-bottom: 8px;
+    font-size: 28px;
+    margin-bottom: 6px;
 }
 
 .faction-name {
-    font-size: 22px;
-    margin-bottom: 8px;
+    font-size: 20px;
+    margin-bottom: 6px;
     letter-spacing: 2px;
 }
 .tobaku-card .faction-name { color: #ff6b6b; }
@@ -656,17 +656,17 @@ body {
 .faction-leader {
     font-size: 13px;
     color: #a8a299;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
     border-bottom: 1px dashed #3a3226;
 }
 
 .faction-traits {
     list-style: none;
     font-size: 13px;
-    line-height: 1.8;
+    line-height: 1.7;
     color: #ccc;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
 .btn-faction {
