@@ -24,7 +24,7 @@
 
     --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.6);
     --shadow-gold: 0 0 16px rgba(223, 177, 91, 0.45);
-    --shadow-red: 0 0 18px rgba(179, 38, 30, 0.55);
+    --header-height: 60px;
 }
 
 * {
@@ -34,14 +34,30 @@
     user-select: none;
 }
 
+html {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overscroll-behavior: none;
+}
+
 body {
     background-color: var(--color-bg-dark);
     color: var(--color-washi);
     font-family: var(--font-serif);
     overflow: hidden;
-    height: 100vh;
-    width: 100vw;
-    position: relative;
+    height: 100%;
+    height: 100dvh;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
     background-image: 
         radial-gradient(circle at 50% 30%, rgba(27, 46, 70, 0.35) 0%, rgba(12, 14, 18, 0.95) 75%),
         linear-gradient(rgba(12, 14, 18, 0.8), rgba(12, 14, 18, 0.8));
@@ -64,7 +80,7 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 60px;
+    height: var(--header-height, 60px);
     background: linear-gradient(180deg, rgba(16, 28, 48, 0.96) 0%, rgba(10, 18, 32, 0.92) 100%);
     border-bottom: 2px solid #204068;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
@@ -72,8 +88,11 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
-    z-index: 50;
+    z-index: 1000;
     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 .main-header.visible {
@@ -438,16 +457,19 @@ body {
 .game-container {
     width: 100%;
     height: 100%;
+    height: 100dvh;
     position: relative;
-    padding-top: 60px;
+    padding-top: var(--header-height, 60px);
+    overflow: hidden;
 }
 
 .game-screen {
     position: absolute;
-    top: 60px;
+    top: var(--header-height, 60px);
     left: 0;
     width: 100%;
-    height: calc(100% - 60px);
+    height: calc(100% - var(--header-height, 60px));
+    height: calc(100dvh - var(--header-height, 60px));
     display: none;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -463,8 +485,9 @@ body {
    1. タイトル＆陣営選択画面
    ========================================== */
 #screen-title {
-    top: 60px;
-    height: calc(100% - 60px);
+    top: var(--header-height, 60px);
+    height: calc(100% - var(--header-height, 60px));
+    height: calc(100dvh - var(--header-height, 60px));
     background-image: linear-gradient(rgba(10, 11, 14, 0.82), rgba(10, 11, 14, 0.94)), url('../img/nippon.jpg');
     background-position: center;
     background-size: cover;
@@ -665,12 +688,16 @@ body {
    2. マップ画面
    ========================================== */
 #screen-map {
+    top: var(--header-height, 60px);
+    height: calc(100% - var(--header-height, 60px));
+    height: calc(100dvh - var(--header-height, 60px));
     background-image: linear-gradient(rgba(10, 11, 14, 0.84), rgba(10, 11, 14, 0.95)), url('../img/nippon.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    justify-content: center;
-    align-items: center;
+    justify-content: stretch;
+    align-items: stretch;
+    overflow: hidden;
 }
 
 .map-view-wrapper {
@@ -679,6 +706,8 @@ body {
     display: flex;
     flex-direction: column;
     padding: 16px 24px;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .map-header-bar {
@@ -687,6 +716,7 @@ body {
     align-items: center;
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 12px;
+    flex-shrink: 0;
 }
 .map-act-title {
     font-size: 24px;
@@ -702,22 +732,30 @@ body {
 
 .map-scroll-area {
     flex: 1;
+    min-height: 0;
     position: relative;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 40px 0;
+    padding: 24px 0 60px 0;
     display: flex;
     justify-content: center;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
 }
 
-.map-svg-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
+.map-scroll-area::-webkit-scrollbar {
+    width: 6px;
+}
+.map-scroll-area::-webkit-scrollbar-track {
+    background: rgba(10, 14, 20, 0.4);
+}
+.map-scroll-area::-webkit-scrollbar-thumb {
+    background: #3a3226;
+    border-radius: 3px;
+}
+.map-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold-dark);
 }
 
 .map-grid-container {
@@ -2119,9 +2157,12 @@ body {
 }
 
 @media (max-width: 540px) {
+    :root {
+        --header-height: 52px;
+    }
     .main-header {
         padding: 0 8px;
-        height: 52px;
+        height: var(--header-height, 52px);
     }
     .header-left {
         gap: 6px;
@@ -2151,9 +2192,5 @@ body {
     }
     .btn-header-menu .menu-icon {
         font-size: 18px;
-    }
-    #screen-title {
-        top: 52px;
-        height: calc(100% - 52px);
     }
 }
