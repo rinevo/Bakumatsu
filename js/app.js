@@ -238,27 +238,44 @@ class BakumatsuApp {
         });
 
         // iOS / iPad Safari での親ウィンドウへのスクロール伝播・ヘッダーズレを完全防止
-        document.addEventListener('touchmove', (e) => {
-            const scrollContainer = e.target.closest('.map-scroll-area, .modal-cards-grid, .card-detail-content');
-            if (!scrollContainer) {
-                // スクロール可能要素の外側（ヘッダー、余白など）でのドラッグは完全無効化
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // スクロール可能要素の端でのゴムバンド（オーバースクロール）がwindowに伝播するのを防ぐ
+        let touchStartY = 0;
         document.addEventListener('touchstart', (e) => {
-            const scrollContainer = e.target.closest('.map-scroll-area, .modal-cards-grid, .card-detail-content');
-            if (!scrollContainer) return;
-            const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
-            if (maxScroll <= 0) return;
-
-            if (scrollContainer.scrollTop === 0) {
-                scrollContainer.scrollTop = 1;
-            } else if (scrollContainer.scrollTop >= maxScroll) {
-                scrollContainer.scrollTop = maxScroll - 1;
+            if (e.touches && e.touches.length === 1) {
+                touchStartY = e.touches[0].clientY;
             }
         }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            // タッチされた要素から上位へ探索して、スクロール可能なコンテナを探す
+            let target = e.target;
+            let scrollable = null;
+            while (target && target !== document.body && target !== document.documentElement) {
+                const style = window.getComputedStyle(target);
+                if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && target.scrollHeight > target.clientHeight) {
+                    scrollable = target;
+                    break;
+                }
+                target = target.parentElement;
+            }
+
+            if (!scrollable) {
+                // スクロール可能要素以外（ヘッダーや画面枠など）でのドラッグは画面全体を動かさないよう阻止
+                if (e.cancelable) e.preventDefault();
+                return;
+            }
+
+            // スクロール可能要素の場合でも、上端でさらに下スワイプ、または下端でさらに上スワイプしたときは画面全体のバウンスを阻止
+            if (e.touches && e.touches.length === 1) {
+                const currentY = e.touches[0].clientY;
+                const deltaY = currentY - touchStartY;
+                const atTop = scrollable.scrollTop <= 0 && deltaY > 0;
+                const atBottom = (scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1) && deltaY < 0;
+
+                if (atTop || atBottom) {
+                    if (e.cancelable) e.preventDefault();
+                }
+            }
+        }, { passive: false });
     }
 
     startNewRun(faction) {
