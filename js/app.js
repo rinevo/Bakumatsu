@@ -407,9 +407,15 @@ class BakumatsuApp {
                 case 'screen-rest':
                     window.soundSystem.playBgm('map');
                     break;
-                case 'screen-gamewin':
+                case 'screen-gamewin': {
+                    const winScreen = document.getElementById('screen-gamewin');
+                    if (winScreen) {
+                        winScreen.classList.remove('faction-tobaku', 'faction-sabaku');
+                        winScreen.classList.add(this.faction === 'tobaku' ? 'faction-tobaku' : 'faction-sabaku');
+                    }
                     window.soundSystem.playBgm('win');
                     break;
+                }
                 case 'screen-gameover':
                     window.soundSystem.stopBgm();
                     break;
@@ -572,6 +578,11 @@ class BakumatsuApp {
                     列強介入度を <strong>${this.imperialGauge}%</strong> に抑え込み、武士の気概と主権を永遠に証明した！
                 `;
             }
+        }
+        const winScreen = document.getElementById('screen-gamewin');
+        if (winScreen) {
+            winScreen.classList.remove('faction-tobaku', 'faction-sabaku');
+            winScreen.classList.add(this.faction === 'tobaku' ? 'faction-tobaku' : 'faction-sabaku');
         }
         this.switchScreen('screen-gamewin');
     }

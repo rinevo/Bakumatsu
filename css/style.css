@@ -2706,7 +2706,7 @@ body {
    7 & 8. ゲームオーバー ＆ 勝利画面
    ========================================== */
 #screen-gamewin {
-    background-image: linear-gradient(rgba(10, 11, 14, 0.45), rgba(10, 11, 14, 0.65)), url('../img/gamewin.jpg');
+    background-image: linear-gradient(rgba(10, 11, 14, 0.45), rgba(10, 11, 14, 0.65)), url('../img/gamewin_tobaku.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -2715,6 +2715,14 @@ body {
     justify-content: center;
     padding: 24px 0;
     box-sizing: border-box;
+}
+
+#screen-gamewin.faction-tobaku {
+    background-image: linear-gradient(rgba(10, 11, 14, 0.45), rgba(10, 11, 14, 0.65)), url('../img/gamewin_tobaku.jpg');
+}
+
+#screen-gamewin.faction-sabaku {
+    background-image: linear-gradient(rgba(10, 11, 14, 0.45), rgba(10, 11, 14, 0.65)), url('../img/gamewin_sabaku.jpg');
 }
 
 #screen-gameover {

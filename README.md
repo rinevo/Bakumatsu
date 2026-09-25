@@ -271,6 +271,7 @@ git clone https://github.com/rinevo/Bakumatsu.git
 📁 幕末風雲録/
 │
 ├── 📄 index.html          # メインHTML（全画面・モーダル・Canvasを一元管理）
+├── 📄 README.md            # プロジェクト概要・ルール・仕様解説書
 ├── 📄 DESIGN.md            # システム詳細設計書（アーキテクチャ・データ構造・システム仕様）
 ├── 📄 CARDS.md             # 全カード一覧（全108枚完全掲載・効果＆連携データ）
 ├── 📄 EVENTS.md            # 全歴史事件一覧（全103件完全掲載・年代＆選択肢データ）
@@ -291,13 +292,14 @@ git clone https://github.com/rinevo/Bakumatsu.git
 │   ├── 🎵 Thunder_of_the_Shogunate.mp3    # 戦闘画面 BGM（戦闘終了時に停止）
 │   └── 🎵 Still_Water_at_the_Temple_Gate.mp3 # ゲームクリア画面 BGM（単発再生・終了時自動停止）
 └── 📁 img/
-    ├── 🖼️ nippon.jpg      # マップ背景（水墨画風日本地図）
-    ├── 🖼️ tatakai.jpg     # 戦闘画面背景
-    ├── 🖼️ shop.jpg        # 商人画面背景
-    ├── 🖼️ event.jpg       # 歴史事件画面背景
-    ├── 🖼️ rest.jpg        # 休息画面背景
-    ├── 🖼️ gameover.jpg    # ゲームオーバー画面背景
-    └── 🖼️ gamewin.jpg     # ゲームクリア画面背景
+    ├── 🖼️ nippon.jpg          # マップ背景（水墨画風日本地図）
+    ├── 🖼️ tatakai.jpg         # 戦闘画面背景
+    ├── 🖼️ shop.jpg            # 商人画面背景
+    ├── 🖼️ event.jpg           # 歴史事件画面背景
+    ├── 🖼️ rest.jpg            # 休息画面背景
+    ├── 🖼️ gameover.jpg        # ゲームオーバー画面背景
+    ├── 🖼️ gamewin_tobaku.jpg  # 討幕派ゲームクリア画面背景
+    └── 🖼️ gamewin_sabaku.jpg  # 佐幕派ゲームクリア画面背景
 ```
 
 ---
