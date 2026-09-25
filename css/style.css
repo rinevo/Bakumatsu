@@ -287,6 +287,19 @@ body {
     box-shadow: 0 0 10px rgba(77, 171, 247, 0.3);
 }
 
+.badge-full {
+    display: inline;
+}
+.badge-short {
+    display: none;
+}
+.stat-label-full {
+    display: inline;
+}
+.stat-label-short {
+    display: none;
+}
+
 /* ヘッダー体力バー */
 .header-stat-box {
     display: flex;
@@ -2189,6 +2202,7 @@ body {
     .header-left {
         gap: 8px;
         font-size: 13px;
+        flex-shrink: 1;
     }
     /* 体力バーを非表示にし数値のみで省スペース化 */
     .header-stat-box .header-bar {
@@ -2210,7 +2224,8 @@ body {
     }
 }
 
-@media (max-width: 540px) {
+/* 画面幅が狭い場合（Android / スマートフォン等）の省スペース化 */
+@media (max-width: 640px) {
     :root {
         --header-height: 52px;
     }
@@ -2221,30 +2236,100 @@ body {
     .header-left {
         gap: 6px;
         font-size: 12px;
+        flex-shrink: 1;
+        min-width: 0;
+    }
+    /* 「薩長同盟（討幕派）」→「討幕派」、「幕府・会津藩（佐幕派）」→「佐幕派」 */
+    .badge-full {
+        display: none !important;
+    }
+    .badge-short {
+        display: inline !important;
     }
     .faction-badge {
         font-size: 11px;
         padding: 2px 6px;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
-    /* 介入メータータイトルをアイコンのみにして折り返し防止 */
+    /* 「体力」→「体」、「資金」→「金」 */
+    .stat-label-full {
+        display: none !important;
+    }
+    .stat-label-short {
+        display: inline !important;
+    }
+    .header-stat-box {
+        gap: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    /* 介入メーターはタイトルを非表示にしてアイコン＋数値バーのみ */
+    .header-center {
+        margin: 0 8px;
+        min-width: 65px;
+        max-width: 140px;
+        flex-shrink: 1;
+    }
     .imperial-title {
-        display: none;
+        display: none !important;
     }
     .imperial-header::before {
         content: "⚠️";
         margin-right: 4px;
     }
-    .imperial-container {
-        min-width: 70px;
+    .imperial-percent {
+        font-size: 11px;
     }
-    /* メニューボタンをアイコンのみにして最小幅でも1行に収める */
+
+    /* 右端のプルダウンメニューボタンが絶対に画面外に押し出されないよう右端固定 */
+    .header-right {
+        flex-shrink: 0 !important;
+    }
     .btn-header-menu .menu-label {
         display: none;
     }
     .btn-header-menu {
-        padding: 6px 10px;
+        padding: 6px 8px;
     }
     .btn-header-menu .menu-icon {
-        font-size: 18px;
+        font-size: 17px;
+    }
+}
+
+/* 最小幅（360px〜400pxクラスのAndroid端末等）向けの最適化 */
+@media (max-width: 420px) {
+    .main-header {
+        padding: 0 5px;
+    }
+    .header-left {
+        gap: 4px;
+        font-size: 11px;
+    }
+    .faction-badge {
+        font-size: 10px;
+        padding: 2px 4px;
+    }
+    .header-stat-box {
+        gap: 2px;
+        font-size: 11px;
+    }
+    .stat-badge-small.def {
+        padding: 1px 4px;
+        font-size: 10px;
+    }
+    .header-center {
+        margin: 0 4px;
+        min-width: 55px;
+    }
+    .imperial-percent {
+        font-size: 10px;
+    }
+    .btn-header-menu {
+        padding: 4px 6px;
+    }
+    .btn-header-menu .menu-icon {
+        font-size: 15px;
     }
 }

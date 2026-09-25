@@ -32,10 +32,10 @@ class UIManager {
         if (factionBadge) {
             if (this.app.faction === 'tobaku') {
                 factionBadge.className = 'faction-badge tobaku';
-                factionBadge.textContent = '🔴 薩長同盟（討幕派）';
+                factionBadge.innerHTML = '<span class="badge-full">🔴 薩長同盟（討幕派）</span><span class="badge-short">🔴 討幕派</span>';
             } else {
                 factionBadge.className = 'faction-badge sabaku';
-                factionBadge.textContent = '🔵 幕府・会津藩（佐幕派）';
+                factionBadge.innerHTML = '<span class="badge-full">🔵 幕府・会津藩（佐幕派）</span><span class="badge-short">🔵 佐幕派</span>';
             }
         }
 
