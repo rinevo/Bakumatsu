@@ -190,6 +190,11 @@ class BakumatsuApp {
                     relicBtn.setAttribute('aria-expanded', 'false');
                 }
             });
+
+            // iPad/Android等タッチ端末でのリスト内スクロールを保証（ヘッダーへの伝播を防止）
+            relicDropdown.addEventListener('touchmove', (e) => {
+                e.stopPropagation();
+            }, { passive: true });
         }
 
         // 中断セーブデータの再開ボタン
@@ -301,9 +306,13 @@ class BakumatsuApp {
         });
 
         // ヘッダー部でのタッチドラッグを完全防止（ヘッダー位置を画面上部に永久固定）
+        // ※ただし所持遺物リストやメニューなど、スクロール可能なプルダウン領域内のタッチスクロール操作は許可する
         const header = document.getElementById('main-header');
         if (header) {
             header.addEventListener('touchmove', (e) => {
+                if (e.target && e.target.closest && e.target.closest('.header-relic-dropdown, .header-dropdown-menu, .relic-dropdown-list')) {
+                    return; // スクロール可能プルダウン内はブラウザのスクロール動作を許可
+                }
                 if (e.cancelable) e.preventDefault();
             }, { passive: false });
         }
