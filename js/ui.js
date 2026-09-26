@@ -919,6 +919,11 @@ class UIManager {
         }
 
         modal.classList.add('active');
+
+        // 戦果確認ウィンドウ表示中のBGM再生
+        if (window.soundSystem && window.soundSystem.playBgm) {
+            window.soundSystem.playBgm('reward');
+        }
     }
 
     closeRewardModal() {

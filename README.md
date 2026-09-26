@@ -288,8 +288,10 @@ git clone https://github.com/rinevo/Bakumatsu.git
 │   └── 📄 app.js          # メインコントローラー・ステート管理・ゲームループ
 ├── 📁 bgm/
 │   ├── 🎵 The_Iron_Horizon.mp3            # 初期画面（陣営選択）BGM（単発再生・終了時自動停止）
-│   ├── 🎵 Edge_of_the_Setting_Sun.mp3     # マップ探索・街道行路 BGM
+│   ├── 🎵 Steps_Through_Hidden_Ground.mp3 # マップ探索・街道行路 BGM
 │   ├── 🎵 Thunder_of_the_Shogunate.mp3    # 戦闘画面 BGM（戦闘終了時に停止）
+│   ├── 🎵 The_Samurai_s_Final_Stand.mp3   # 戦闘後予備音源
+│   ├── 🎵 Morning_at_the_Fortress_Gate.mp3 # 戦果確認（戦闘勝利報酬）BGM
 │   └── 🎵 Still_Water_at_the_Temple_Gate.mp3 # ゲームクリア画面 BGM（単発再生・終了時自動停止）
 └── 📁 img/
     ├── 🖼️ nippon.jpg          # マップ背景（水墨画風日本地図）
@@ -312,8 +314,9 @@ git clone https://github.com/rinevo/Bakumatsu.git
 | 画面・シーン | 楽曲ファイル名 | 再生仕様 |
 |---|---|---|
 | 初期画面（陣営選択） | `The_Iron_Horizon.mp3` | **単発再生（即時事前ロード・曲終了時自動停止・非ループ）** |
-| マップ探索・各イベント | `Edge_of_the_Setting_Sun.mp3` | ループ再生（マップ復帰時自動再開） |
+| マップ探索・各イベント | `Steps_Through_Hidden_Ground.mp3` | ループ再生（マップ復帰時自動再開） |
 | 戦闘画面 | `Thunder_of_the_Shogunate.mp3` | ループ再生（戦闘終了時自動停止） |
+| 戦果確認（勝利報酬） | `Morning_at_the_Fortress_Gate.mp3` | **単発再生（曲終了時自動停止・非ループ）** |
 | ゲームクリア画面 | `Still_Water_at_the_Temple_Gate.mp3` | **単発再生（曲終了時自動停止・非ループ）** |
 
 ### ⚔️ プロシージャル効果音（Web Audio API）

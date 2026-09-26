@@ -21,13 +21,15 @@ class SoundSystem {
         this.bgmVolume = 0.45;
         this.bgmTracks = {
             title: "bgm/The_Iron_Horizon.mp3",
-            map: "bgm/Edge_of_the_Setting_Sun.mp3",
+            map: "bgm/Steps_Through_Hidden_Ground.mp3",
             battle: "bgm/Thunder_of_the_Shogunate.mp3",
+            reward: "bgm/Morning_at_the_Fortress_Gate.mp3",
             win: "bgm/Still_Water_at_the_Temple_Gate.mp3"
         };
         // ループ再生しない（一度きりで停止する）トラック
         this.bgmNonLooping = {
             title: true,
+            reward: true,
             win: true
         };
         this.audioElements = {};
