@@ -44,20 +44,26 @@ class BakumatsuApp {
             window.soundSystem.playBgm('title');
         }
 
-        // 画面のどこかを操作した際に確実にBGMと効果音をアンロック
+        // 初回ユーザー操作時にオーディオコンテキストをアンロック
         const validGestures = ['click', 'pointerdown', 'mousedown', 'touchstart', 'touchend', 'keydown'];
-        const unlockAllAudio = () => {
+        const unlockInitialAudio = () => {
             if (window.soundSystem) {
                 window.soundSystem.init();
-                if (!window.soundSystem.isBgmMuted) {
-                    if (!window.soundSystem.bgmAudio || window.soundSystem.bgmAudio.paused) {
+                // 初期画面（タイトル）が表示されている場合のみタイトルBGMを再生
+                const titleScreen = document.getElementById('screen-title');
+                if (titleScreen && titleScreen.classList.contains('active')) {
+                    if (!window.soundSystem.isBgmMuted && (!window.soundSystem.bgmAudio || window.soundSystem.bgmAudio.paused)) {
                         window.soundSystem.playBgm('title');
                     }
                 }
             }
+            // 初回操作が完了したら不要なリスナーを全削除
+            validGestures.forEach(ev => {
+                document.removeEventListener(ev, unlockInitialAudio);
+            });
         };
         validGestures.forEach(ev => {
-            document.addEventListener(ev, unlockAllAudio, { passive: true });
+            document.addEventListener(ev, unlockInitialAudio, { passive: true });
         });
     }
 
@@ -284,14 +290,22 @@ class BakumatsuApp {
             btnRestPurge.addEventListener('click', () => this.shop.restPurgeCard());
         }
 
-        // リスタートボタン
+        // リスタート（背景鑑賞モードへ遷移）ボタン
         const btnRestart = document.getElementById('btn-restart');
         const btnRestartWin = document.getElementById('btn-restart-win');
         if (btnRestart) {
-            btnRestart.addEventListener('click', () => this.switchScreen('screen-title'));
+            btnRestart.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.enableBackdropView('screen-gameover');
+            });
         }
         if (btnRestartWin) {
-            btnRestartWin.addEventListener('click', () => this.switchScreen('screen-title'));
+            btnRestartWin.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.enableBackdropView('screen-gamewin');
+            });
         }
 
         // ウィンドウリサイズ時のマップ線再描画＆ヘッダー再計算
@@ -370,6 +384,43 @@ class BakumatsuApp {
         this.ui.renderMap();
     }
 
+    enableBackdropView(screenId) {
+        const screen = document.getElementById(screenId);
+        if (!screen) return;
+        screen.classList.add('backdrop-only');
+
+        // 背景鑑賞モード中は現在再生中の音楽をそのまま維持（停止しない）
+
+        // ボタン押下直後のタップ遅延や合成クリックによる即時誤判定（ゴーストクリック）を完全に防止するため
+        // ガード時間を設定（最低400msはクリックを受け付けない）
+        const readyTime = Date.now() + 400;
+
+        const onBackdropDismiss = (e) => {
+            if (Date.now() < readyTime) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                return;
+            }
+
+            // リスナーをクリーンアップ
+            screen.removeEventListener('click', onBackdropDismiss);
+            screen.removeEventListener('touchend', onBackdropDismiss);
+
+            screen.classList.remove('backdrop-only');
+
+            // 画面クリック後に初期画面を表示し、初期画面のBGMを再生
+            this.switchScreen('screen-title');
+        };
+
+        // ボタンのクリックイベント完了後にリスナーを登録
+        setTimeout(() => {
+            screen.addEventListener('click', onBackdropDismiss);
+            screen.addEventListener('touchend', onBackdropDismiss);
+        }, 150);
+    }
+
     switchScreen(screenId) {
         const screens = [
             'screen-title',
@@ -385,6 +436,7 @@ class BakumatsuApp {
         screens.forEach(s => {
             const el = document.getElementById(s);
             if (el) {
+                el.classList.remove('backdrop-only');
                 if (s === screenId) {
                     el.classList.add('active');
                 } else {

@@ -2784,6 +2784,7 @@ body {
 }
 
 .result-box {
+    position: relative;
     margin: auto;
     max-width: 650px;
     width: 90%;
@@ -2791,6 +2792,62 @@ body {
     padding: 48px;
     text-align: center;
     box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* 背景鑑賞モード */
+#screen-gamewin.backdrop-only {
+    background-image: url('../img/gamewin_tobaku.jpg');
+    cursor: pointer;
+}
+#screen-gamewin.faction-tobaku.backdrop-only {
+    background-image: url('../img/gamewin_tobaku.jpg');
+}
+#screen-gamewin.faction-sabaku.backdrop-only {
+    background-image: url('../img/gamewin_sabaku.jpg');
+}
+#screen-gameover.backdrop-only {
+    background-image: url('../img/gameover.jpg');
+    cursor: pointer;
+}
+
+.game-screen.backdrop-only .result-box {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+}
+
+.result-backdrop-hint {
+    display: none;
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #f0e6d2;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 15px;
+    letter-spacing: 2px;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    z-index: 10;
+}
+
+.game-screen.backdrop-only .result-backdrop-hint {
+    display: block;
+    animation: fadeInHint 0.5s ease forwards, pulse-hint 2s infinite ease-in-out 0.5s;
+}
+
+@keyframes fadeInHint {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 0.85; transform: translate(-50%, 0); }
+}
+
+@keyframes pulse-hint {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 0.4; }
 }
 
 .gameover-box {
