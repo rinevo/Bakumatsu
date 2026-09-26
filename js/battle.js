@@ -101,12 +101,22 @@ class BattleSystem {
             this.app.currentTrend.applyBattleStart(this);
         }
 
+        // 開幕シールド（初期防陣）の計算（第二幕・終幕の敵耐久強化）
+        const currentAct = (this.app.map && this.app.map.currentAct) ? this.app.map.currentAct : 1;
+        let defaultStartShield = 0;
+        if (currentAct === 2) {
+            defaultStartShield = enemyData.isBoss ? 35 : (enemyData.isElite ? 25 : 15);
+        } else if (currentAct === 3) {
+            defaultStartShield = enemyData.isFinalBoss ? 50 : (enemyData.isElite ? 35 : 25);
+        }
+        const initialShield = (enemyData.startShield !== undefined) ? enemyData.startShield : defaultStartShield;
+
         // 敵データクローン
         this.enemy = {
             name: enemyData.name,
             maxHp: enemyData.maxHp,
             hp: enemyData.maxHp,
-            shield: 0,
+            shield: initialShield,
             isElite: enemyData.isElite || false,
             isBoss: enemyData.isBoss || false,
             isFinalBoss: enemyData.isFinalBoss || false,
@@ -118,6 +128,14 @@ class BattleSystem {
         };
         this.enemyIntentIndex = 0;
         this.enemyComboCount = 0;
+
+        if (initialShield > 0) {
+            setTimeout(() => {
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    window.particleSystem.createFloatingText(`敵防陣展開: シールド+${initialShield}`, window.innerWidth / 2, window.innerHeight * 0.3, "#4299e1");
+                }
+            }, 300);
+        }
 
         // 敵デッキ・手札の初期化
         this.initEnemyDeck(enemyData);
@@ -851,6 +869,19 @@ class BattleSystem {
         }
         window.soundSystem.playVictory();
 
+        // 残存シールドによるサステイン還元（ノーダメージ立ち回りへのボーナス）
+        if (this.playerShield > 0) {
+            const healAmount = Math.min(5, Math.floor(this.playerShield * 0.2));
+            if (healAmount > 0) {
+                this.healPlayer(healAmount);
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    setTimeout(() => {
+                        window.particleSystem.createFloatingText(`防陣温存: HP+${healAmount}`, window.innerWidth / 2, window.innerHeight * 0.5, "#48bb78");
+                    }, 400);
+                }
+            }
+        }
+
         // レリックの戦闘勝利効果
         this.app.relics.forEach(relicId => {
             const r = GAME_DATA.relics[relicId];
@@ -913,9 +944,55 @@ class BattleSystem {
             return c.faction === this.app.faction || c.faction === 'neutral';
         });
 
+        // 幕およびエリート判定に応じたレアリティ出現ウェイト
+        const currentAct = (this.app.map && this.app.map.currentAct) ? this.app.map.currentAct : 1;
+        const isElite = this.enemy && (this.enemy.isElite || this.enemy.isBoss);
+
+        let weights;
+        if (currentAct === 1) {
+            weights = isElite
+                ? { common: 40, uncommon: 40, rare: 18, legendary: 2 }
+                : { common: 65, uncommon: 28, rare: 7, legendary: 0 };
+        } else if (currentAct === 2) {
+            weights = isElite
+                ? { common: 20, uncommon: 40, rare: 32, legendary: 8 }
+                : { common: 40, uncommon: 38, rare: 18, legendary: 4 };
+        } else { // Act 3 (終幕)
+            weights = isElite
+                ? { common: 10, uncommon: 30, rare: 45, legendary: 15 }
+                : { common: 20, uncommon: 40, rare: 30, legendary: 10 };
+        }
+
+        const pickRarity = () => {
+            const total = weights.common + weights.uncommon + weights.rare + weights.legendary;
+            const roll = Math.random() * total;
+            if (roll < weights.common) return 'common';
+            if (roll < weights.common + weights.uncommon) return 'uncommon';
+            if (roll < weights.common + weights.uncommon + weights.rare) return 'rare';
+            return 'legendary';
+        };
+
         const rewardCount = this.app.hasRelic("yoshida_shoin_brush") ? 4 : 3;
-        const shuffled = this.shuffleArray(availablePool);
-        return shuffled.slice(0, rewardCount);
+        const chosenCards = [];
+        const poolCopy = [...availablePool];
+
+        for (let i = 0; i < rewardCount; i++) {
+            if (poolCopy.length === 0) break;
+            const targetRarity = pickRarity();
+            // 対象レアリティのカード群をフィルタ
+            let matching = poolCopy.filter(id => GAME_DATA.cards[id].rarity === targetRarity);
+            // なければ全体のプールからフォールバック
+            if (matching.length === 0) {
+                matching = poolCopy;
+            }
+            const pickedId = matching[Math.floor(Math.random() * matching.length)];
+            chosenCards.push(pickedId);
+            // 重複除外
+            const idx = poolCopy.indexOf(pickedId);
+            if (idx !== -1) poolCopy.splice(idx, 1);
+        }
+
+        return chosenCards;
     }
 
     handlePlayerDefeated(reason) {

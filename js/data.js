@@ -53,7 +53,7 @@ const GAME_DATA = {
             attack: 8,
             shield: 4,
             desc: "敵に 8 ダメージ、防 4。手札を全て捨てて3枚ドロー。敵の攻撃意図を3減少。",
-            rarity: "rare",
+            rarity: "legendary",
             onPlay: (b, self) => {
                 b.dealDamageToEnemy(8);
                 b.gainPlayerShield(4);
@@ -73,7 +73,7 @@ const GAME_DATA = {
             attack: 0,
             shield: 0,
             desc: "手札の志士カード1枚を除外し、山札からカードを2枚引く。連鎖+1。",
-            rarity: "common",
+            rarity: "uncommon",
             onPlay: (b, self) => {
                 const shishiIdx = b.hand.findIndex(c => c.type === 'shishi');
                 if (shishiIdx !== -1) {
@@ -96,7 +96,7 @@ const GAME_DATA = {
             attack: 8,
             shield: 4,
             desc: "敵に 8 ダメージ、防 4。【連携：坂本龍馬】場に龍馬がいればコスト0＆追加1ドロー。",
-            rarity: "common",
+            rarity: "legendary",
             partnerId: "ryoma_kaiwentai",
             onPlay: (b, self) => {
                 b.dealDamageToEnemy(8);
@@ -119,7 +119,7 @@ const GAME_DATA = {
             attack: 16,
             shield: 6,
             desc: "敵に 16 ダメージ。敵のシールドを半減させる。",
-            rarity: "rare",
+            rarity: "legendary",
             onPlay: (b, self) => {
                 if (b.enemy) {
                     b.enemy.shield = Math.floor(b.enemy.shield / 2);
@@ -138,7 +138,7 @@ const GAME_DATA = {
             attack: 10,
             shield: 0,
             desc: "敵に 10 ダメージ。このターン使ったカード1枚につき追加3ダメージ。",
-            rarity: "uncommon",
+            rarity: "legendary",
             onPlay: (b, self) => {
                 const bonus = (b.playedThisTurn.length - 1) * 3;
                 b.dealDamageToEnemy(10 + bonus);
@@ -154,7 +154,7 @@ const GAME_DATA = {
             attack: 0,
             shield: 8,
             desc: "防 8。敵に「脱力 2」（与ダメージ25%減）を付与し、カードを1枚引く。",
-            rarity: "uncommon",
+            rarity: "legendary",
             onPlay: (b, self) => {
                 b.gainPlayerShield(8);
                 b.applyStatusToEnemy("weak", 2);
@@ -170,7 +170,7 @@ const GAME_DATA = {
             attack: 0,
             shield: 0,
             desc: "文を 1 獲得。HPを 3 消費する。このターンの攻撃力+4。",
-            rarity: "common",
+            rarity: "uncommon",
             onPlay: (b, self) => {
                 b.gainPlayerEnergy(1);
                 b.damagePlayerDirect(3);
@@ -187,7 +187,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 5,
             desc: "敵に 5 ダメージ、防 5。列強介入メーターを 3% 下げる。",
-            rarity: "uncommon",
+            rarity: "rare",
             onPlay: (b) => {
                 b.modifyImperialGauge(-3);
             }
@@ -202,7 +202,7 @@ const GAME_DATA = {
             attack: 11,
             shield: 3,
             desc: "敵に 11 ダメージ、防 3。カードを1枚引く。",
-            rarity: "uncommon",
+            rarity: "rare",
             onPlay: (b) => {
                 b.drawCards(1);
             }
@@ -217,7 +217,7 @@ const GAME_DATA = {
             attack: 6,
             shield: 5,
             desc: "敵に 6 ダメージ、防 5。列強介入メーターを 2% 下げる。",
-            rarity: "uncommon",
+            rarity: "rare",
             onPlay: (b) => {
                 b.modifyImperialGauge(-2);
             }
@@ -262,7 +262,7 @@ const GAME_DATA = {
             attack: 4,
             shield: 8,
             desc: "敵に 4 ダメージ、防 8。列強介入メーターを 4% 下げる。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.modifyImperialGauge(-4);
             }
@@ -277,7 +277,7 @@ const GAME_DATA = {
             attack: 9,
             shield: 9,
             desc: "敵に 9 ダメージ、防 9。列強介入メーターを 5% 下げる。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.modifyImperialGauge(-5);
             }
@@ -338,7 +338,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 9,
             desc: "敵に 5 ダメージ、防 9。次のターンの手札を1枚追加する。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.handDrawBonus += 1;
             }
@@ -353,7 +353,7 @@ const GAME_DATA = {
             attack: 12,
             shield: 6,
             desc: "敵に 12 ダメージ、防 6。敵の攻撃意図を 4 減少させる。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 if (b.enemy && b.enemy.intent && b.enemy.intent.damage) {
                     b.enemy.intent.damage = Math.max(0, b.enemy.intent.damage - 4);
@@ -370,7 +370,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 7,
             desc: "敵に 5 ダメージ、防 7。次に使う戦術カードを1枚引く。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 const tactic = b.drawPile.findIndex(cardId => GAME_DATA.cards[cardId] && GAME_DATA.cards[cardId].type === 'tactic');
                 if (tactic !== -1) {
@@ -389,7 +389,7 @@ const GAME_DATA = {
             attack: 10,
             shield: 10,
             desc: "敵に 10 ダメージ、防 10。自分のHPを 5 回復する。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.healPlayer(5);
             }
@@ -404,7 +404,7 @@ const GAME_DATA = {
             attack: 12,
             shield: 8,
             desc: "敵に 12 ダメージ、防 8。最大HPを 3 増やす。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.playerMaxHp += 3;
                 b.app.maxHp += 3;
@@ -420,7 +420,7 @@ const GAME_DATA = {
             attack: 7,
             shield: 7,
             desc: "敵に 7 ダメージ、防 7。カードを1枚引き、15両を得る。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.drawCards(1);
                 b.app.gold += 15;
@@ -436,7 +436,7 @@ const GAME_DATA = {
             attack: 8,
             shield: 12,
             desc: "敵に 8 ダメージ、防 12。列強介入メーターを 5% 下げる。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.modifyImperialGauge(-5);
             }
@@ -451,7 +451,7 @@ const GAME_DATA = {
             attack: 13,
             shield: 2,
             desc: "敵に 13 ダメージ、防 2。HPを 2 消費する。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.damagePlayerDirect(2);
             }
@@ -466,7 +466,7 @@ const GAME_DATA = {
             attack: 6,
             shield: 6,
             desc: "敵に 6 ダメージ、防 6。カードを1枚引く。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.drawCards(1);
             }
@@ -481,7 +481,7 @@ const GAME_DATA = {
             attack: 8,
             shield: 11,
             desc: "敵に 8 ダメージ、防 11。列強介入メーターを 5% 下げる。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.modifyImperialGauge(-5);
             }
@@ -496,7 +496,7 @@ const GAME_DATA = {
             attack: 15,
             shield: 0,
             desc: "敵に 15 ダメージ。自分のHPを 4 消費する。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.damagePlayerDirect(4);
             }
@@ -511,7 +511,7 @@ const GAME_DATA = {
             attack: 6,
             shield: 8,
             desc: "敵に 6 ダメージ、防 8。カードを1枚引く。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.drawCards(1);
             }
@@ -527,7 +527,7 @@ const GAME_DATA = {
             attack: 11,
             shield: 4,
             desc: "敵に 11 ダメージ、防 4。次の戦闘の攻撃力+3。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.applyPlayerBuff("strength", 3);
             }
@@ -559,7 +559,7 @@ const GAME_DATA = {
             attack: 6,
             shield: 6,
             desc: "敵に 6 ダメージ、防 6。敵の攻撃意図を 3 減少させる。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 if (b.enemy && b.enemy.intent && b.enemy.intent.damage) {
                     b.enemy.intent.damage = Math.max(0, b.enemy.intent.damage - 3);
@@ -591,7 +591,7 @@ const GAME_DATA = {
             attack: 12,
             shield: 3,
             desc: "敵に 12 ダメージ、防 3。列強介入メーターを 3%下げる。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.modifyImperialGauge(-3);
             }
@@ -607,7 +607,7 @@ const GAME_DATA = {
             attack: 18,
             shield: 0,
             desc: "敵に 18 ダメージ。自分のHPを 5 消費する。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.damagePlayerDirect(5);
             }
@@ -637,7 +637,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 10,
             desc: "敵に 5 ダメージ、防 10。列強介入メーターを 4%下げる。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.modifyImperialGauge(-4);
             }
@@ -700,7 +700,7 @@ const GAME_DATA = {
             attack: 6,
             shield: 10,
             desc: "敵に 6 ダメージ、防 10。敵に脱力 1を付与する。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.applyStatusToEnemy("weak", 1);
             }
@@ -716,7 +716,7 @@ const GAME_DATA = {
             attack: 13,
             shield: 3,
             desc: "敵に 13 ダメージ、防 3。敵が攻撃意図なら追加3ダメージ。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 if (b.enemy && b.enemy.intent && b.enemy.intent.type === 'attack') {
                     b.dealDamageToEnemy(3);
@@ -733,7 +733,7 @@ const GAME_DATA = {
             attack: 9,
             shield: 10,
             desc: "敵に 9 ダメージ、防 10。次の戦闘の攻撃力+5。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.applyPlayerBuff("strength", 5);
             }
@@ -764,7 +764,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 9,
             desc: "敵に 5 ダメージ、防 9。列強介入メーターを 5%下げる。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.modifyImperialGauge(-5);
             }
@@ -794,7 +794,7 @@ const GAME_DATA = {
             attack: 6,
             shield: 9,
             desc: "敵に 6 ダメージ、防 9。列強介入メーターを 3% 下げる。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.modifyImperialGauge(-3);
             }
@@ -821,7 +821,7 @@ const GAME_DATA = {
             attack: 6,
             shield: 8,
             desc: "敵に 6 ダメージ、防 8。25両を獲得し、列強介入メーターを 3% 下げる。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.dealDamageToEnemy(6);
                 b.gainPlayerShield(8);
@@ -841,7 +841,7 @@ const GAME_DATA = {
             attack: 18,
             shield: 0,
             desc: "敵に 18 ダメージ。自分のHPを 4 消費する。次のカードの攻撃力+4。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.dealDamageToEnemy(18);
                 b.damagePlayerDirect(4);
@@ -885,7 +885,7 @@ const GAME_DATA = {
             attack: 13,
             shield: 7,
             desc: "敵のシールドを無視して 13 ダメージ、防 7。【代償】ターン終了時に手札を1枚破棄。",
-            rarity: "rare",
+            rarity: "legendary",
             onPlay: (b, self) => {
                 b.dealPiercingDamageToEnemy(13);
                 b.gainPlayerShield(7);
@@ -920,7 +920,7 @@ const GAME_DATA = {
             attack: 12,
             shield: 8,
             desc: "敵に 12 ダメージ、防 8。【連携：土方歳三】場に土方がいれば反撃態勢（攻撃を受けた時10反射）。",
-            rarity: "common",
+            rarity: "legendary",
             partnerId: "hijikata_fukucho",
             onPlay: (b, self) => {
                 b.dealDamageToEnemy(12);
@@ -960,7 +960,7 @@ const GAME_DATA = {
             attack: 0,
             shield: 16,
             desc: "防 16。列強介入メーターを 5% 下げる。敵の次の攻撃力を半減。",
-            rarity: "rare",
+            rarity: "legendary",
             onPlay: (b, self) => {
                 b.gainPlayerShield(16);
                 b.modifyImperialGauge(-5);
@@ -979,7 +979,7 @@ const GAME_DATA = {
             attack: 0,
             shield: 15,
             desc: "防 15。現在のシールド値を 1.4 倍にする。",
-            rarity: "uncommon",
+            rarity: "rare",
             onPlay: (b, self) => {
                 b.gainPlayerShield(15);
                 b.playerShield = Math.floor(b.playerShield * 1.4);
@@ -995,7 +995,7 @@ const GAME_DATA = {
             attack: 9,
             shield: 3,
             desc: "敵に 9 ダメージ。敵が攻撃準備中なら威力 1.5倍（13）。",
-            rarity: "common",
+            rarity: "uncommon",
             onPlay: (b, self) => {
                 const isAttacking = b.enemy && b.enemy.intent && b.enemy.intent.type === 'attack';
                 const dmg = isAttacking ? 13 : 9;
@@ -1065,7 +1065,7 @@ const GAME_DATA = {
             attack: 7,
             shield: 7,
             desc: "敵に 7 ダメージ、防 7。敵に脱力 1を付与する。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.applyStatusToEnemy("weak", 1);
             }
@@ -1080,7 +1080,7 @@ const GAME_DATA = {
             attack: 8,
             shield: 12,
             desc: "敵に 8 ダメージ、防 12。",
-            rarity: "rare"
+            rarity: "uncommon"
         },
         "enomoto_naval": {
             id: "enomoto_naval",
@@ -1159,7 +1159,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 11,
             desc: "敵に 5 ダメージ、防 11。HPを 3 回復する。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.healPlayer(3);
             }
@@ -1174,7 +1174,7 @@ const GAME_DATA = {
             attack: 10,
             shield: 8,
             desc: "敵に 10 ダメージ、防 8。カードを2枚引く。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.drawCards(2);
             }
@@ -1205,7 +1205,7 @@ const GAME_DATA = {
             attack: 8,
             shield: 10,
             desc: "敵に 8 ダメージ、防 10。HPを 4 回復する。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.healPlayer(4);
             }
@@ -1220,7 +1220,7 @@ const GAME_DATA = {
             attack: 4,
             shield: 13,
             desc: "敵に 4 ダメージ、防 13。列強介入メーターを 4% 下げる。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.modifyImperialGauge(-4);
             }
@@ -1235,7 +1235,7 @@ const GAME_DATA = {
             attack: 11,
             shield: 10,
             desc: "敵に 11 ダメージ、防 10。敵のシールドを 6 破壊する。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 if (b.enemy) {
                     b.enemy.shield = Math.max(0, b.enemy.shield - 6);
@@ -1270,7 +1270,7 @@ const GAME_DATA = {
             attack: 7,
             shield: 15,
             desc: "敵に 7 ダメージ、防 15。次のターンの被ダメージを 4 軽減する。",
-            rarity: "rare",
+            rarity: "legendary",
             onPlay: (b) => {
                 b.applyPlayerBuff("damage_reduction", 4);
             }
@@ -1303,7 +1303,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 14,
             desc: "敵に 5 ダメージ、防 14。HPを 3 回復する。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.healPlayer(3);
             }
@@ -1333,7 +1333,7 @@ const GAME_DATA = {
             attack: 10,
             shield: 13,
             desc: "敵に 10 ダメージ、防 13。次のターンの被ダメージを 3 軽減する。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.applyPlayerBuff("damage_reduction", 3);
             }
@@ -1349,7 +1349,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 12,
             desc: "敵に 5 ダメージ、防 12。列強介入メーターを 4% 下げる。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.modifyImperialGauge(-4);
             }
@@ -1379,7 +1379,7 @@ const GAME_DATA = {
             attack: 6,
             shield: 9,
             desc: "敵に 6 ダメージ、防 9。敵に脱力 2を付与する。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.applyStatusToEnemy("weak", 2);
             }
@@ -1412,7 +1412,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 14,
             desc: "敵に 5 ダメージ、防 14。列強介入メーターを 5%下げる。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.modifyImperialGauge(-5);
             }
@@ -1427,7 +1427,7 @@ const GAME_DATA = {
             attack: 8,
             shield: 12,
             desc: "敵に 8 ダメージ、防 12。カードを1枚引く。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.drawCards(1);
             }
@@ -1442,7 +1442,7 @@ const GAME_DATA = {
             attack: 10,
             shield: 6,
             desc: "敵に 10 ダメージ、防 6。敵が攻撃意図なら追加4ダメージ。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 if (b.enemy && b.enemy.intent && b.enemy.intent.type === 'attack') {
                     b.dealDamageToEnemy(4);
@@ -1459,7 +1459,7 @@ const GAME_DATA = {
             attack: 6,
             shield: 16,
             desc: "敵に 6 ダメージ、防 16。HPを 4 回復する。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.healPlayer(4);
             }
@@ -1474,7 +1474,7 @@ const GAME_DATA = {
             attack: 9,
             shield: 8,
             desc: "敵に 9 ダメージ、防 8。敵が攻撃意図なら追加4ダメージ。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 if (b.enemy && b.enemy.intent && b.enemy.intent.type === 'attack') {
                     b.dealDamageToEnemy(4);
@@ -1492,7 +1492,7 @@ const GAME_DATA = {
             attack: 7,
             shield: 15,
             desc: "敵に 7 ダメージ、防 15。列強介入メーターを 3%下げる。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.modifyImperialGauge(-3);
             }
@@ -1507,7 +1507,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 13,
             desc: "敵に 5 ダメージ、防 13。カードを1枚引く。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.drawCards(1);
             }
@@ -1522,7 +1522,7 @@ const GAME_DATA = {
             attack: 10,
             shield: 11,
             desc: "敵に 10 ダメージ、防 11。列強介入メーターを 4%下げる。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.modifyImperialGauge(-4);
             }
@@ -1537,7 +1537,7 @@ const GAME_DATA = {
             attack: 4,
             shield: 10,
             desc: "敵に 4 ダメージ、防 10。HPを 8 回復する。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.healPlayer(8);
             }
@@ -1552,7 +1552,7 @@ const GAME_DATA = {
             attack: 12,
             shield: 6,
             desc: "敵に 12 ダメージ、防 6。敵に脱力 2を付与する。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.applyStatusToEnemy("weak", 2);
             }
@@ -1568,7 +1568,7 @@ const GAME_DATA = {
             attack: 0,
             shield: 18,
             desc: "防 18。列強介入メーターを 5% 下げる。敵の攻撃意図を 4 減少。",
-            rarity: "rare",
+            rarity: "legendary",
             onPlay: (b) => {
                 b.modifyImperialGauge(-5);
                 if (b.enemy && b.enemy.intent && b.enemy.intent.damage) {
@@ -1604,7 +1604,7 @@ const GAME_DATA = {
             attack: 8,
             shield: 16,
             desc: "敵に 8 ダメージ、防 16。次のターンに受けるダメージを 3 軽減。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.applyPlayerBuff("damage_reduction", 3);
             }
@@ -1651,7 +1651,7 @@ const GAME_DATA = {
             attack: 5,
             shield: 12,
             desc: "敵に 5 ダメージ、防 12。列強介入メーターを 4% 下げる。カードを1枚引く。",
-            rarity: "rare",
+            rarity: "common",
             onPlay: (b) => {
                 b.dealDamageToEnemy(5);
                 b.gainPlayerShield(12);
@@ -1669,7 +1669,7 @@ const GAME_DATA = {
             attack: 12,
             shield: 6,
             desc: "敵に 12 ダメージ、防 6。カードを2枚引く。連鎖+1。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b) => {
                 b.dealDamageToEnemy(12);
                 b.gainPlayerShield(6);
@@ -1723,7 +1723,7 @@ const GAME_DATA = {
             attack: 0,
             shield: 0,
             desc: "毎ターン終了時、敵に自動で 6 ダメージ。⚠️ 列強介入メーター+6%。",
-            rarity: "rare",
+            rarity: "legendary",
             imperialRisk: 6,
             onPlay: (b, self) => {
                 b.applyPlayerBuff("auto_gatling", 6);
@@ -1804,7 +1804,7 @@ const GAME_DATA = {
             attack: 10,
             shield: 8,
             desc: "敵に 10 ダメージ、防 8。敵に流血 2を付与する。次回戦闘の攻撃力+4。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b, self) => {
                 b.dealDamageToEnemy(10);
                 b.gainPlayerShield(8);
@@ -1823,7 +1823,7 @@ const GAME_DATA = {
             attack: 8,
             shield: 16,
             desc: "敵に 8 ダメージ、防 16。列強介入度を -5% 低下させ、敵のシールドを 6 破壊する。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b, self) => {
                 b.dealDamageToEnemy(8);
                 b.gainPlayerShield(16);
@@ -1843,7 +1843,7 @@ const GAME_DATA = {
             attack: 12,
             shield: 4,
             desc: "敵に 12 ダメージ、防 4。次の戦闘の攻撃力+4、20両を得る。",
-            rarity: "rare",
+            rarity: "uncommon",
             onPlay: (b, self) => {
                 b.dealDamageToEnemy(12);
                 b.gainPlayerShield(4);
@@ -2232,7 +2232,8 @@ const GAME_DATA = {
         // 互換性エイリアス
         "act2_elite_serizawa": {
             name: "芹沢鴨（豪刀の猛威）",
-            maxHp: 98,
+            maxHp: 180,
+            startShield: 25,
             isElite: true,
             sprite: "serizawa",
             faction: "sabaku",
@@ -2275,7 +2276,8 @@ const GAME_DATA = {
         // ==========================================
         "act2_normal_1": {
             name: "幕府新式歩兵連隊",
-            maxHp: 65,
+            maxHp: 105,
+            startShield: 15,
             sprite: "shinsiki",
             faction: "sabaku",
             intents: [
@@ -2287,7 +2289,8 @@ const GAME_DATA = {
         },
         "act2_normal_satsuma_samurai": {
             name: "薩摩藩城下士",
-            maxHp: 62,
+            maxHp: 100,
+            startShield: 15,
             sprite: "ronin",
             faction: "tobaku",
             intents: [
@@ -2299,7 +2302,8 @@ const GAME_DATA = {
         },
         "act2_normal_denshitai": {
             name: "幕府伝習隊狙撃手",
-            maxHp: 58,
+            maxHp: 95,
+            startShield: 20,
             sprite: "shinsiki",
             faction: "sabaku",
             intents: [
@@ -2311,7 +2315,8 @@ const GAME_DATA = {
         },
         "act2_normal_british_marine": {
             name: "英国式警備陸戦隊",
-            maxHp: 68,
+            maxHp: 110,
+            startShield: 20,
             sprite: "shinsiki",
             intents: [
                 { type: "attack", damage: 16, desc: "列強式斉射号令" },
@@ -2322,7 +2327,8 @@ const GAME_DATA = {
         },
         "act2_elite_iba": {
             name: "隻腕の小天狗・伊庭八郎",
-            maxHp: 120,
+            maxHp: 190,
+            startShield: 25,
             isElite: true,
             sprite: "mimarigumi",
             faction: "sabaku",
@@ -2335,7 +2341,8 @@ const GAME_DATA = {
         },
         "act2_elite_hanjiro": {
             name: "人斬り半次郎 (桐野利秋)",
-            maxHp: 125,
+            maxHp: 200,
+            startShield: 25,
             isElite: true,
             sprite: "izo",
             faction: "tobaku",
@@ -2348,7 +2355,8 @@ const GAME_DATA = {
         },
         "act2_boss_katamori": {
             name: "会津藩主・松平容保",
-            maxHp: 200,
+            maxHp: 340,
+            startShield: 35,
             isBoss: true,
             sprite: "katamori_boss",
             faction: "sabaku",
@@ -2361,7 +2369,8 @@ const GAME_DATA = {
         },
         "act2_boss_saigo": {
             name: "薩摩軍総督・西郷隆盛",
-            maxHp: 210,
+            maxHp: 350,
+            startShield: 35,
             isBoss: true,
             sprite: "saigo_boss",
             faction: "tobaku",
@@ -2378,7 +2387,8 @@ const GAME_DATA = {
         // ==========================================
         "act3_normal_shogitai": {
             name: "上野彰義隊決死隊",
-            maxHp: 85,
+            maxHp: 140,
+            startShield: 25,
             sprite: "ronin",
             faction: "sabaku",
             intents: [
@@ -2390,7 +2400,8 @@ const GAME_DATA = {
         },
         "act3_normal_ouetsu": {
             name: "奥羽越列藩同盟精鋭",
-            maxHp: 90,
+            maxHp: 150,
+            startShield: 30,
             sprite: "mimarigumi",
             faction: "sabaku",
             intents: [
@@ -2402,7 +2413,8 @@ const GAME_DATA = {
         },
         "act3_normal_shinseifu": {
             name: "新政府軍電撃隊",
-            maxHp: 88,
+            maxHp: 145,
+            startShield: 25,
             sprite: "shinsiki",
             faction: "tobaku",
             intents: [
@@ -2414,7 +2426,8 @@ const GAME_DATA = {
         },
         "act3_normal_armstrong": {
             name: "アームストロング砲兵隊",
-            maxHp: 80,
+            maxHp: 135,
+            startShield: 30,
             sprite: "shinsiki",
             intents: [
                 { type: "defend", shield: 25, desc: "照準固定・弾薬装填" },
@@ -2425,7 +2438,8 @@ const GAME_DATA = {
         },
         "act3_elite_battotai": {
             name: "警視抜刀隊指揮官",
-            maxHp: 150,
+            maxHp: 250,
+            startShield: 35,
             isElite: true,
             sprite: "izo",
             faction: "tobaku",
@@ -2438,7 +2452,8 @@ const GAME_DATA = {
         },
         "act3_elite_sagawa": {
             name: "鬼神・佐川官兵衛",
-            maxHp: 160,
+            maxHp: 260,
+            startShield: 35,
             isElite: true,
             sprite: "serizawa",
             faction: "sabaku",
@@ -2451,7 +2466,8 @@ const GAME_DATA = {
         },
         "act3_final_yoshinobu": {
             name: "征夷大将軍・徳川慶喜",
-            maxHp: 300,
+            maxHp: 480,
+            startShield: 50,
             isFinalBoss: true,
             sprite: "yoshinobu_boss",
             faction: "sabaku",
@@ -2464,7 +2480,8 @@ const GAME_DATA = {
         },
         "act3_final_kangun": {
             name: "新政府官軍総司令部",
-            maxHp: 310,
+            maxHp: 500,
+            startShield: 50,
             isFinalBoss: true,
             sprite: "kangun_boss",
             faction: "tobaku",
@@ -4688,11 +4705,16 @@ const GAME_DATA = {
                 {
                     opinionChange: 20,
                     text: "志士を逃がし、再起の道を残す",
-                    effectDesc: "志士『西郷隆盛』を獲得。次の戦闘の攻撃力+13、HPを 10 失う。",
+                    effectDesc: "志士『西郷隆盛』を獲得。軍資金40両を拠出し、HPを 20 失う（逃走潜伏の重傷）。所持金不足時は追加でHP10喪失。次の戦闘の攻撃力+13。",
                     action: (app) => {
                         app.addCardToDeck("saigo_jigen");
+                        if (app.gold >= 40) {
+                            app.gold -= 40;
+                        } else {
+                            app.damagePlayer(10);
+                        }
+                        app.damagePlayer(20);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 13;
-                        app.damagePlayer(10);
                     }
                 },
                 {
@@ -4798,14 +4820,14 @@ const GAME_DATA = {
                 {
                     opinionChange: -20,
                     text: "救援隊を送り、町を立て直す",
-                    effectDesc: "志士『勝海舟』を獲得。50両を支払い、最大HP+10。資金が足りない場合は選択不可。",
-                    costGold: 50,
-                    canChoose: (app) => app.gold >= 50,
+                    effectDesc: "志士『勝海舟』を獲得。復興資金として65両を支払い、最大HP+5、HPを 5 回復する。資金が足りない場合は選択不可。",
+                    costGold: 65,
+                    canChoose: (app) => app.gold >= 65,
                     action: (app) => {
                         app.addCardToDeck("katsu_kaishu");
-                        app.gold -= 50;
-                        app.maxHp += 10;
-                        app.hp += 10;
+                        app.gold -= 65;
+                        app.maxHp += 5;
+                        app.healPlayer(5);
                     }
                 },
                 {
@@ -6731,11 +6753,11 @@ const GAME_DATA = {
                     opinionChange: -20,
                     text: "【佐幕派】天然理心流の極意・無双三段突きの指導を受ける",
                     faction: "sabaku",
-                    effectDesc: "志士『沖田総司』を獲得。次の戦闘の攻撃力+15、HPを 8 失う。",
+                    effectDesc: "志士『沖田総司』を獲得。次の戦闘の攻撃力+15、HPを 16 失う（激しい打ち込みと喀血の戦慄）。",
                     action: (app) => {
                         app.addCardToDeck("okita_sandan");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 15;
-                        app.damagePlayer(8);
+                        app.damagePlayer(16);
                         if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
@@ -6743,11 +6765,10 @@ const GAME_DATA = {
                     opinionChange: 20,
                     text: "【討幕派】道場の太刀筋を冷静に見極め、神道無念流の剣技で対抗する",
                     faction: "tobaku",
-                    effectDesc: "志士『桂小五郎』を獲得。最大HP+6、HPを 6 回復する。",
+                    effectDesc: "志士『桂小五郎』を獲得。最大HP+4（潜伏と逃走の労苦により回復なし）。",
                     action: (app) => {
                         app.addCardToDeck("katsura_shindo");
-                        app.maxHp += 6;
-                        app.hp += 6;
+                        app.maxHp += 4;
                         if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
@@ -6972,22 +6993,28 @@ const GAME_DATA = {
                     opinionChange: -20,
                     text: "【佐幕派】京都守護職・新選組の警戒網を強化し、刺客の襲撃を退ける",
                     faction: "sabaku",
-                    effectDesc: "志士『近藤勇』を獲得。HPを 10 回復し、40両を得る。",
+                    effectDesc: "志士『近藤勇』を獲得。市中警護の激闘によりHPを 12 失うが、次回戦闘の攻撃力+14。",
                     action: (app) => {
                         app.addCardToDeck("kondo_kotetsu");
-                        app.healPlayer(10);
-                        app.gold += 40;
+                        app.damagePlayer(12);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 14;
                         if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
                     opinionChange: 0,
                     text: "勝海舟の身辺警護を依頼し、その剛剣を人命救助のために生かす",
-                    effectDesc: "志士『勝海舟』を獲得。最大HP+6、HPを 10 回復する。",
+                    effectDesc: "志士『勝海舟』を獲得。操練所の警護費用として45両を拠出し、最大HP+5。資金不足時は最大HP-5。",
                     action: (app) => {
                         app.addCardToDeck("katsu_kaishu");
-                        app.maxHp += 6;
-                        app.healPlayer(10);
+                        if (app.gold >= 45) {
+                            app.gold -= 45;
+                            app.maxHp += 5;
+                            app.hp += 5;
+                        } else {
+                            app.maxHp = Math.max(20, app.maxHp - 5);
+                            app.hp = Math.min(app.hp, app.maxHp);
+                        }
                         if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
