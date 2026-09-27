@@ -36,6 +36,7 @@ class BattleSystem {
         this.turnCount = 0;
         this.comboCount = 0;
         this.playedThisTurn = [];
+        this.triggeredCombosThisTurn = new Set();
         this.turnEndDiscardCount = 0;
 
         // 状態異常・バフ
@@ -65,6 +66,7 @@ class BattleSystem {
         this.turnCount = 0;
         this.comboCount = 0;
         this.playedThisTurn = [];
+        this.triggeredCombosThisTurn = new Set();
 
         // プレイヤー初期化
         this.playerHp = this.app.hp;
@@ -328,6 +330,7 @@ class BattleSystem {
         this.isPlayerTurn = true;
         this.comboCount = 0;
         this.playedThisTurn = [];
+        this.triggeredCombosThisTurn.clear();
         this.turnEndDiscardCount = 0;
 
         // シールドリセット（一部レリックがあれば保持可能）
@@ -481,7 +484,7 @@ class BattleSystem {
         // 1. 志士同士のコネクトリンク（GAME_DATA.combosを参照）
         if (currentCard.character && GAME_DATA.combos) {
             const possibleCombos = GAME_DATA.combos
-                .filter(combo => combo.chars && combo.chars.includes(currentCard.character))
+                .filter(combo => combo.chars && combo.chars.includes(currentCard.character) && !this.triggeredCombosThisTurn.has(combo.id))
                 .sort((a, b) => b.chars.length - a.chars.length);
 
             for (const combo of possibleCombos) {
@@ -495,6 +498,7 @@ class BattleSystem {
 
                 if (allPartnersPresent) {
                     // コネクトリンク発動！
+                    this.triggeredCombosThisTurn.add(combo.id);
                     window.soundSystem.playConnectLink();
                     window.particleSystem.createSparks(window.innerWidth / 2, window.innerHeight * 0.45, 25, true);
 

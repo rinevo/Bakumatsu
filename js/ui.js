@@ -205,10 +205,14 @@ class UIManager {
         const handCards = document.querySelectorAll('#battle-hand .card-frame');
         const hoveredElem = document.querySelector(`[data-card-id="${hoveredCard.id}"]`);
 
-        // 1. 志士のコンボパートナーを判定
+        // 1. 志士のコンボパートナーを判定（今ターン未発動のコンボのみ）
         let partnerChars = [];
         if (hoveredCard.character && GAME_DATA.combos) {
-            const relevantCombos = GAME_DATA.combos.filter(combo => combo.chars && combo.chars.includes(hoveredCard.character));
+            const b = this.app.battle;
+            const triggered = (b && b.triggeredCombosThisTurn) ? b.triggeredCombosThisTurn : new Set();
+            const relevantCombos = GAME_DATA.combos.filter(combo =>
+                combo.chars && combo.chars.includes(hoveredCard.character) && !triggered.has(combo.id)
+            );
             partnerChars = [...new Set(relevantCombos.flatMap(combo => combo.chars.filter(ch => ch !== hoveredCard.character)))];
         }
 
