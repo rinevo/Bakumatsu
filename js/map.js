@@ -442,12 +442,29 @@ class MapSystem {
         return actEvents;
     }
 
+    // 必ず通る関門（チョークポイント）に割り当てる重大歴史事件の定義
+    static get CHOKEPOINT_EVENTS() {
+        return {
+            1: 'event_hamaguri_gate',      // 第一幕関門: 禁門の変、御所前の激戦
+            2: 'event_second_choshu_war',  // 第二幕関門: 第二次長州征討、四境戦争の激闘
+            3: 'event_toba_fushimi'        // 第三幕関門: 鳥羽・伏見の戦い
+        };
+    }
+
+    static get ALL_CHOKEPOINT_EVENT_IDS() {
+        return new Set(Object.values(MapSystem.CHOKEPOINT_EVENTS));
+    }
+
     assignChronologicalEvents(actNumber) {
         const actEvents = this.getChronologicalEventsForAct(actNumber);
         if (actEvents.length === 0) return;
 
-        const maxFloor = actNumber === 3 ? 13 : 14;
         const faction = this.app ? this.app.faction : null;
+        const allChokeEventIds = MapSystem.ALL_CHOKEPOINT_EVENT_IDS;
+        const chokeId = MapSystem.CHOKEPOINT_EVENTS[actNumber];
+
+        // 道中イベント用の候補プール（四境戦争などの関門専用イベントは絶対に除外）
+        const generalActEvents = actEvents.filter(e => !allChokeEventIds.has(e.id));
 
         // マップ上の全イベントノードを floor 昇順、col 昇順に抽出
         const eventNodes = this.nodes
@@ -455,30 +472,30 @@ class MapSystem {
             .sort((a, b) => a.floor - b.floor || a.col - b.col);
 
         const assignedIds = new Set();
+        // 関門イベントIDをあらかじめ予約登録し、道中ノードが選択できないように完全ガード
+        allChokeEventIds.forEach(id => assignedIds.add(id));
+
         let lastSortKey = 0;
 
         eventNodes.forEach(node => {
             let candidates;
 
             if (node.isChokepoint) {
-                // 歴史の関門（チョークポイント）: 幕に応じた不可避の重大決戦事件を確定割り当て
-                let chokeId = 'event_hamaguri_gate'; // Act 1: 禁門の変
-                if (actNumber === 2) chokeId = 'event_second_choshu_war'; // Act 2: 第二次長州征伐
-                if (actNumber === 3) chokeId = 'event_toba_fushimi'; // Act 3: 鳥羽・伏見の戦い
+                // 歴史の関門（チョークポイント・必ず通るコマ）: 幕に応じた不可避の重大決戦事件を確定割り当て
                 const found = GAME_DATA.events.find(e => e.id === chokeId);
                 candidates = found ? [found] : actEvents;
             } else if (node.floor === 0) {
-                // 第一幕 Floor 0: 幕の黎明期（最初の5件）から選択
-                candidates = actEvents.slice(0, 5).filter(e => !assignedIds.has(e.id));
-                if (candidates.length === 0) candidates = actEvents.slice(0, 5);
+                // 第一幕 Floor 0: 幕の黎明期（最初の5件）から選択（関門イベントは除外）
+                candidates = generalActEvents.slice(0, 5).filter(e => !assignedIds.has(e.id));
+                if (candidates.length === 0) candidates = generalActEvents.slice(0, 5);
             } else {
-                // 道中フロア: 直前の事件の年代以降から抽出
-                candidates = actEvents.filter(e => !assignedIds.has(e.id) && (e.sortKey || 0) >= lastSortKey);
+                // 道中フロア: 直前の事件の年代以降から抽出（関門イベントは除外）
+                candidates = generalActEvents.filter(e => !assignedIds.has(e.id) && (e.sortKey || 0) >= lastSortKey);
                 if (candidates.length === 0) {
-                    candidates = actEvents.filter(e => !assignedIds.has(e.id));
+                    candidates = generalActEvents.filter(e => !assignedIds.has(e.id));
                 }
                 if (candidates.length === 0) {
-                    candidates = actEvents;
+                    candidates = generalActEvents.length > 0 ? generalActEvents : actEvents;
                 }
             }
 
@@ -494,15 +511,17 @@ class MapSystem {
                 return 0;
             });
 
-            const selected = candidates[0] || actEvents[0];
-            assignedIds.add(selected.id);
-            lastSortKey = selected.sortKey || lastSortKey;
+            const selected = candidates[0] || (node.isChokepoint ? GAME_DATA.events.find(e => e.id === chokeId) : generalActEvents[0] || actEvents[0]);
+            if (selected) {
+                assignedIds.add(selected.id);
+                lastSortKey = selected.sortKey || lastSortKey;
 
-            node.eventId = selected.id;
-            node.period = selected.period || `${selected.year || 1860}年`;
-            node.shortTitle = selected.shortTitle || selected.title;
-            node.title = `${node.period}\n${node.shortTitle}`;
-            node.sortKey = selected.sortKey || 0;
+                node.eventId = selected.id;
+                node.period = selected.period || `${selected.year || 1860}年`;
+                node.shortTitle = selected.shortTitle || selected.title;
+                node.title = `${node.period}\n${node.shortTitle}`;
+                node.sortKey = selected.sortKey || 0;
+            }
         });
     }
 
@@ -580,20 +599,27 @@ class MapSystem {
 
         if (!eventToTrigger) {
             const currentAct = this.currentAct || 1;
-            // 現在の幕に対応する志士入手可能イベントを優先抽出
-            const shishiEvents = this.getShishiEventsForAct(currentAct);
-            let availableEvents = shishiEvents.length > 0 ? shishiEvents : GAME_DATA.events.filter(e => {
-                if (Array.isArray(e.act)) return e.act.includes(currentAct);
-                return e.act === currentAct;
-            });
-            if (availableEvents.length === 0) {
-                availableEvents = GAME_DATA.events;
-            }
+            const allChokeEventIds = MapSystem.ALL_CHOKEPOINT_EVENT_IDS;
 
-            // 未遭遇イベントを優先選出（長編化での重複防止）
-            const unvisited = availableEvents.filter(e => !this.visitedEventIds.includes(e.id));
-            const pool = unvisited.length > 0 ? unvisited : availableEvents;
-            eventToTrigger = pool[Math.floor(Math.random() * pool.length)];
+            if (node && node.isChokepoint) {
+                const chokeId = MapSystem.CHOKEPOINT_EVENTS[currentAct];
+                eventToTrigger = GAME_DATA.events.find(e => e.id === chokeId);
+            } else {
+                // 道中ノードでは関門専用イベント（四境戦争等）を絶対に除外
+                const shishiEvents = this.getShishiEventsForAct(currentAct).filter(e => !allChokeEventIds.has(e.id));
+                let availableEvents = shishiEvents.length > 0 ? shishiEvents : GAME_DATA.events.filter(e => {
+                    if (Array.isArray(e.act)) return e.act.includes(currentAct);
+                    return e.act === currentAct;
+                }).filter(e => !allChokeEventIds.has(e.id));
+                if (availableEvents.length === 0) {
+                    availableEvents = GAME_DATA.events.filter(e => !allChokeEventIds.has(e.id));
+                }
+
+                // 未遭遇イベントを優先選出（長編化での重複防止）
+                const unvisited = availableEvents.filter(e => !this.visitedEventIds.includes(e.id));
+                const pool = unvisited.length > 0 ? unvisited : availableEvents;
+                eventToTrigger = pool[Math.floor(Math.random() * pool.length)];
+            }
         }
 
         if (eventToTrigger) {

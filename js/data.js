@@ -282,19 +282,20 @@ const GAME_DATA = {
                 b.modifyImperialGauge(-5);
             }
         },
-        "kido_reform": {
-            id: "kido_reform",
-            name: "桂小五郎：維新の設計",
+        "sufu_reform": {
+            id: "sufu_reform",
+            name: "周布政之助：長州の経綸",
             faction: "tobaku",
-            character: "katsura",
+            character: "sufu",
             type: "shishi",
-            cost: 1,
+            cost: 2,
             attack: 8,
-            shield: 6,
-            desc: "敵に 8 ダメージ、防 6。カードを1枚引く。",
+            shield: 10,
+            desc: "敵に 8 ダメージ、防 10。カードを2枚引く。次のターンの文を +1 得る。",
             rarity: "rare",
             onPlay: (b) => {
-                b.drawCards(1);
+                b.drawCards(2);
+                b.gainPlayerEnergy(1);
             }
         },
         "nakaoka_mediator": {
@@ -977,12 +978,13 @@ const GAME_DATA = {
             type: "shishi",
             cost: 2,
             attack: 0,
-            shield: 15,
-            desc: "防 15。現在のシールド値を 1.4 倍にする。",
-            rarity: "rare",
+            shield: 16,
+            desc: "防 16。現在のシールド値を 1.4 倍にし、次のターンの被ダメージを 4 軽減する。",
+            rarity: "legendary",
             onPlay: (b, self) => {
-                b.gainPlayerShield(15);
+                b.gainPlayerShield(16);
                 b.playerShield = Math.floor(b.playerShield * 1.4);
+                b.applyPlayerBuff("damage_reduction", 4);
             }
         },
         "saito_gato": {
@@ -1015,17 +1017,23 @@ const GAME_DATA = {
             desc: "敵に 10 ダメージ、防 4。",
             rarity: "uncommon"
         },
-        "yamagawa_defense": {
-            id: "yamagawa_defense",
-            name: "山川大蔵：会津守備隊",
+        "sakai_genba_charge": {
+            id: "sakai_genba_charge",
+            name: "酒井玄蕃：鬼玄蕃の雷名",
             faction: "sabaku",
-            character: "yamakawa",
+            character: "sakai_genba",
             type: "shishi",
             cost: 2,
-            attack: 4,
-            shield: 14,
-            desc: "敵に 4 ダメージ、防 14。",
-            rarity: "uncommon"
+            attack: 16,
+            shield: 4,
+            desc: "敵に 16 ダメージ、防 4。敵のシールドを 8 破壊し、次の戦闘の攻撃力 +4。",
+            rarity: "rare",
+            onPlay: (b) => {
+                if (b.enemy) {
+                    b.enemy.shield = Math.max(0, (b.enemy.shield || 0) - 8);
+                }
+                if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 4;
+            }
         },
         "harada_spear": {
             id: "harada_spear",
@@ -1197,17 +1205,18 @@ const GAME_DATA = {
         },
         "yamakawa_cavalry": {
             id: "yamakawa_cavalry",
-            name: "山川大蔵：会津の退陣",
+            name: "山川大蔵：彼岸獅子の奮戦",
             faction: "sabaku",
             character: "yamakawa",
             type: "shishi",
-            cost: 1,
-            attack: 8,
-            shield: 10,
-            desc: "敵に 8 ダメージ、防 10。HPを 4 回復する。",
+            cost: 2,
+            attack: 12,
+            shield: 8,
+            desc: "敵に 12 ダメージ、防 8。HPを 4 回復し、敵に脱力 1 を付与する。",
             rarity: "uncommon",
             onPlay: (b) => {
                 b.healPlayer(4);
+                b.applyStatusToEnemy("weak", 1);
             }
         },
         "nagai_retreat": {
@@ -1260,19 +1269,23 @@ const GAME_DATA = {
                 }
             }
         },
-        "katamori_oath": {
-            id: "katamori_oath",
-            name: "松平容保：義の誓い",
+        "kayano_sacrifice": {
+            id: "kayano_sacrifice",
+            name: "萱野権兵衛：会津の殉難",
             faction: "sabaku",
-            character: "katamori",
+            killedByTobaku: true, // 歴史上、新政府軍の裁定により主家殉難・自刃（討幕派プレイ時入手不可）
+            character: "kayano",
             type: "shishi",
-            cost: 2,
-            attack: 7,
-            shield: 15,
-            desc: "敵に 7 ダメージ、防 15。次のターンの被ダメージを 4 軽減する。",
-            rarity: "legendary",
+            cost: 1,
+            attack: 6,
+            shield: 12,
+            desc: "敵に 6 ダメージ、防 12。味方のデバフを解除し、HPを 4 回復する。",
+            rarity: "rare",
             onPlay: (b) => {
-                b.applyPlayerBuff("damage_reduction", 4);
+                b.healPlayer(4);
+                if (b.playerDebuffs) {
+                    b.playerDebuffs = {};
+                }
             }
         },
         "koga_naval": {
@@ -3439,12 +3452,13 @@ const GAME_DATA = {
                 },
                 {
                     opinionChange: -20,
-                    text: "降伏を申し入れ、城下を守る",
-                    effectDesc: "志士『山川大蔵』を獲得。列強介入-7%、50両を失う。",
+                    text: "【佐幕派】庄内藩・酒井玄蕃の援軍と呼応し、新政府軍の包囲網を突破する",
+                    effectDesc: "志士『酒井玄蕃：鬼玄蕃の雷名』を獲得。次の戦闘の攻撃力+16、HPを 6 回復。",
+                    faction: "sabaku",
                     action: (app) => {
-                        app.addCardToDeck("yamakawa_cavalry");
-                        app.modifyImperialGauge(-7);
-                        app.gold = Math.max(0, app.gold - 50);
+                        app.addCardToDeck("sakai_genba_charge");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 16;
+                        app.healPlayer(6);
                     }
                 }
             ]
@@ -3781,10 +3795,10 @@ const GAME_DATA = {
                 },
                 {
                     opinionChange: 15,
-                    text: "密かに長州へ武器を流す",
-                    effectDesc: "志士『桂小五郎』を獲得。『新式ミニエ銃』をデッキに加え、列強介入+7%。",
+                    text: "密かに長州へ武器を流し、執政・周布政之助と共に防備を固める",
+                    effectDesc: "志士『周布政之助：長州の経綸』を獲得。『新式ミニエ銃』をデッキに加え、列強介入+7%。",
                     action: (app) => {
-                        app.addCardToDeck("katsura_shindo");
+                        app.addCardToDeck("sufu_reform");
                         app.addCardToDeck("weapon_minie");
                         app.modifyImperialGauge(7);
                     }
@@ -3811,10 +3825,10 @@ const GAME_DATA = {
                 {
                     opinionChange: -20,
                     text: "旧幕府軍の防衛線を支える",
-                    effectDesc: "志士『松平容保：義の誓い』を獲得。60両を得るが、HPを 8 失う。",
+                    effectDesc: "志士『松平容保：会津の義気』を獲得。60両を得るが、HPを 8 失う。",
                     faction: "sabaku",
                     action: (app) => {
-                        app.addCardToDeck("katamori_oath");
+                        app.addCardToDeck("aizu_shield");
                         app.gold += 60;
                         app.damagePlayer(8);
                     }
@@ -3983,7 +3997,7 @@ const GAME_DATA = {
                     text: "視察費を軍備に回す",
                     effectDesc: "志士『桂小五郎』を獲得。『アームストロング砲』をデッキに加えるが、列強介入+10%。",
                     action: (app) => {
-                        app.addCardToDeck("kido_reform");
+                        app.addCardToDeck("katsura_shindo");
                         app.addCardToDeck("weapon_armstrong");
                         app.modifyImperialGauge(10);
                     }
@@ -4113,7 +4127,7 @@ const GAME_DATA = {
                     text: "改革を急ぎ、中央の力を強める",
                     effectDesc: "志士『桂小五郎』を獲得。次の戦闘の攻撃力+12、列強介入+5%。",
                     action: (app) => {
-                        app.addCardToDeck("kido_reform");
+                        app.addCardToDeck("katsura_shindo");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 12;
                         app.modifyImperialGauge(5);
                     }
@@ -4141,7 +4155,7 @@ const GAME_DATA = {
                     text: "改革を断行し、国の仕組みを統一する",
                     effectDesc: "志士『桂小五郎』を獲得。最大HP+10、次の戦闘の攻撃力+7。",
                     action: (app) => {
-                        app.addCardToDeck("kido_reform");
+                        app.addCardToDeck("katsura_shindo");
                         app.maxHp += 10;
                         app.hp += 10;
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 7;
@@ -4436,7 +4450,7 @@ const GAME_DATA = {
                     text: "奉還を進め、中央の制度を整える",
                     effectDesc: "志士『桂小五郎』を獲得。最大HP+9、列強介入-6%。",
                     action: (app) => {
-                        app.addCardToDeck("kido_reform");
+                        app.addCardToDeck("katsura_shindo");
                         app.maxHp += 9;
                         app.hp += 9;
                         app.modifyImperialGauge(-6);
@@ -5238,10 +5252,10 @@ const GAME_DATA = {
                 {
                     opinionChange: -20,
                     text: "【佐幕派】京都守護職・会津藩兵と新選組を指揮し、御所九門を厳重封鎖する",
-                    effectDesc: "志士『松平容保：義の誓い』を獲得。御所死守の激闘によりHPを 25 失い、最大HP-6。世論佐幕+30%。",
+                    effectDesc: "志士『松平容保：会津の義気』を獲得。御所死守の激闘によりHPを 25 失い、最大HP-6。世論佐幕+30%。",
                     faction: "sabaku",
                     action: (app) => {
-                        app.addCardToDeck("katamori_oath");
+                        app.addCardToDeck("aizu_shield");
                         app.maxHp = Math.max(20, app.maxHp - 6);
                         app.damagePlayer(25);
                     }
@@ -5467,10 +5481,10 @@ const GAME_DATA = {
                 },
                 {
                     opinionChange: 20,
-                    text: "軍費を民生へ回す",
-                    effectDesc: "志士『桂小五郎』を獲得。HPを 12 回復し、60両を得る。",
+                    text: "軍費を民生へ回し、藩政改革の経綸を広げる",
+                    effectDesc: "志士『周布政之助：長州の経綸』を獲得。HPを 12 回復し、60両を得る。",
                     action: (app) => {
-                        app.addCardToDeck("kido_reform");
+                        app.addCardToDeck("sufu_reform");
                         app.healPlayer(12);
                         app.gold += 60;
                     }
@@ -5576,10 +5590,10 @@ const GAME_DATA = {
                 },
                 {
                     opinionChange: 20,
-                    text: "職人の技を守り、和洋を融合する",
-                    effectDesc: "志士『桂小五郎』を獲得。40両を得て、HPを 8 回復する。",
+                    text: "職人の技を守り、実学と和洋の経綸を融合する",
+                    effectDesc: "志士『周布政之助：長州の経綸』を獲得。40両を得て、HPを 8 回復する。",
                     action: (app) => {
-                        app.addCardToDeck("kido_reform");
+                        app.addCardToDeck("sufu_reform");
                         app.gold += 40;
                         app.healPlayer(8);
                     }
@@ -5774,7 +5788,7 @@ const GAME_DATA = {
                     text: "全国に学校を整備する",
                     effectDesc: "志士『桂小五郎』を獲得。最大HP+10、HPを 10 回復する。",
                     action: (app) => {
-                        app.addCardToDeck("kido_reform");
+                        app.addCardToDeck("katsura_shindo");
                         app.maxHp += 10;
                         app.hp += 10;
                     }
@@ -6515,9 +6529,9 @@ const GAME_DATA = {
                 {
                     opinionChange: -20,
                     text: "会津・桑名の高須兄弟と義盟を結び、結束を固める",
-                    effectDesc: "志士『松平容保：義の誓い』を獲得。HPを 10 回復し、50両を得る。",
+                    effectDesc: "志士『松平容保：会津の義気』を獲得。HPを 10 回復し、50両を得る。",
                     action: (app) => {
-                        app.addCardToDeck("katamori_oath");
+                        app.addCardToDeck("aizu_shield");
                         app.healPlayer(10);
                         app.gold += 50;
                     }
@@ -6539,7 +6553,7 @@ const GAME_DATA = {
                     effectDesc: "志士『桂小五郎』を獲得。50両を得て、列強介入-8%。",
                     faction: "tobaku",
                     action: (app) => {
-                        app.addCardToDeck("kido_reform");
+                        app.addCardToDeck("katsura_shindo");
                         app.gold += 50;
                         app.modifyImperialGauge(-8);
                     }
@@ -7002,10 +7016,10 @@ const GAME_DATA = {
                 },
                 {
                     opinionChange: -20,
-                    text: "城下の物資を城内へ運び込み、藩主・松平容保の本丸防備を支える",
-                    effectDesc: "志士『松平容保』を獲得。50両を得て、列強介入-6%。",
+                    text: "家老・萱野権兵衛と共に本丸防備を固め、藩主・容保公を死守する",
+                    effectDesc: "志士『萱野権兵衛：会津の殉難』を獲得。50両を得て、列強介入-6%。",
                     action: (app) => {
-                        app.addCardToDeck("katamori_oath");
+                        app.addCardToDeck("kayano_sacrifice");
                         app.gold += 50;
                         app.modifyImperialGauge(-6);
                         if (window.soundSystem) window.soundSystem.playFanfare();
@@ -7337,7 +7351,7 @@ const GAME_DATA = {
     ],
 
     // ==========================================
-    // 6. 志士連携（コンボ・コネクトリンク）マスター定義 (全224組・全志士網羅)
+    // 6. 志士連携（コンボ・コネクトリンク）マスター定義 (全233組・全志士網羅)
     // ==========================================
     combos: [
     // === 既存のコンボ（連鎖墨文字を必ず表示） ===
@@ -9588,6 +9602,105 @@ const GAME_DATA = {
             if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 6;
             if (b.enemy) b.enemy.debuffBleed = (b.enemy.debuffBleed || 0) + 3;
             b.damagePlayer(3);
+        }
+    },
+    // === 萱野権兵衛 史実コンボ（会津藩家老・殉難の忠義） ===
+    {
+        id: "combo_kayano_katamori",
+        chars: ["kayano", "katamori"],
+        title: "【主家殉難・義の家老！】",
+        desc: "防 18、HP 5 回復、デバフを解除。",
+        apply: (b) => {
+            b.gainPlayerShield(18);
+            b.healPlayer(5);
+            if (b.playerDebuffs) b.playerDebuffs = {};
+        }
+    },
+    {
+        id: "combo_kayano_saigo_tanomo",
+        chars: ["kayano", "saigo_tanomo"],
+        title: "【会津両家老・悲愁の決別！】",
+        desc: "敵に 14 ダメージ、防 12、次ターンの被ダメージ 3 軽減。",
+        apply: (b) => {
+            b.dealDamageToEnemy(14);
+            b.gainPlayerShield(12);
+            b.applyPlayerBuff("damage_reduction", 3);
+        }
+    },
+    {
+        id: "combo_kayano_sagawa",
+        chars: ["kayano", "sagawa"],
+        title: "【会津士魂・不抜の覚悟！】",
+        desc: "敵に 16 ダメージ、防 10、次回攻撃力 +5。",
+        apply: (b) => {
+            b.dealDamageToEnemy(16);
+            b.gainPlayerShield(10);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 5;
+        }
+    },
+    // === 周布政之助 史実コンボ（長州藩執政・尊攘開国の経綸） ===
+    {
+        id: "combo_sufu_katsura",
+        chars: ["sufu", "katsura"],
+        title: "【長州藩政の師弟！】",
+        desc: "敵に 14 ダメージ、防 12、カードを 2 枚引く。",
+        apply: (b) => {
+            b.dealDamageToEnemy(14);
+            b.gainPlayerShield(12);
+            b.drawCards(2);
+        }
+    },
+    {
+        id: "combo_sufu_yoshida",
+        chars: ["sufu", "yoshida"],
+        title: "【至誠開花・村塾庇護！】",
+        desc: "防 12、カードを 2 枚引く、次回攻撃力 +4。",
+        apply: (b) => {
+            b.gainPlayerShield(12);
+            b.drawCards(2);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 4;
+        }
+    },
+    {
+        id: "combo_sufu_takasugi",
+        chars: ["sufu", "takasugi"],
+        title: "【奇兵隊創設の英断！】",
+        desc: "敵に 18 ダメージ、次回攻撃力 +6。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 6;
+        }
+    },
+    // === 酒井玄蕃 史実コンボ（庄内藩猛将・戊辰不敗の鬼玄蕃） ===
+    {
+        id: "combo_sakai_katamori",
+        chars: ["sakai_genba", "katamori"],
+        title: "【奥羽越の盟主・不抜の絆！】",
+        desc: "敵に 16 ダメージ、防 14、敵シールドを 8 破壊。",
+        apply: (b) => {
+            b.dealDamageToEnemy(16);
+            b.gainPlayerShield(14);
+            if (b.enemy) b.enemy.shield = Math.max(0, (b.enemy.shield || 0) - 8);
+        }
+    },
+    {
+        id: "combo_sakai_tatsumi",
+        chars: ["sakai_genba", "tatsumi"],
+        title: "【奥羽連勝・雷神と鬼玄蕃！】",
+        desc: "敵に 20 ダメージ、次回攻撃力 +8。",
+        apply: (b) => {
+            b.dealDamageToEnemy(20);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 8;
+        }
+    },
+    {
+        id: "combo_sakai_kawai",
+        chars: ["sakai_genba", "kawai"],
+        title: "【北越連帯・最新兵器の雷撃！】",
+        desc: "敵に 18 ダメージ、敵シールドを 10 破壊。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            if (b.enemy) b.enemy.shield = Math.max(0, (b.enemy.shield || 0) - 10);
         }
     }
 ]
