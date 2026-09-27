@@ -660,10 +660,18 @@ class UIManager {
 
                 let opinionBadgeHtml = '';
                 if (typeof choice.opinionChange === 'number') {
+                    const isAdverse = (this.app.faction === 'tobaku' && choice.opinionChange < 0) ||
+                                      (this.app.faction === 'sabaku' && choice.opinionChange > 0);
+                    const effectiveChange = isAdverse ? Math.round(choice.opinionChange * 1.8) : choice.opinionChange;
+
                     if (choice.opinionChange > 0) {
-                        opinionBadgeHtml = `<span class="badge-opinion badge-opinion-tobaku">🔴 世論: 討幕+${choice.opinionChange}%</span>`;
+                        const label = isAdverse ? `⚠️ 逆風: 討幕+${Math.abs(effectiveChange)}%` : `🔴 世論: 討幕+${effectiveChange}%`;
+                        const cls = isAdverse ? 'badge-opinion badge-opinion-warning' : 'badge-opinion badge-opinion-tobaku';
+                        opinionBadgeHtml = `<span class="${cls}">${label}</span>`;
                     } else if (choice.opinionChange < 0) {
-                        opinionBadgeHtml = `<span class="badge-opinion badge-opinion-sabaku">🔵 世論: 佐幕+${Math.abs(choice.opinionChange)}%</span>`;
+                        const label = isAdverse ? `⚠️ 逆風: 佐幕+${Math.abs(effectiveChange)}%` : `🔵 世論: 佐幕+${Math.abs(effectiveChange)}%`;
+                        const cls = isAdverse ? 'badge-opinion badge-opinion-warning' : 'badge-opinion badge-opinion-sabaku';
+                        opinionBadgeHtml = `<span class="${cls}">${label}</span>`;
                     } else {
                         opinionBadgeHtml = `<span class="badge-opinion badge-opinion-neutral">⚖️ 世論: 変動なし</span>`;
                     }

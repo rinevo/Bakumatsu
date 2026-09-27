@@ -1752,6 +1752,24 @@ const GAME_DATA = {
         },
 
         // --- ⚠️ 不平等条約・呪いカード ---
+        "curse_bounty": {
+            id: "curse_bounty",
+            name: "幕府指名手配",
+            faction: "curse",
+            type: "curse",
+            cost: 1,
+            desc: "【呪い・重圧】手札にある間、ターン終了時に HP 3 ダメージ。1文支払って使用するとその戦闘中は除外（Exhaust）される。",
+            rarity: "curse",
+            exhaust: true,
+            onTurnEndInHand: (battle) => {
+                battle.damagePlayerDirect(3);
+            },
+            onPlay: (battle) => {
+                if (window.soundSystem && window.soundSystem.playWarning) {
+                    window.soundSystem.playWarning();
+                }
+            }
+        },
         "curse_extraterritoriality": {
             id: "curse_extraterritoriality",
             name: "不平等条約：治外法権の受容",
@@ -2827,12 +2845,12 @@ const GAME_DATA = {
                 {
                     opinionChange: 15,
                     text: "砲台を死守し、攘夷の意地を示す",
-                    effectDesc: "志士『高杉晋作』を獲得。HPを 10 失うが、50両と次の戦闘の攻撃力+6を得る。",
+                    effectDesc: "志士『高杉晋作』を獲得。四国連合艦隊の猛砲撃に晒されHPを 30 失い、最大HP-6。次戦の攻撃力+12。",
                     action: (app) => {
                         app.addCardToDeck("takasugi_kiheitai");
-                        app.damagePlayer(10);
-                        app.gold += 50;
-                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 6;
+                        app.maxHp = Math.max(20, app.maxHp - 6);
+                        app.damagePlayer(30);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 12;
                     }
                 },
                 {
@@ -3501,23 +3519,24 @@ const GAME_DATA = {
                 {
                     opinionChange: -20,
                     text: "【佐幕派】近藤勇の指導力に従い、局中法度を厳格に布く",
-                    effectDesc: "志士『近藤勇』を獲得。HPを 10 失うが、次の戦闘の攻撃力+10。",
+                    effectDesc: "志士『近藤勇』を獲得。鉄の規律と血の粛清によりHPを 25 失い、最大HP-6。次の戦闘攻撃力+12。",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("kondo_kotetsu");
-                        app.damagePlayer(10);
-                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 10;
+                        app.maxHp = Math.max(20, app.maxHp - 6);
+                        app.damagePlayer(25);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 12;
                     }
                 },
                 {
                     opinionChange: -20,
                     text: "【佐幕派】土方歳三と共に軍律を固め、組織を統制する",
-                    effectDesc: "志士『土方歳三』を獲得。HPを 8 回復し、列強介入-5%。",
+                    effectDesc: "志士『土方歳三』を獲得。鬼の副長による苛烈な軍律によりHPを 25 失い、最大HP-6。世論佐幕+20%。",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("hijikata_fukucho");
-                        app.healPlayer(8);
-                        app.modifyImperialGauge(-5);
+                        app.maxHp = Math.max(20, app.maxHp - 6);
+                        app.damagePlayer(25);
                     }
                 },
                 {
@@ -3765,11 +3784,14 @@ const GAME_DATA = {
                 {
                     opinionChange: -20,
                     text: "異国の技術を学び、海軍を創設する",
-                    effectDesc: "志士『勝海舟』を獲得。HPを完全回復し、列強介入-10%。",
+                    effectDesc: "志士『勝海舟』を獲得。異国軍制導入の反発により軍資金50両を拠出、HPを 20 失い、最大HP-6、列強介入+8%。呪い『家臣の寝返り』混入。",
                     action: (app) => {
                         app.addCardToDeck("katsu_kaishu");
-                        app.hp = app.maxHp;
-                        app.modifyImperialGauge(-10);
+                        app.addCardToDeck("curse_betrayal");
+                        app.gold = Math.max(0, app.gold - 50);
+                        app.maxHp = Math.max(20, app.maxHp - 6);
+                        app.damagePlayer(20);
+                        app.modifyImperialGauge(8);
                     }
                 },
                 {
@@ -4705,15 +4727,17 @@ const GAME_DATA = {
                 {
                     opinionChange: 20,
                     text: "志士を逃がし、再起の道を残す",
-                    effectDesc: "志士『西郷隆盛』を獲得。軍資金40両を拠出し、HPを 20 失う（逃走潜伏の重傷）。所持金不足時は追加でHP10喪失。次の戦闘の攻撃力+13。",
+                    effectDesc: "志士『西郷隆盛』を獲得。軍資金50両を拠出し、HPを 32 失い、最大HP-8（生涯残る古傷）。呪い『幕府指名手配』が混入。資金不足時は最大HP-14。次の戦闘攻撃力+13。",
                     action: (app) => {
                         app.addCardToDeck("saigo_jigen");
-                        if (app.gold >= 40) {
-                            app.gold -= 40;
+                        app.addCardToDeck("curse_bounty");
+                        if (app.gold >= 50) {
+                            app.gold -= 50;
+                            app.maxHp = Math.max(20, app.maxHp - 8);
                         } else {
-                            app.damagePlayer(10);
+                            app.maxHp = Math.max(20, app.maxHp - 14);
                         }
-                        app.damagePlayer(20);
+                        app.damagePlayer(32);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 13;
                     }
                 },
@@ -4820,14 +4844,14 @@ const GAME_DATA = {
                 {
                     opinionChange: -20,
                     text: "救援隊を送り、町を立て直す",
-                    effectDesc: "志士『勝海舟』を獲得。復興資金として65両を支払い、最大HP+5、HPを 5 回復する。資金が足りない場合は選択不可。",
-                    costGold: 65,
-                    canChoose: (app) => app.gold >= 65,
+                    effectDesc: "志士『勝海舟』を獲得。復興・海防基金として80両を拠出し、HPを 15 失い、最大HP-5。資金が足りない場合は選択不可。",
+                    costGold: 80,
+                    canChoose: (app) => app.gold >= 80,
                     action: (app) => {
                         app.addCardToDeck("katsu_kaishu");
-                        app.gold -= 65;
-                        app.maxHp += 5;
-                        app.healPlayer(5);
+                        app.gold -= 80;
+                        app.maxHp = Math.max(20, app.maxHp - 5);
+                        app.damagePlayer(15);
                     }
                 },
                 {
@@ -5149,12 +5173,12 @@ const GAME_DATA = {
                 {
                     opinionChange: -20,
                     text: "【佐幕派】京都守護職・会津藩兵と新選組を指揮し、御所九門を厳重封鎖する",
-                    effectDesc: "志士『松平容保：義の誓い』を獲得。HPを 12 回復し、列強介入-8%。",
+                    effectDesc: "志士『松平容保：義の誓い』を獲得。御所死守の激闘によりHPを 25 失い、最大HP-6。世論佐幕+30%。",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("katamori_oath");
-                        app.healPlayer(12);
-                        app.modifyImperialGauge(-8);
+                        app.maxHp = Math.max(20, app.maxHp - 6);
+                        app.damagePlayer(25);
                     }
                 },
                 {
@@ -6529,11 +6553,12 @@ const GAME_DATA = {
                 {
                     opinionChange: -20,
                     text: "【佐幕派】局長・近藤勇の天然理心流の稽古に加わり、剣技を研ぎ澄ます",
-                    effectDesc: "志士『近藤勇』を獲得。HPを 10 失うが、次回戦闘の攻撃力+16。",
+                    effectDesc: "志士『近藤勇』を獲得。骨をも砕く天然理心流の荒稽古によりHPを 28 失い、最大HP-6。次回戦闘の攻撃力+16。",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("kondo_kotetsu");
-                        app.damagePlayer(10);
+                        app.maxHp = Math.max(20, app.maxHp - 6);
+                        app.damagePlayer(28);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 16;
                     }
                 },
@@ -6753,11 +6778,12 @@ const GAME_DATA = {
                     opinionChange: -20,
                     text: "【佐幕派】天然理心流の極意・無双三段突きの指導を受ける",
                     faction: "sabaku",
-                    effectDesc: "志士『沖田総司』を獲得。次の戦闘の攻撃力+15、HPを 16 失う（激しい打ち込みと喀血の戦慄）。",
+                    effectDesc: "志士『沖田総司』を獲得。鬼気迫る死線稽古によりHPを 30 失い、最大HP-6（喀血の戦慄）。次の戦闘攻撃力+16。",
                     action: (app) => {
                         app.addCardToDeck("okita_sandan");
-                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 15;
-                        app.damagePlayer(16);
+                        app.maxHp = Math.max(20, app.maxHp - 6);
+                        app.damagePlayer(30);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 16;
                         if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
@@ -6765,10 +6791,12 @@ const GAME_DATA = {
                     opinionChange: 20,
                     text: "【討幕派】道場の太刀筋を冷静に見極め、神道無念流の剣技で対抗する",
                     faction: "tobaku",
-                    effectDesc: "志士『桂小五郎』を獲得。最大HP+4（潜伏と逃走の労苦により回復なし）。",
+                    effectDesc: "志士『桂小五郎』を獲得。新選組の追撃をかわす極限の逃走によりHPを 20 失い、最大HP-4。次回攻撃力+12。",
                     action: (app) => {
                         app.addCardToDeck("katsura_shindo");
-                        app.maxHp += 4;
+                        app.maxHp = Math.max(20, app.maxHp - 4);
+                        app.damagePlayer(20);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 12;
                         if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
@@ -6993,10 +7021,11 @@ const GAME_DATA = {
                     opinionChange: -20,
                     text: "【佐幕派】京都守護職・新選組の警戒網を強化し、刺客の襲撃を退ける",
                     faction: "sabaku",
-                    effectDesc: "志士『近藤勇』を獲得。市中警護の激闘によりHPを 12 失うが、次回戦闘の攻撃力+14。",
+                    effectDesc: "志士『近藤勇』を獲得。刺客との死闘によりHPを 28 失い、最大HP-6。次回戦闘の攻撃力+14。",
                     action: (app) => {
                         app.addCardToDeck("kondo_kotetsu");
-                        app.damagePlayer(12);
+                        app.maxHp = Math.max(20, app.maxHp - 6);
+                        app.damagePlayer(28);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 14;
                         if (window.soundSystem) window.soundSystem.playFanfare();
                     }
@@ -7004,16 +7033,15 @@ const GAME_DATA = {
                 {
                     opinionChange: 0,
                     text: "勝海舟の身辺警護を依頼し、その剛剣を人命救助のために生かす",
-                    effectDesc: "志士『勝海舟』を獲得。操練所の警護費用として45両を拠出し、最大HP+5。資金不足時は最大HP-5。",
+                    effectDesc: "志士『勝海舟』を獲得。操練所の警備資金60両を拠出し、最大HP-6。呪い『家臣の寝返り（内通）』混入。資金不足時は最大HP-12。",
                     action: (app) => {
                         app.addCardToDeck("katsu_kaishu");
-                        if (app.gold >= 45) {
-                            app.gold -= 45;
-                            app.maxHp += 5;
-                            app.hp += 5;
+                        app.addCardToDeck("curse_betrayal");
+                        if (app.gold >= 60) {
+                            app.gold -= 60;
+                            app.maxHp = Math.max(20, app.maxHp - 6);
                         } else {
-                            app.maxHp = Math.max(20, app.maxHp - 5);
-                            app.hp = Math.min(app.hp, app.maxHp);
+                            app.maxHp = Math.max(20, app.maxHp - 12);
                         }
                         if (window.soundSystem) window.soundSystem.playFanfare();
                     }

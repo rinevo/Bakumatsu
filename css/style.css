@@ -798,6 +798,17 @@ body {
     border: 1px solid #d69e2e;
     color: #fefcbf;
 }
+.badge-opinion-warning {
+    background: rgba(229, 62, 62, 0.35);
+    border: 1px solid #ff3333;
+    color: #ffcccc;
+    box-shadow: 0 0 8px rgba(255, 50, 50, 0.4);
+    animation: opinionPulse 1.8s infinite;
+}
+@keyframes opinionPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
 
 /* 世論フェーズ別スタイル */
 .opinion-phase-bakui {

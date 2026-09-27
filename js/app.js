@@ -506,8 +506,15 @@ class BakumatsuApp {
     }
 
     modifyPublicOpinion(delta) {
+        let actualDelta = delta;
+        // 敵軍有利（自軍不利）の選択時は1.8倍の激甚ペナルティ
+        const isAdverse = (this.faction === 'tobaku' && delta < 0) || (this.faction === 'sabaku' && delta > 0);
+        if (isAdverse) {
+            actualDelta = Math.round(delta * 1.8);
+        }
+
         const prevPhase = this.getPublicOpinionPhase();
-        this.publicOpinion = Math.max(-100, Math.min(100, this.publicOpinion + delta));
+        this.publicOpinion = Math.max(-100, Math.min(100, this.publicOpinion + actualDelta));
         const newPhase = this.getPublicOpinionPhase();
 
         // フェーズが変動した場合の効果音や演出
