@@ -152,8 +152,9 @@ class ShopSystem {
         const sit = this.app.getFactionSituation();
         if (sit === 'super_advantage') return 0.80; // 20%割引（民衆・豪商の全面支援）
         if (sit === 'advantage') return 0.90;       // 10%割引
-        if (sit === 'disadvantage') return 1.10;    // 10%高騰（警戒・物価高）
-        if (sit === 'super_disadvantage') return 1.35; // 35%高騰（逆賊への物資遮断・買い占め）
+        if (sit === 'disadvantage') return 1.40;    // 40%高騰（警戒・物価高、旧20%の倍）
+        if (sit === 'super_disadvantage') return 2.00; // 100%超高騰（定価の2倍！物資遮断・買い占め）
+        if (sit === 'extreme_disadvantage') return 2.50; // 150%超高騰（定価の2.5倍！完全経済封鎖）
         return 1.0;
     }
 
@@ -186,9 +187,23 @@ class ShopSystem {
     }
 
     restHeal() {
-        const healRatio = this.app.hasRelic("samurai_pipe") ? 0.50 : 0.35;
+        const sit = this.app.getFactionSituation ? this.app.getFactionSituation() : 'neutral';
+        let healRatio = 0.35;
+        if (sit === 'extreme_disadvantage') {
+            healRatio = 0.0; // 追手急襲・四面楚歌: 休息不能（回復0%）
+        } else if (sit === 'super_disadvantage') {
+            healRatio = 0.05; // 追手迫る極限状態: 5%のみ回復
+        } else if (sit === 'disadvantage') {
+            healRatio = 0.15; // 警戒態勢・野営困難: 15%に低下
+        }
+        if (this.app.hasRelic("samurai_pipe")) {
+            healRatio += 0.15; // 志士の煙管所持で+15%
+        }
         const healAmount = Math.floor(this.app.maxHp * healRatio);
         this.app.healPlayer(healAmount);
+        if (healAmount === 0 && window.particleSystem && window.particleSystem.createFloatingText) {
+            window.particleSystem.createFloatingText("追手急襲！休息できず回復0", window.innerWidth / 2, window.innerHeight * 0.45, "#e53e3e");
+        }
         window.soundSystem.playTaiko(false);
         this.leaveRestSite();
     }

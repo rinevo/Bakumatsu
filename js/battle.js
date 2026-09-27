@@ -81,6 +81,7 @@ class BattleSystem {
         };
         this.playerDebuffs = {
             weak: 0,
+            vulnerable: 0,
             bleed: 0
         };
         this.app.nextBattleStrengthBuff = 0;
@@ -161,26 +162,44 @@ class BattleSystem {
         const situation = this.app.getFactionSituation ? this.app.getFactionSituation() : 'neutral';
         const phase = this.app.getPublicOpinionPhase ? this.app.getPublicOpinionPhase() : null;
 
-        if (situation === 'super_disadvantage') {
-            // 🚨 強烈な劣勢（孤立無援・逆賊）: 手札-1枚、敵剛力+4、敵開幕シールド20、プレイヤー脱力2
-            this.handDrawBonus -= 1;
-            this.enemy.buffStrength = (this.enemy.buffStrength || 0) + 4;
-            this.enemy.shield = 20;
-            this.playerDebuffs.weak = 2;
+        if (situation === 'extreme_disadvantage') {
+            // ☠️ 極限劣勢（朝敵討滅令・完全孤立無援・世論敵対100%）: 手札-2枚、敵剛力+12、敵開幕シールド80、プレイヤー脱力4 & 脆弱4
+            this.handDrawBonus -= 2;
+            this.enemy.buffStrength = (this.enemy.buffStrength || 0) + 12;
+            this.enemy.shield = (this.enemy.shield || 0) + 80;
+            this.playerDebuffs.weak = 4;
+            this.playerDebuffs.vulnerable = 4;
             if (window.particleSystem && window.particleSystem.createFloatingText) {
                 setTimeout(() => {
-                    window.particleSystem.createFloatingText("🚨【孤立無援】世論極限劣勢！手札-1 / 敵剛力+4 / 敵防20 / 脱力2", window.innerWidth / 2, window.innerHeight * 0.4, "#e53e3e");
+                    window.particleSystem.createFloatingText("☠️【朝敵討滅令】世論100%完全孤立！手札-2 / 敵剛力+12 / 敵防80 / 脱力4 / 脆弱4 / 毎ターン投石8ダメ / 報酬ゼロ", window.innerWidth / 2, window.innerHeight * 0.4, "#9b2c2c");
+                }, 500);
+            }
+            if (window.soundSystem && window.soundSystem.playTaiko) {
+                window.soundSystem.playTaiko(true);
+            }
+        } else if (situation === 'super_disadvantage') {
+            // 🚨 強烈な劣勢（孤立無援・朝敵・逆賊）: 手札-1枚、敵剛力+10、敵開幕シールド60、プレイヤー脱力3 & 脆弱3
+            this.handDrawBonus -= 1;
+            this.enemy.buffStrength = (this.enemy.buffStrength || 0) + 10;
+            this.enemy.shield = (this.enemy.shield || 0) + 60;
+            this.playerDebuffs.weak = 3;
+            this.playerDebuffs.vulnerable = 3;
+            if (window.particleSystem && window.particleSystem.createFloatingText) {
+                setTimeout(() => {
+                    window.particleSystem.createFloatingText("🚨【孤立無援】世論極限劣勢！手札-1 / 敵剛力+10 / 敵防60 / 脱力3 / 脆弱3 / 毎ターン投石6ダメ", window.innerWidth / 2, window.innerHeight * 0.4, "#e53e3e");
                 }, 500);
             }
             if (window.soundSystem && window.soundSystem.playTaiko) {
                 window.soundSystem.playTaiko(true);
             }
         } else if (situation === 'disadvantage') {
-            // ⚠️ やや劣勢（逆風）: 敵剛力+1
-            this.enemy.buffStrength = (this.enemy.buffStrength || 0) + 1;
+            // ⚠️ やや劣勢（逆風）: 敵剛力+4、敵開幕シールド20、自軍開幕脱力2
+            this.enemy.buffStrength = (this.enemy.buffStrength || 0) + 4;
+            this.enemy.shield = (this.enemy.shield || 0) + 20;
+            this.playerDebuffs.weak = 2;
             if (window.particleSystem && window.particleSystem.createFloatingText) {
                 setTimeout(() => {
-                    window.particleSystem.createFloatingText("⚠️【世論逆風】敵の士気上昇（剛力+1）", window.innerWidth / 2, window.innerHeight * 0.4, "#dd6b20");
+                    window.particleSystem.createFloatingText("⚠️【世論逆風】敵剛力+4 / 敵防20 / 自軍脱力2", window.innerWidth / 2, window.innerHeight * 0.4, "#dd6b20");
                 }, 500);
             }
         } else if (situation === 'neutral') {
@@ -571,6 +590,11 @@ class BattleSystem {
     damagePlayerWithShield(amount) {
         let dmg = amount;
 
+        // 脆弱デバフ（被ダメージ50%増加）
+        if (this.playerDebuffs && this.playerDebuffs.vulnerable > 0) {
+            dmg = Math.round(dmg * 1.5);
+        }
+
         // ダメージ軽減バフ
         if (this.playerBuffs.damage_reduction > 0) {
             dmg = Math.max(0, dmg - this.playerBuffs.damage_reduction);
@@ -707,9 +731,31 @@ class BattleSystem {
             this.app.currentTrend.onTurnEnd(this);
         }
 
+        // 4.1 世論（天下の大勢）劣勢時の民衆投石・刺客スリップダメージ
+        const situation = this.app.getFactionSituation ? this.app.getFactionSituation() : 'neutral';
+        if (situation === 'extreme_disadvantage' || situation === 'super_disadvantage') {
+            const isExtreme = situation === 'extreme_disadvantage';
+            const stoneDamage = isExtreme ? 8 : 6;
+            this.damagePlayerDirect(stoneDamage);
+            if (window.particleSystem && window.particleSystem.createFloatingText) {
+                const label = isExtreme ? "民衆の一斉蜂起・狙撃: 8ダメ" : "民衆の投石・敵視: 6ダメ";
+                window.particleSystem.createFloatingText(label, window.innerWidth / 2, window.innerHeight * 0.45, "#e53e3e");
+            }
+            if (window.soundSystem && window.soundSystem.playTaiko) {
+                window.soundSystem.playTaiko(false);
+            }
+            if (this.playerHp <= 0) {
+                this.handlePlayerDefeated("民衆の敵視と追手の刃に呑まれ、力尽きた…");
+                return;
+            }
+        }
+
         // プレイヤーのデバフ持続ターン減衰
         if (this.playerDebuffs && this.playerDebuffs.weak > 0) {
             this.playerDebuffs.weak--;
+        }
+        if (this.playerDebuffs && this.playerDebuffs.vulnerable > 0) {
+            this.playerDebuffs.vulnerable--;
         }
 
         // 5. 手札を捨て札へ
@@ -907,12 +953,18 @@ class BattleSystem {
             goldEarned += 15;
         }
 
-        // 世論（天下の大勢）優勢による民衆・豪商からの軍資金支援
+        // 世論（天下の大勢）優勢による民衆・豪商からの軍資金支援、および劣勢ペナルティ
         const victorySituation = this.app.getFactionSituation ? this.app.getFactionSituation() : 'neutral';
         if (victorySituation === 'super_advantage') {
             goldEarned += 25; // 絶大優勢ボーナス
         } else if (victorySituation === 'advantage') {
             goldEarned += 10; // やや優勢ボーナス
+        } else if (victorySituation === 'disadvantage') {
+            goldEarned = Math.max(1, Math.round(goldEarned * 0.50)); // 50%没収（倍増ペナルティ）
+        } else if (victorySituation === 'super_disadvantage') {
+            goldEarned = Math.max(1, Math.round(goldEarned * 0.25)); // 75%激減（孤立無援・補給深刻途絶）
+        } else if (victorySituation === 'extreme_disadvantage') {
+            goldEarned = 0; // 0両（完全朝敵・世論敵対100%による完全没収！）
         }
 
         this.app.gold += goldEarned;
@@ -972,7 +1024,21 @@ class BattleSystem {
             return 'legendary';
         };
 
-        const rewardCount = this.app.hasRelic("yoshida_shoin_brush") ? 4 : 3;
+        const rewardSituation = this.app.getFactionSituation ? this.app.getFactionSituation() : 'neutral';
+        if (rewardSituation === 'extreme_disadvantage') {
+            return []; // ☠️ 極限劣勢（完全朝敵・世論敵対100%）: 誰も味方せずカード提示0枚！
+        }
+
+        let baseRewardCount = 3;
+        if (rewardSituation === 'super_disadvantage') {
+            baseRewardCount = 1; // 孤立無援: 1枚のみ提示
+        } else if (rewardSituation === 'disadvantage') {
+            baseRewardCount = 2; // やや劣勢: 2枚提示
+        }
+        if (this.app.hasRelic("yoshida_shoin_brush")) {
+            baseRewardCount += 1;
+        }
+        const rewardCount = baseRewardCount;
         const chosenCards = [];
         const poolCopy = [...availablePool];
 

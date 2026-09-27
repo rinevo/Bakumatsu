@@ -543,18 +543,20 @@ class BakumatsuApp {
         // 佐幕派: 負が有利、正が不利
         const op = this.publicOpinion;
         if (this.faction === 'tobaku') {
-            if (op >= 50) return 'super_advantage';     // 絶大優勢（回天官軍）
-            if (op >= 20) return 'advantage';           // やや優勢（討幕高揚）
-            if (op >= -19) return 'neutral';            // 拮抗（天下混迷）
-            if (op >= -49) return 'disadvantage';       // やや劣勢（佐幕優勢）
-            return 'super_disadvantage';                // 強烈劣勢（幕威轟々）
+            if (op <= -100) return 'extreme_disadvantage'; // ☠️ 極限劣勢（完全朝敵・幕威100%）
+            if (op >= 50) return 'super_advantage';       // 絶大優勢（回天官軍）
+            if (op >= 20) return 'advantage';             // やや優勢（討幕高揚）
+            if (op >= -19) return 'neutral';              // 拮抗（天下混迷）
+            if (op >= -49) return 'disadvantage';         // やや劣勢（佐幕優勢）
+            return 'super_disadvantage';                  // 強烈劣勢（幕威轟々）
         } else {
             // 佐幕派
-            if (op <= -50) return 'super_advantage';    // 絶大優勢（幕威轟々）
-            if (op <= -20) return 'advantage';          // やや優勢（佐幕優勢）
-            if (op <= 19) return 'neutral';             // 拮抗（天下混迷）
-            if (op <= 49) return 'disadvantage';        // やや劣勢（討幕高揚）
-            return 'super_disadvantage';                // 強烈劣勢（回天官軍）
+            if (op >= 100) return 'extreme_disadvantage'; // ☠️ 極限劣勢（完全朝敵・官軍100%）
+            if (op <= -50) return 'super_advantage';      // 絶大優勢（幕威轟々）
+            if (op <= -20) return 'advantage';            // やや優勢（佐幕優勢）
+            if (op <= 19) return 'neutral';               // 拮抗（天下混迷）
+            if (op <= 49) return 'disadvantage';          // やや劣勢（討幕高揚）
+            return 'super_disadvantage';                  // 強烈劣勢（回天官軍）
         }
     }
 

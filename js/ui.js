@@ -96,8 +96,9 @@ class UIManager {
                 if (situation === 'super_advantage') situationDesc = "【絶大優勢】全攻撃+4、開幕防+10、敵士気動揺、商人20%引、勝利小判+25両";
                 else if (situation === 'advantage') situationDesc = "【やや優勢】全攻撃+2、開幕防+5、商人10%引、勝利小判+10両";
                 else if (situation === 'neutral') situationDesc = "【情勢拮抗】シールド獲得時+1、標準相場";
-                else if (situation === 'disadvantage') situationDesc = "【やや劣勢】敵剛力+1、商人10%高騰";
-                else if (situation === 'super_disadvantage') situationDesc = "🚨【孤立無援・極度の不利】毎ターン手札-1枚、敵剛力+4、敵開幕防+20、開幕脱力2、商人35%高騰！";
+                else if (situation === 'disadvantage') situationDesc = "⚠️【やや劣勢】敵剛力+4、敵防20、自軍開幕脱力2、商人価格1.4倍、勝利小判-50%、カード提示2枚、休息回復15%";
+                else if (situation === 'super_disadvantage') situationDesc = "🚨【孤立無援】毎ターン手札-1枚、敵剛力+10、敵防60、開幕脱力3&脆弱3、毎ターン投石6ダメ、商人価格2倍、勝利小判-75%、カード提示1枚、休息回復5%";
+                else if (situation === 'extreme_disadvantage') situationDesc = "☠️【朝敵討滅令・完全孤立】毎ターン手札-2枚、敵剛力+12、敵防80、開幕脱力4&脆弱4、毎ターン投石8ダメ、商人価格2.5倍、勝利小判0両、カード提示0枚、休息回復0%！";
 
                 opinionContainer.title = `世論動乱（天下の大勢）: ${phase.name} (${sign}${this.app.publicOpinion}%)\n${phase.desc}\n自陣営状況: ${situationDesc}`;
             }
@@ -913,6 +914,10 @@ class UIManager {
         if (cardsContainer) {
             cardsContainer.innerHTML = '';
             cardsContainer.scrollLeft = 0; // スクロール位置を左端（先頭カード）に初期化
+
+            if (!rewardData.cards || rewardData.cards.length === 0) {
+                cardsContainer.innerHTML = '<div style="color: #e53e3e; padding: 20px; text-align: center; font-weight: bold; width: 100%; font-size: 1.05rem;">☠️【朝敵指定・完全孤立】世論完全敵対のため、味方する新たな志士は現れなかった…（提示カード0枚）</div>';
+            }
 
             const scrollHint = document.getElementById('reward-scroll-hint');
             if (scrollHint) {
