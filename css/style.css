@@ -2805,7 +2805,7 @@ body {
 }
 
 #screen-gameover {
-    background-image: linear-gradient(rgba(10, 11, 14, 0.58), rgba(10, 11, 14, 0.75)), url('../img/gameover.jpg');
+    background-image: linear-gradient(rgba(10, 11, 14, 0.84), rgba(10, 11, 14, 0.95)), url('../img/gameover.jpg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -2838,10 +2838,6 @@ body {
 }
 #screen-gamewin.faction-sabaku.backdrop-only {
     background-image: url('../img/gamewin_sabaku.jpg');
-}
-#screen-gameover.backdrop-only {
-    background-image: url('../img/gameover.jpg');
-    cursor: pointer;
 }
 
 .game-screen.backdrop-only .result-box {
