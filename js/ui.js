@@ -675,16 +675,20 @@ class UIManager {
                 btn.disabled = !canChoose;
 
                 let opinionBadgeHtml = '';
-                if (typeof choice.opinionChange === 'number') {
-                    const isAdverse = (this.app.faction === 'tobaku' && choice.opinionChange < 0) ||
-                                      (this.app.faction === 'sabaku' && choice.opinionChange > 0);
-                    const effectiveChange = isAdverse ? Math.round(choice.opinionChange * 1.8) : choice.opinionChange;
+                const rawOpinionChange = typeof choice.opinionChange === 'function'
+                    ? choice.opinionChange(this.app)
+                    : choice.opinionChange;
 
-                    if (choice.opinionChange === 0) {
+                if (typeof rawOpinionChange === 'number') {
+                    const isAdverse = (this.app.faction === 'tobaku' && rawOpinionChange < 0) ||
+                                      (this.app.faction === 'sabaku' && rawOpinionChange > 0);
+                    const effectiveChange = isAdverse ? Math.round(rawOpinionChange * 1.8) : rawOpinionChange;
+
+                    if (rawOpinionChange === 0) {
                         opinionBadgeHtml = `<span class="badge-opinion badge-opinion-neutral">⚖️ 世論: 変動なし</span>`;
                     } else {
-                        const targetFactionName = choice.opinionChange > 0 ? "討幕" : "佐幕";
-                        const factionCircle = choice.opinionChange > 0 ? "🔴" : "🔵";
+                        const targetFactionName = rawOpinionChange > 0 ? "討幕" : "佐幕";
+                        const factionCircle = rawOpinionChange > 0 ? "🔴" : "🔵";
 
                         if (isAdverse) {
                             // 自軍不利なもの：赤色背景（逆風）
@@ -709,8 +713,11 @@ class UIManager {
                     } catch (err) {
                         console.error("Event choice execution error:", err);
                     }
-                    if (typeof choice.opinionChange === 'number' && choice.opinionChange !== 0) {
-                        this.app.modifyPublicOpinion(choice.opinionChange);
+                    const opinionVal = typeof choice.opinionChange === 'function'
+                        ? choice.opinionChange(this.app)
+                        : choice.opinionChange;
+                    if (typeof opinionVal === 'number' && opinionVal !== 0) {
+                        this.app.modifyPublicOpinion(opinionVal);
                     }
                     if (window.soundSystem && window.soundSystem.playTaiko) {
                         window.soundSystem.playTaiko(false);

@@ -2819,9 +2819,9 @@ const GAME_DATA = {
             desc: "淀川沿いに錦の御旗が高らかに翻り、砲煙弾雨の中、天下の大勢が一夜にして暗転する。幕府軍1万5千と薩長軍5千の激突、どちらの道を歩むか。",
             choices: [
                 {
-                    opinionChange: 45,
+                    opinionChange: 50,
                     text: "【討幕派】錦旗を先頭に官軍怒涛の追撃戦を敢行し、旧幕府軍を壊滅させる",
-                    effectDesc: "志士『岩倉具視』と志士『山田顕義』を獲得。決死の銃撃戦でHPを 35 失い、最大HP-10。絶対的大義名分により世論が一気に討幕極限（+100%）へ到達、小判100両を獲得！",
+                    effectDesc: "志士『岩倉具視』と志士『山田顕義』を獲得。決死の銃撃戦でHPを 35 失い、最大HP-10。絶対的大義名分により世論が一気に討幕極限（+50%）へ到達、小判100両を獲得！",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("iwakura_imperial");
@@ -2829,13 +2829,12 @@ const GAME_DATA = {
                         app.maxHp = Math.max(20, app.maxHp - 10);
                         app.damagePlayer(35);
                         app.gold += 100;
-                        app.publicOpinion = 100;
                     }
                 },
                 {
-                    opinionChange: -40,
+                    opinionChange: 40,
                     text: "【佐幕派】淀千両松で殿軍を死守し、将軍慶喜公の脱出行を警護する",
-                    effectDesc: "志士『松平定敬』を獲得。朝敵転落の激震で世論佐幕-40%、追撃でHPを 32 失い、最大HP-8。徳川の信義を貫いた証として神器レリック『葵の御紋章佩刀』を獲得！",
+                    effectDesc: "志士『松平定敬』を獲得。朝敵転落の激震で世論が討幕へ急転（大逆風）、追撃でHPを 32 失い、最大HP-8。徳川の信義を貫いた証として神器レリック『葵の御紋章佩刀』を獲得！",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("sadaakira_guard");
@@ -2954,7 +2953,7 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 20,
+                    opinionChange: -20,
                     text: "幕府との関係を保ち、情勢を見極める",
                     effectDesc: "志士『吉井友実』を獲得。最大HP+5、列強介入-5%。",
                     action: (app) => {
@@ -2965,7 +2964,7 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 20,
+                    opinionChange: 0,
                     text: "どちらにも与せず、兵糧を確保する",
                     effectDesc: "志士『伊地知正治』を獲得。70両を得るが、HPを 6 失う。",
                     action: (app) => {
@@ -3389,7 +3388,7 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 20,
+                    opinionChange: -20,
                     text: "旧幕臣との融和を探る",
                     effectDesc: "志士『山内容堂』を獲得。列強介入-10%、HPを 10 回復。",
                     action: (app) => {
@@ -3454,70 +3453,75 @@ const GAME_DATA = {
             id: "event_hamaguri_gate",
             act: 1,
             title: "禁門の変、御所前の激戦",
-            desc: "長州軍が御所へ迫り、門前はたちまち戦場となった。撤退の道を確保するか、火線を押し返すか。",
+            desc: "長州軍が御所へ迫り、門前はたちまち戦場となった。天下の主導権と朝敵の汚名が交錯する不可避の大激戦。",
             choices: [
                 {
-                    opinionChange: 20,
+                    opinionChange: -35,
                     text: "【討幕派】御所を目指し、鷹司邸の激戦へ突撃する",
-                    effectDesc: "志士『久坂玄瑞』を獲得。HPを 8 失うが、次の戦闘の攻撃力+12。",
+                    effectDesc: "志士『久坂玄瑞』を獲得。朝敵指定の汚名で世論が佐幕へ傾き（大逆風）、決死の猛攻でHPを 30 失い、最大HP-8。散華の覚悟の証として神器レリック『長州の血盟録』を獲得！",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("kusaka_revolt");
-                        app.damagePlayer(8);
-                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 12;
+                        app.addRelic("choshu_blood_pact");
+                        app.maxHp = Math.max(20, app.maxHp - 8);
+                        app.damagePlayer(30);
                     }
                 },
                 {
-                    opinionChange: 20,
+                    opinionChange: -30,
                     text: "【討幕派】蛤御門へ肉薄し、決死の猛進を指揮する",
-                    effectDesc: "志士『来島又兵衛』を獲得。HPを 10 失うが、次の戦闘の攻撃力+15。",
+                    effectDesc: "志士『来島又兵衛』を獲得。朝敵指定で世論が佐幕へ傾き（大逆風）、砲煙弾雨でHPを 28 失う。次回戦闘の攻撃力+18。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("kirishima_charge");
-                        app.damagePlayer(10);
-                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 15;
+                        app.damagePlayer(28);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 18;
                     }
                 },
                 {
-                    opinionChange: 20,
+                    opinionChange: -25,
                     text: "【討幕派】包囲網を突破し、再起の密使として脱出する",
-                    effectDesc: "志士『入江九一』を獲得。40両を得る。",
+                    effectDesc: "志士『入江九一』を獲得。朝敵指定で世論が佐幕へ傾き（大逆風）、HPを 22 失う。軍資金45両を獲得。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("irie_secret");
-                        app.gold += 40;
+                        app.damagePlayer(22);
+                        app.gold += 45;
                     }
                 },
                 {
                     opinionChange: -20,
                     text: "【佐幕派】蛤御門で会津藩兵を率い、長州勢の突撃を粉砕する",
-                    effectDesc: "志士『松平容保：会津の義気』を獲得。HPを 8 失うが、次の戦闘の攻撃力+14。",
+                    effectDesc: "志士『松平容保：会津の義気』を獲得。禁裏死守の激闘でHPを 30 失い、最大HP-8。朝廷防衛の勲功として神器レリック『禁裏の錦旗御守』を獲得！",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("aizu_shield");
-                        app.damagePlayer(8);
-                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 14;
+                        app.addRelic("imperial_brocade_amulet");
+                        app.maxHp = Math.max(20, app.maxHp - 8);
+                        app.damagePlayer(30);
                     }
                 },
                 {
-                    opinionChange: -20,
+                    opinionChange: -15,
                     text: "【佐幕派】御所周辺の警備を固め、禁裏の延焼を防ぐ",
-                    effectDesc: "志士『斎藤一』を獲得。HPを 12 回復し、列強介入-6%。",
+                    effectDesc: "志士『斎藤一』を獲得。都の消火と治安維持で軍資金40両を拠出、HPを 24 失う。次回防御+12。",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("saito_gato");
-                        app.healPlayer(12);
-                        app.modifyImperialGauge(-6);
+                        app.gold = Math.max(0, app.gold - 40);
+                        app.damagePlayer(24);
+                        app.nextBattleShieldBuff = (app.nextBattleShieldBuff || 0) + 12;
                     }
                 },
                 {
-                    opinionChange: -20,
+                    opinionChange: -15,
                     text: "【佐幕派】桑名藩兵と共に敵の退路を遮断し、都の治安を回復する",
-                    effectDesc: "志士『松平定敬』を獲得。50両を得る。",
+                    effectDesc: "志士『松平定敬』を獲得。追撃戦でHPを 26 失う。軍資金45両を獲得。",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("sadaakira_guard");
-                        app.gold += 50;
+                        app.damagePlayer(26);
+                        app.gold += 45;
                     }
                 }
             ]
@@ -3816,7 +3820,7 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 20,
+                    opinionChange: 0,
                     text: "中立を保ち、物資の流通を守る",
                     effectDesc: "志士『岩崎弥太郎』を獲得。50両を得る。",
                     action: (app) => {
@@ -4182,7 +4186,7 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 20,
+                    opinionChange: -20,
                     text: "強硬論を退け、幕政の刷新を訴える",
                     effectDesc: "志士『松平春嶽』を獲得。次の戦闘の攻撃力+6、最大HP+3。",
                     action: (app) => {
@@ -6715,7 +6719,7 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: -20,
+                    opinionChange: 20,
                     text: "脱出を図る鈴木三樹三郎らを援護し、薩摩藩邸へ逃れる",
                     effectDesc: "志士『鈴木三樹三郎』を獲得。HPを 10 回復し、40両を得る。",
                     action: (app) => {
@@ -7230,13 +7234,11 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 0,
+                    opinionChange: (app) => (app.faction === 'tobaku' ? -25 : 25),
                     text: "【共通】諸藩の疲弊を憂い、休戦交渉の周旋に奔走して流血を止める",
-                    effectDesc: "両陣営の強硬派から裏切り者とみなされ呪い『家臣の寝返り』混入、自軍世論-25%。国力温存により最大HP+10、HP全回復、列強介入-10%。",
+                    effectDesc: "両陣営の強硬派から裏切り者とみなされ呪い『家臣の寝返り』混入、自軍世論-25%（大逆風）。国力温存により最大HP+10、HP全回復、列強介入-10%。",
                     action: (app) => {
                         app.addCardToDeck("curse_betrayal");
-                        const pen = (app.faction === 'tobaku') ? -25 : 25;
-                        app.modifyPublicOpinion(pen);
                         app.maxHp += 10;
                         app.hp = app.maxHp;
                         app.modifyImperialGauge(-10);
