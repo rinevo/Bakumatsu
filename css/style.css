@@ -783,27 +783,28 @@ body {
     margin-right: 6px;
     vertical-align: middle;
 }
-.badge-opinion-tobaku {
-    background: rgba(197, 48, 48, 0.25);
-    border: 1px solid #e53e3e;
-    color: #feb2b2;
-}
+/* 自軍有利な世論変動（青色） */
+.badge-opinion-favorable,
 .badge-opinion-sabaku {
     background: rgba(43, 108, 176, 0.25);
     border: 1px solid #3182ce;
     color: #bee3f8;
 }
-.badge-opinion-neutral {
-    background: rgba(214, 158, 46, 0.2);
-    border: 1px solid #d69e2e;
-    color: #fefcbf;
-}
-.badge-opinion-warning {
+
+/* 自軍不利・逆風の世論変動（赤色・警告パルス） */
+.badge-opinion-adverse,
+.badge-opinion-warning,
+.badge-opinion-tobaku {
     background: rgba(229, 62, 62, 0.35);
     border: 1px solid #ff3333;
     color: #ffcccc;
     box-shadow: 0 0 8px rgba(255, 50, 50, 0.4);
     animation: opinionPulse 1.8s infinite;
+}
+.badge-opinion-neutral {
+    background: rgba(214, 158, 46, 0.2);
+    border: 1px solid #d69e2e;
+    color: #fefcbf;
 }
 @keyframes opinionPulse {
     0%, 100% { opacity: 1; }
@@ -1579,6 +1580,27 @@ body {
 .map-node.boss.selectable {
     border-color: #ba68c8;
     box-shadow: 0 0 20px rgba(186, 104, 200, 0.7);
+}
+
+/* 歴史の関門（チョークポイント）ノード & 歴史の霧 */
+.map-node.chokepoint-node {
+    background: radial-gradient(circle, #3d1c1c 0%, #1c0e0e 100%);
+    border: 2px solid #e53e3e;
+    box-shadow: 0 0 15px rgba(229, 62, 62, 0.4);
+}
+.map-node.chokepoint-node.selectable {
+    border-color: #ff4d4d;
+    box-shadow: 0 0 22px rgba(255, 77, 77, 0.8), 0 0 8px #ffd700;
+}
+.node-fog {
+    color: #a0aec0 !important;
+    font-style: italic;
+    opacity: 0.85;
+}
+.node-fog-choke {
+    color: #f6ad55 !important;
+    font-weight: bold;
+    text-shadow: 0 0 6px rgba(237, 137, 54, 0.6);
 }
 
 /* 武器庫（宝箱）モーダル */

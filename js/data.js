@@ -1914,6 +1914,59 @@ const GAME_DATA = {
     // 2. レリック（遺物）定義
     // ==========================================
     relics: {
+        "choshu_blood_pact": {
+            id: "choshu_blood_pact",
+            name: "長州の血盟録",
+            desc: "各ターン開始時、手札のランダムなカード1枚のコストを -1文（最低0）にする。",
+            price: 220,
+            onTurnStart: (b) => {
+                if (b.hand && b.hand.length > 0) {
+                    const c = b.hand[Math.floor(Math.random() * b.hand.length)];
+                    c.cost = Math.max(0, (c.cost || 0) - 1);
+                    if (window.particleSystem && window.particleSystem.createFloatingText) {
+                        window.particleSystem.createFloatingText("血盟の志: コスト-1文", window.innerWidth / 2, window.innerHeight * 0.45, "#e53e3e");
+                    }
+                }
+            }
+        },
+        "imperial_brocade_amulet": {
+            id: "imperial_brocade_amulet",
+            name: "禁裏の錦旗御守",
+            desc: "毎ターン開始時、シールドを 6 自動で獲得する。",
+            price: 220,
+            onTurnStart: (b) => {
+                b.gainPlayerShield(6);
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    window.particleSystem.createFloatingText("錦旗加護: シールド+6", window.innerWidth / 2, window.innerHeight * 0.45, "#ecc94b");
+                }
+            }
+        },
+        "omura_tactics_scroll": {
+            id: "omura_tactics_scroll",
+            name: "大村益次郎の陣図",
+            desc: "戦闘開始時、全ての敵に 20 ダメージを与え、脱力 2（与ダメ25%減）を付与する。",
+            price: 240,
+            onBattleStart: (b) => {
+                b.dealDamageToEnemy(20);
+                b.applyStatusToEnemy("weak", 2);
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    window.particleSystem.createFloatingText("陣図展開: 敵全体20ダメ & 脱力2", window.innerWidth / 2, window.innerHeight * 0.35, "#3182ce");
+                }
+            }
+        },
+        "aoi_crest_blade": {
+            id: "aoi_crest_blade",
+            name: "葵の御紋章佩刀",
+            desc: "戦闘開始時、自身に剛力+5（全攻撃威力+5）および開幕シールド+12を獲得する。",
+            price: 240,
+            onBattleStart: (b) => {
+                b.applyPlayerBuff("strength", 5);
+                b.gainPlayerShield(12);
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    window.particleSystem.createFloatingText("葵の武威: 剛力+5 & シールド+12", window.innerWidth / 2, window.innerHeight * 0.35, "#805ad5");
+                }
+            }
+        },
         "brocade_banner": {
             id: "brocade_banner",
             name: "錦の御旗",
@@ -2761,38 +2814,46 @@ const GAME_DATA = {
         },
         {
             id: "event_toba_fushimi",
-            act: 2,
-            title: "鳥羽・伏見の戦端",
-            desc: "錦の御旗が翻り、淀川沿いに砲声が轟く。戦場へ急行すれば勝機はあるが、退けば兵を温存できる。",
+            act: 3,
+            title: "鳥羽・伏見の決戦、錦旗の翻転",
+            desc: "淀川沿いに錦の御旗が高らかに翻り、砲煙弾雨の中、天下の大勢が一夜にして暗転する。幕府軍1万5千と薩長軍5千の激突、どちらの道を歩むか。",
             choices: [
                 {
-                    opinionChange: 35,
-                    text: "錦の御旗を掲げ、全軍の士気を高める",
-                    effectDesc: "志士『岩倉具視』を獲得。次の戦闘の攻撃力+10、HPを 8 失う。",
+                    opinionChange: 45,
+                    text: "【討幕派】錦旗を先頭に官軍怒涛の追撃戦を敢行し、旧幕府軍を壊滅させる",
+                    effectDesc: "志士『岩倉具視』と志士『山田顕義』を獲得。決死の銃撃戦でHPを 35 失い、最大HP-10。絶対的大義名分により世論が一気に討幕極限（+100%）へ到達、小判100両を獲得！",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("iwakura_imperial");
-                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 10;
-                        app.damagePlayer(8);
-                    }
-                },
-                {
-                    opinionChange: 20,
-                    text: "新式銃隊で側面を突き、敵の陣形を崩す",
-                    effectDesc: "志士『山田顕義』を獲得。40両を得る。",
-                    action: (app) => {
                         app.addCardToDeck("yamada_modern_army");
-                        app.gold += 40;
+                        app.maxHp = Math.max(20, app.maxHp - 10);
+                        app.damagePlayer(35);
+                        app.gold += 100;
+                        app.publicOpinion = 100;
                     }
                 },
                 {
-                    opinionChange: -20,
-                    text: "兵を退き、民の被害を抑えて戦線を再編する",
-                    effectDesc: "志士『松平定敬』を獲得。HPを 12 回復し、列強介入-6%。",
+                    opinionChange: -40,
+                    text: "【佐幕派】淀千両松で殿軍を死守し、将軍慶喜公の脱出行を警護する",
+                    effectDesc: "志士『松平定敬』を獲得。朝敵転落の激震で世論佐幕-40%、追撃でHPを 32 失い、最大HP-8。徳川の信義を貫いた証として神器レリック『葵の御紋章佩刀』を獲得！",
+                    faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("sadaakira_guard");
-                        app.healPlayer(12);
-                        app.modifyImperialGauge(-6);
+                        app.addRelic("aoi_crest_blade");
+                        app.maxHp = Math.max(20, app.maxHp - 8);
+                        app.damagePlayer(32);
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "【共通】戦禍の負傷兵を敵味方なく救護し、近代人道支援の魁となる",
+                    effectDesc: "軍備を放擲して救護に奔走するため軍資金70両を拠出、HPを 20 失う。人道の徳望により最大HP+12、HP全回復、列強介入-15%。",
+                    action: (app) => {
+                        app.gold = Math.max(0, app.gold - 70);
+                        app.damagePlayer(20);
+                        app.maxHp += 12;
+                        app.hp = app.maxHp;
+                        app.modifyImperialGauge(-15);
                     }
                 }
             ]
@@ -7139,42 +7200,46 @@ const GAME_DATA = {
             id: "event_second_choshu_war",
             act: 2,
             title: "第二次長州征討、四境戦争の激闘",
-            desc: "幕府は十四代将軍家茂自ら出陣し、四方より長州藩を取り囲む「四境戦争」が勃発した。老中・小笠原長行率いる幕府軍に対し、高杉晋作の丙寅丸と奇兵隊が夜襲を仕掛け、幕末の軍事バランスを揺るがす決戦が始まる。",
+            desc: "幕府は十四代将軍家茂自ら出陣し、四方より長州藩を取り囲む「四境戦争」が勃発した。幕府軍総勢10万に対し、近代兵制で武装した長州勢が乾坤一擲の反撃に出る。",
             choices: [
                 {
-                    opinionChange: -20,
-                    text: "【佐幕派】老中・小笠原長行の指揮下に入り、小倉口の防衛線を死守する",
-                    faction: "sabaku",
-                    effectDesc: "志士『小笠原長行』を獲得。列強介入-8%、最大HP+10、HPを 10 回復する。",
+                    opinionChange: 35,
+                    text: "【討幕派】大村益次郎の陣図に従い、最新火器で幕府総軍を四境で撃破する",
+                    effectDesc: "志士『大村益次郎』を獲得。弾薬消耗で軍資金60両拠出、列強介入+10%。世論討幕+35%、神器レリック『大村益次郎の陣図』を獲得！",
+                    faction: "tobaku",
                     action: (app) => {
-                        app.addCardToDeck("ogasawara_minister");
-                        app.modifyImperialGauge(-8);
-                        app.maxHp += 10;
-                        app.hp += 10;
+                        app.addCardToDeck("omura_reform");
+                        app.addRelic("omura_tactics_scroll");
+                        app.gold = Math.max(0, app.gold - 60);
+                        app.modifyImperialGauge(10);
                         if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
-                    opinionChange: 25,
-                    text: "【討幕派】高杉晋作の丙寅丸と共に夜襲を仕掛け、幕府艦隊を粉砕する",
-                    faction: "tobaku",
-                    effectDesc: "志士『高杉晋作』を獲得。次回戦闘の攻撃力+16、40両を得る。",
+                    opinionChange: -30,
+                    text: "【佐幕派】小笠原長行と共に小倉口・長岡防衛線を死守し、猛火に耐える",
+                    effectDesc: "志士『小笠原長行』を獲得。最新兵器の猛攻に晒されHPを 32 失い、最大HP-8。幕府軍備より軍資金 100両と『新式ミニエ銃』を獲得、世論佐幕+30%！",
+                    faction: "sabaku",
                     action: (app) => {
-                        app.addCardToDeck("takasugi_kiheitai");
-                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 16;
-                        app.gold += 40;
+                        app.addCardToDeck("ogasawara_minister");
+                        app.addCardToDeck("weapon_minie");
+                        app.gold += 100;
+                        app.maxHp = Math.max(20, app.maxHp - 8);
+                        app.damagePlayer(32);
                         if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
                     opinionChange: 0,
-                    text: "大村益次郎の近代兵制と最新火器を支援し、石州口の戦線を支える",
-                    effectDesc: "志士『大村益次郎』を獲得。50両を得て、次回戦闘の攻撃力+10。",
+                    text: "【共通】諸藩の疲弊を憂い、休戦交渉の周旋に奔走して流血を止める",
+                    effectDesc: "両陣営の強硬派から裏切り者とみなされ呪い『家臣の寝返り』混入、自軍世論-25%。国力温存により最大HP+10、HP全回復、列強介入-10%。",
                     action: (app) => {
-                        app.addCardToDeck("omura_reform");
-                        app.gold += 50;
-                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 10;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
+                        app.addCardToDeck("curse_betrayal");
+                        const pen = (app.faction === 'tobaku') ? -25 : 25;
+                        app.modifyPublicOpinion(pen);
+                        app.maxHp += 10;
+                        app.hp = app.maxHp;
+                        app.modifyImperialGauge(-10);
                     }
                 }
             ]

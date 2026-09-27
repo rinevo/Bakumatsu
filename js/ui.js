@@ -528,11 +528,27 @@ class UIManager {
         mapSystem.nodes.forEach(node => {
             const nodeDiv = document.createElement('div');
             nodeDiv.className = `map-node ${node.type}`;
+            if (node.isChokepoint) {
+                nodeDiv.classList.add('chokepoint-node');
+            }
             nodeDiv.id = `node-${node.id}`;
 
             let titleContent = node.title;
             if (node.period && node.shortTitle) {
-                titleContent = `<span class="node-period">${node.period}</span><span class="node-name">${node.shortTitle}</span>`;
+                // 歴史の霧: 2フロア以上先の未訪問事件は具体的な事件名を伏せる
+                const currentFloor = mapSystem.currentFloor || 0;
+                const isFogged = (node.type === 'event') && !node.completed && (node.floor > currentFloor + 1);
+
+                if (isFogged) {
+                    if (node.isChokepoint) {
+                        titleContent = `<span class="node-period">${node.period}</span><span class="node-name node-fog-choke">⛩️ 歴史の関門</span>`;
+                    } else {
+                        titleContent = `<span class="node-period">${node.period}</span><span class="node-name node-fog">🌫️ 風雲急（未詳）</span>`;
+                    }
+                } else {
+                    const chokePrefix = node.isChokepoint ? '⛩️ ' : '';
+                    titleContent = `<span class="node-period">${node.period}</span><span class="node-name">${chokePrefix}${node.shortTitle}</span>`;
+                }
             }
 
             nodeDiv.innerHTML = `
@@ -664,16 +680,21 @@ class UIManager {
                                       (this.app.faction === 'sabaku' && choice.opinionChange > 0);
                     const effectiveChange = isAdverse ? Math.round(choice.opinionChange * 1.8) : choice.opinionChange;
 
-                    if (choice.opinionChange > 0) {
-                        const label = isAdverse ? `⚠️ 逆風: 討幕+${Math.abs(effectiveChange)}%` : `🔴 世論: 討幕+${effectiveChange}%`;
-                        const cls = isAdverse ? 'badge-opinion badge-opinion-warning' : 'badge-opinion badge-opinion-tobaku';
-                        opinionBadgeHtml = `<span class="${cls}">${label}</span>`;
-                    } else if (choice.opinionChange < 0) {
-                        const label = isAdverse ? `⚠️ 逆風: 佐幕+${Math.abs(effectiveChange)}%` : `🔵 世論: 佐幕+${Math.abs(effectiveChange)}%`;
-                        const cls = isAdverse ? 'badge-opinion badge-opinion-warning' : 'badge-opinion badge-opinion-sabaku';
-                        opinionBadgeHtml = `<span class="${cls}">${label}</span>`;
-                    } else {
+                    if (choice.opinionChange === 0) {
                         opinionBadgeHtml = `<span class="badge-opinion badge-opinion-neutral">⚖️ 世論: 変動なし</span>`;
+                    } else {
+                        const targetFactionName = choice.opinionChange > 0 ? "討幕" : "佐幕";
+                        const factionCircle = choice.opinionChange > 0 ? "🔴" : "🔵";
+
+                        if (isAdverse) {
+                            // 自軍不利なもの：赤色背景（逆風）
+                            const label = `⚠️ 逆風: ${factionCircle}${targetFactionName}+${Math.abs(effectiveChange)}%`;
+                            opinionBadgeHtml = `<span class="badge-opinion badge-opinion-adverse">${label}</span>`;
+                        } else {
+                            // 自軍有利なもの：青色背景
+                            const label = `${factionCircle} 世論: ${targetFactionName}+${Math.abs(effectiveChange)}%`;
+                            opinionBadgeHtml = `<span class="badge-opinion badge-opinion-favorable">${label}</span>`;
+                        }
                     }
                 }
 

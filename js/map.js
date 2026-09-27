@@ -83,9 +83,14 @@ class MapSystem {
         // Floor 1 〜 floorCount - 1 の戦略的長編ノード網生成
         for (let f = 1; f < floorCount; f++) {
             const fNodes = [];
-            // ボス直前フロアは2分岐（休息＆商人）、中盤山場（f=6）は3分岐、他は2〜3分岐
+            // 歴史の関門フロア（不可避の重大事件合流地点）
+            const chokeFloor = (actNumber === 3) ? 7 : 8;
+
+            // ボス直前フロアは2分岐（休息＆商人）、中盤山場（f=6）は3分岐、関門（chokeFloor）は1合流、他は2〜3分岐
             let colCount = 2;
-            if (f === floorCount - 1) {
+            if (f === chokeFloor) {
+                colCount = 1;
+            } else if (f === floorCount - 1) {
                 colCount = 2;
             } else if (f === 6) {
                 colCount = 3;
@@ -97,9 +102,16 @@ class MapSystem {
                 let type = 'battle';
                 let icon = '⚔️';
                 let title = '戦場';
+                let isChokepoint = false;
 
                 // --- 階層設計（Slay the Spire級の洗練されたペース配分） ---
-                if (f === floorCount - 1) {
+                if (f === chokeFloor) {
+                    // 歴史の関門: 全ルートが必ず通過する重大歴史特異点
+                    type = 'event';
+                    icon = '⛩️';
+                    title = '歴史の関門';
+                    isChokepoint = true;
+                } else if (f === floorCount - 1) {
                     // ボス直前フロア: 本陣休息または洋行商人
                     if (c === 0) {
                         type = 'rest';
@@ -216,6 +228,7 @@ class MapSystem {
                     type,
                     title,
                     icon,
+                    isChokepoint,
                     completed: false
                 };
                 this.nodes.push(node);
@@ -447,7 +460,14 @@ class MapSystem {
         eventNodes.forEach(node => {
             let candidates;
 
-            if (node.floor === 0) {
+            if (node.isChokepoint) {
+                // 歴史の関門（チョークポイント）: 幕に応じた不可避の重大決戦事件を確定割り当て
+                let chokeId = 'event_hamaguri_gate'; // Act 1: 禁門の変
+                if (actNumber === 2) chokeId = 'event_second_choshu_war'; // Act 2: 第二次長州征伐
+                if (actNumber === 3) chokeId = 'event_toba_fushimi'; // Act 3: 鳥羽・伏見の戦い
+                const found = GAME_DATA.events.find(e => e.id === chokeId);
+                candidates = found ? [found] : actEvents;
+            } else if (node.floor === 0) {
                 // 第一幕 Floor 0: 幕の黎明期（最初の5件）から選択
                 candidates = actEvents.slice(0, 5).filter(e => !assignedIds.has(e.id));
                 if (candidates.length === 0) candidates = actEvents.slice(0, 5);
