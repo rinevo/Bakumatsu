@@ -284,9 +284,9 @@ const GAME_DATA = {
         },
         "kido_reform": {
             id: "kido_reform",
-            name: "木戸孝允：維新の設計",
+            name: "桂小五郎：維新の設計",
             faction: "tobaku",
-            character: "kido",
+            character: "katsura",
             type: "shishi",
             cost: 1,
             attack: 8,
@@ -396,7 +396,7 @@ const GAME_DATA = {
         },
         "kuroda_frontier": {
             id: "kuroda_frontier",
-            name: "黒田清隆：北辺の開拓",
+            name: "黒田了介：北辺の開拓",
             faction: "tobaku",
             character: "kuroda",
             type: "shishi",
@@ -1017,9 +1017,9 @@ const GAME_DATA = {
         },
         "yamagawa_defense": {
             id: "yamagawa_defense",
-            name: "山川浩：会津守備隊",
+            name: "山川大蔵：会津守備隊",
             faction: "sabaku",
-            character: "yamagawa",
+            character: "yamakawa",
             type: "shishi",
             cost: 2,
             attack: 4,
@@ -1199,7 +1199,7 @@ const GAME_DATA = {
             id: "yamakawa_cavalry",
             name: "山川大蔵：会津の退陣",
             faction: "sabaku",
-            character: "yamakawa_taizo",
+            character: "yamakawa",
             type: "shishi",
             cost: 1,
             attack: 8,
@@ -1293,11 +1293,11 @@ const GAME_DATA = {
                 }
             }
         },
-        "kuroda_defense": {
-            id: "kuroda_defense",
-            name: "黒田了介：守備の采配",
+        "saigo_tanomo_defense": {
+            id: "saigo_tanomo_defense",
+            name: "西郷頼母：会津の悲哀",
             faction: "sabaku",
-            character: "kuroda_ryosuke",
+            character: "saigo_tanomo",
             type: "shishi",
             cost: 1,
             attack: 5,
@@ -3647,11 +3647,11 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: -20,
+                    opinionChange: 15,
                     text: "敗北を認め、洋式兵器を研究する",
                     effectDesc: "志士『黒田了介』を獲得。『アームストロング砲』をデッキに加えるが、列強介入+8%。",
                     action: (app) => {
-                        app.addCardToDeck("kuroda_defense");
+                        app.addCardToDeck("kuroda_frontier");
                         app.addCardToDeck("weapon_armstrong");
                         app.modifyImperialGauge(8);
                     }
@@ -3894,7 +3894,7 @@ const GAME_DATA = {
                 {
                     opinionChange: 20,
                     text: "視察費を軍備に回す",
-                    effectDesc: "志士『木戸孝允』を獲得。『アームストロング砲』をデッキに加えるが、列強介入+10%。",
+                    effectDesc: "志士『桂小五郎』を獲得。『アームストロング砲』をデッキに加えるが、列強介入+10%。",
                     action: (app) => {
                         app.addCardToDeck("kido_reform");
                         app.addCardToDeck("weapon_armstrong");
@@ -4024,7 +4024,7 @@ const GAME_DATA = {
                 {
                     opinionChange: 20,
                     text: "改革を急ぎ、中央の力を強める",
-                    effectDesc: "志士『木戸孝允』を獲得。次の戦闘の攻撃力+12、列強介入+5%。",
+                    effectDesc: "志士『桂小五郎』を獲得。次の戦闘の攻撃力+12、列強介入+5%。",
                     action: (app) => {
                         app.addCardToDeck("kido_reform");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 12;
@@ -4052,7 +4052,7 @@ const GAME_DATA = {
                 {
                     opinionChange: 20,
                     text: "改革を断行し、国の仕組みを統一する",
-                    effectDesc: "志士『木戸孝允』を獲得。最大HP+10、次の戦闘の攻撃力+7。",
+                    effectDesc: "志士『桂小五郎』を獲得。最大HP+10、次の戦闘の攻撃力+7。",
                     action: (app) => {
                         app.addCardToDeck("kido_reform");
                         app.maxHp += 10;
@@ -4347,7 +4347,7 @@ const GAME_DATA = {
                 {
                     opinionChange: 20,
                     text: "奉還を進め、中央の制度を整える",
-                    effectDesc: "志士『木戸孝允』を獲得。最大HP+9、列強介入-6%。",
+                    effectDesc: "志士『桂小五郎』を獲得。最大HP+9、列強介入-6%。",
                     action: (app) => {
                         app.addCardToDeck("kido_reform");
                         app.maxHp += 9;
@@ -5095,12 +5095,12 @@ const GAME_DATA = {
                 },
                 {
                     opinionChange: -15,
-                    text: "城下の復興資金を残す",
-                    effectDesc: "志士『山川浩』を獲得。50両を支払い、最大HP+10。資金が足りない場合は選択不可。",
+                    text: "城下の復興資金を残し、家老・西郷頼母と共に藩の誇りを守る",
+                    effectDesc: "志士『西郷頼母』を獲得。50両を支払い、最大HP+10。資金が足りない場合は選択不可。",
                     costGold: 50,
                     canChoose: (app) => app.gold >= 50,
                     action: (app) => {
-                        app.addCardToDeck("yamagawa_defense");
+                        app.addCardToDeck("saigo_tanomo_defense");
                         app.gold -= 50;
                         app.maxHp += 10;
                         app.hp += 10;
@@ -5379,7 +5379,7 @@ const GAME_DATA = {
                 {
                     opinionChange: 20,
                     text: "軍費を民生へ回す",
-                    effectDesc: "志士『木戸孝允』を獲得。HPを 12 回復し、60両を得る。",
+                    effectDesc: "志士『桂小五郎』を獲得。HPを 12 回復し、60両を得る。",
                     action: (app) => {
                         app.addCardToDeck("kido_reform");
                         app.healPlayer(12);
@@ -5488,7 +5488,7 @@ const GAME_DATA = {
                 {
                     opinionChange: 20,
                     text: "職人の技を守り、和洋を融合する",
-                    effectDesc: "志士『木戸孝允』を獲得。40両を得て、HPを 8 回復する。",
+                    effectDesc: "志士『桂小五郎』を獲得。40両を得て、HPを 8 回復する。",
                     action: (app) => {
                         app.addCardToDeck("kido_reform");
                         app.gold += 40;
@@ -5683,7 +5683,7 @@ const GAME_DATA = {
                 {
                     opinionChange: 20,
                     text: "全国に学校を整備する",
-                    effectDesc: "志士『木戸孝允』を獲得。最大HP+10、HPを 10 回復する。",
+                    effectDesc: "志士『桂小五郎』を獲得。最大HP+10、HPを 10 回復する。",
                     action: (app) => {
                         app.addCardToDeck("kido_reform");
                         app.maxHp += 10;
@@ -6447,7 +6447,7 @@ const GAME_DATA = {
                 {
                     opinionChange: 20,
                     text: "【討幕派】奥羽諸藩の結束を分断し、新政府軍の進路を切り開く",
-                    effectDesc: "志士『木戸孝允』を獲得。50両を得て、列強介入-8%。",
+                    effectDesc: "志士『桂小五郎』を獲得。50両を得て、列強介入-8%。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("kido_reform");
@@ -7242,7 +7242,7 @@ const GAME_DATA = {
     ],
 
     // ==========================================
-    // 6. 志士連携（コンボ・コネクトリンク）マスター定義 (全177組・全志士網羅)
+    // 6. 志士連携（コンボ・コネクトリンク）マスター定義 (全224組・全志士網羅)
     // ==========================================
     combos: [
     // === 既存のコンボ（連鎖墨文字を必ず表示） ===
@@ -7370,13 +7370,14 @@ const GAME_DATA = {
         }
     },
     {
-        id: "combo_katsura_kido",
-        chars: ["katsura", "kido"],
-        title: "【維新の設計図！】",
-        desc: "列強介入-5%、腕力+4。",
+        id: "combo_katsura_maebara",
+        chars: ["katsura", "maebara"],
+        title: "【松門の重鎮・下関挙兵！】",
+        desc: "敵に 16 ダメージ、防 12、カードを 1 枚引く。",
         apply: (b) => {
-            b.modifyImperialGauge(-5);
-            b.applyPlayerBuff("strength", 4);
+            b.dealDamageToEnemy(16);
+            b.gainPlayerShield(12);
+            b.drawCards(1);
         }
     },
     {
@@ -7416,7 +7417,7 @@ const GAME_DATA = {
     },
     {
         id: "combo_katamori_yamagawa",
-        chars: ["katamori", "yamagawa"],
+        chars: ["katamori", "yamakawa"],
         title: "【会津守護の陣！】",
         desc: "防14、HPを5回復。",
         apply: (b) => {
@@ -7773,13 +7774,14 @@ const GAME_DATA = {
         }
     },
     {
-        id: "combo_yamagawa_yamakawa_taizo",
-        chars: ["yamagawa", "yamakawa_taizo"],
-        title: "【会津山川の奮戦！】",
-        desc: "防16、HPを5回復。",
+        id: "combo_yamakawa_akizuki",
+        chars: ["yamakawa", "akizuki"],
+        title: "【会津軍政の知恵・日光口の転戦！】",
+        desc: "敵に 14 ダメージ、防 12、カードを 1 枚引く。",
         apply: (b) => {
-            b.gainPlayerShield(16);
-            b.healPlayer(5);
+            b.dealDamageToEnemy(14);
+            b.gainPlayerShield(12);
+            b.drawCards(1);
         }
     },
     {
@@ -7796,15 +7798,14 @@ const GAME_DATA = {
         }
     },
     {
-        id: "combo_kawamura_kuroda_ryosuke",
-        chars: ["kawamura", "kuroda_ryosuke"],
-        title: "【海防軍政の防備！】",
-        desc: "防14、敵シールド8破壊。",
+        id: "combo_saigo_tanomo_katamori",
+        chars: ["saigo_tanomo", "katamori"],
+        title: "【会津の忠諫・家老の覚悟！】",
+        desc: "防 16、HPを 6 回復、次のターンの被ダメージを 3 軽減。",
         apply: (b) => {
-            b.gainPlayerShield(14);
-            if (b.enemy) {
-                b.enemy.shield = Math.max(0, b.enemy.shield - 8);
-            }
+            b.gainPlayerShield(16);
+            b.healPlayer(6);
+            b.nextTurnDamageReduction = (b.nextTurnDamageReduction || 0) + 3;
         }
     },
     {
@@ -8265,12 +8266,14 @@ const GAME_DATA = {
         }
     },
     {
-        id: "combo_kido_okubo",
-        chars: ["kido","okubo"],
-        title: "【維新二傑の経綸！】",
-        desc: "敵に16ダメージ、防16、カードを2枚引く。",
+        id: "combo_katsura_sanjo",
+        chars: ["katsura", "sanjo"],
+        title: "【朝廷周旋・七卿落ちの信義！】",
+        desc: "防 14、カードを 2 枚引く、列強介入度 -4%。",
         apply: (b) => {
-            b.dealDamageToEnemy(16); b.gainPlayerShield(16); b.drawCards(2);
+            b.gainPlayerShield(14);
+            b.drawCards(2);
+            if (window.app) window.app.modifyImperialGauge(-4);
         }
     },
     {
@@ -8400,12 +8403,12 @@ const GAME_DATA = {
         }
     },
     {
-        id: "combo_kuroda_ryosuke_saigo",
-        chars: ["kuroda_ryosuke","saigo"],
-        title: "【薩摩剛勇の将！】",
-        desc: "敵に16ダメージ、防14、腕力+3。",
+        id: "combo_saigo_tanomo_yamakawa",
+        chars: ["saigo_tanomo", "yamakawa"],
+        title: "【会津主従・白河口防衛！】",
+        desc: "敵に 14 ダメージ、防 14、HPを 4 回復。",
         apply: (b) => {
-            b.dealDamageToEnemy(16); b.gainPlayerShield(14); b.applyPlayerBuff('strength', 3);
+            b.dealDamageToEnemy(14); b.gainPlayerShield(14); b.healPlayer(4);
         }
     },
     {
@@ -8724,17 +8727,17 @@ const GAME_DATA = {
         }
     },
     {
-        id: "combo_yamagawa_sagawa",
-        chars: ["yamagawa","sagawa"],
-        title: "【会津防衛の双璧！】",
-        desc: "敵に14ダメージ、防14。",
+        id: "combo_yamakawa_sadaakira",
+        chars: ["yamakawa","sadaakira"],
+        title: "【会桑不抜・柏崎の同盟！】",
+        desc: "敵に15ダメージ、防12、HPを4回復。",
         apply: (b) => {
-            b.dealDamageToEnemy(14); b.gainPlayerShield(14);
+            b.dealDamageToEnemy(15); b.gainPlayerShield(12); b.healPlayer(4);
         }
     },
     {
         id: "combo_yamagawa_yamamoto",
-        chars: ["yamagawa","yamamoto"],
+        chars: ["yamakawa","yamamoto"],
         title: "【会津蘭学・防備の絆！】",
         desc: "敵に12ダメージ、防12、カードを1枚引く。",
         apply: (b) => {
@@ -8770,7 +8773,7 @@ const GAME_DATA = {
     },
     {
         id: "combo_yamakawa_taizo_katamori",
-        chars: ["yamakawa_taizo","katamori"],
+        chars: ["yamakawa","katamori"],
         title: "【彼岸獅子の奇策！】",
         desc: "敵に12ダメージ、防16、HPを5回復。",
         apply: (b) => {
@@ -9175,6 +9178,321 @@ const GAME_DATA = {
             b.dealDamageToEnemy(12);
             b.drawCards(1);
             if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 6;
+        }
+    },
+    // === 史実連携コンボ（追加24組） ===
+    // --- 佐幕派・幕府勢力（12組） ---
+    {
+        id: "combo_sannan_okita",
+        chars: ["sannan", "okita"],
+        title: "【試衛館の情愛・哀惜の太刀！】",
+        desc: "敵に14ダメージ、防8、カードを1枚引く。",
+        apply: (b) => {
+            b.dealDamageToEnemy(14);
+            b.gainPlayerShield(8);
+            b.drawCards(1);
+        }
+    },
+    {
+        id: "combo_sannan_hijikata",
+        chars: ["sannan", "hijikata"],
+        title: "【総長と副長・局中草創の誓い！】",
+        desc: "防14、敵全体に脱力2、次回攻撃力+4。",
+        apply: (b) => {
+            b.gainPlayerShield(14);
+            if (b.enemy) b.enemy.debuffWeak = (b.enemy.debuffWeak || 0) + 2;
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 4;
+        }
+    },
+    {
+        id: "combo_shimada_saito",
+        chars: ["shimada", "saito"],
+        title: "【新選組の殿軍・不滅の誠！】",
+        desc: "敵に12ダメージ、防16。",
+        apply: (b) => {
+            b.dealDamageToEnemy(12);
+            b.gainPlayerShield(16);
+        }
+    },
+    {
+        id: "combo_tatsumi_otori",
+        chars: ["tatsumi", "otori"],
+        title: "【雷神と伝習・不敗の指揮！】",
+        desc: "敵に16ダメージ、敵シールドを8破壊、カードを1枚引く。",
+        apply: (b) => {
+            b.dealDamageToEnemy(16);
+            b.destroyEnemyShield(8);
+            b.drawCards(1);
+        }
+    },
+    {
+        id: "combo_tatsumi_hijikata",
+        chars: ["tatsumi", "hijikata"],
+        title: "【箱館決戦・雷神と鬼！】",
+        desc: "敵に18ダメージ、防10。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            b.gainPlayerShield(10);
+        }
+    },
+    {
+        id: "combo_koga_hijikata",
+        chars: ["koga", "hijikata"],
+        title: "【宮古湾突入・アポルダージュ！】",
+        desc: "敵に20ダメージ、敵シールド全破壊、被ダメ-3。",
+        apply: (b) => {
+            b.dealDamageToEnemy(20);
+            if (b.enemy) b.enemy.shield = 0;
+            if (window.app) window.app.damageReductionNextTurn = (window.app.damageReductionNextTurn || 0) + 3;
+        }
+    },
+    {
+        id: "combo_kawai_sakuma",
+        chars: ["kawai", "sakuma"],
+        title: "【象山門下の先見・富国強兵！】",
+        desc: "敵に16ダメージ、25両獲得、列強介入度-3%。",
+        apply: (b) => {
+            b.dealDamageToEnemy(16);
+            if (window.app) {
+                window.app.gold += 25;
+                window.app.modifyImperialGauge(-3);
+            }
+        }
+    },
+    {
+        id: "combo_kawai_katsu",
+        chars: ["kawai", "katsu"],
+        title: "【長岡の気概と海舟の大局！】",
+        desc: "防16、列強介入度-5%、敵の次攻撃力を半減。",
+        apply: (b) => {
+            b.gainPlayerShield(16);
+            if (window.app) window.app.modifyImperialGauge(-5);
+            if (b.enemy) b.enemy.nextDamageMultiplier = 0.5;
+        }
+    },
+    {
+        id: "combo_ii_mizuno",
+        chars: ["ii_naosuke", "mizuno"],
+        title: "【大老と奉行・開国条約の断行！】",
+        desc: "防16、列強介入度-6%、カードを1枚引く。",
+        apply: (b) => {
+            b.gainPlayerShield(16);
+            b.drawCards(1);
+            if (window.app) window.app.modifyImperialGauge(-6);
+        }
+    },
+    {
+        id: "combo_hayashi_enomoto",
+        chars: ["hayashi", "enomoto"],
+        title: "【脱藩藩主と総裁・蝦夷の義挙！】",
+        desc: "敵に14ダメージ、防14、次回攻撃力+6。",
+        apply: (b) => {
+            b.dealDamageToEnemy(14);
+            b.gainPlayerShield(14);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 6;
+        }
+    },
+    {
+        id: "combo_yamakawa_sagawa",
+        chars: ["yamakawa", "sagawa"],
+        title: "【会津の知謀と猛撃・城下の絆！】",
+        desc: "敵に16ダメージ、防10、HP4回復。",
+        apply: (b) => {
+            b.dealDamageToEnemy(16);
+            b.gainPlayerShield(10);
+            if (window.app) window.app.healPlayer(4);
+        }
+    },
+    {
+        id: "combo_kimura_enomoto",
+        chars: ["kimura", "enomoto"],
+        title: "【長崎伝習・幕府海軍の黎明！】",
+        desc: "防14、敵シールドを8破壊、カードを1枚引く。",
+        apply: (b) => {
+            b.gainPlayerShield(14);
+            b.destroyEnemyShield(8);
+            b.drawCards(1);
+        }
+    },
+    // --- 討幕派・薩長土肥（12組） ---
+    {
+        id: "combo_katsura_saigo",
+        chars: ["katsura", "saigo"],
+        title: "【薩長盟約の巨頭・新時代の大業！】",
+        desc: "敵全体に16ダメージ、防12、次回攻撃力+6。",
+        apply: (b) => {
+            b.dealDamageToEnemy(16);
+            b.gainPlayerShield(12);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 6;
+        }
+    },
+    {
+        id: "combo_katsura_fukuoka",
+        chars: ["katsura", "fukuoka"],
+        title: "【五箇条御誓文の起草！】",
+        desc: "防12、カードを2枚引く、次回攻撃力+4。",
+        apply: (b) => {
+            b.gainPlayerShield(12);
+            b.drawCards(2);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 4;
+        }
+    },
+    {
+        id: "combo_katsura_yamada",
+        chars: ["katsura", "yamada"],
+        title: "【長州軍政・用兵の俊英！】",
+        desc: "敵に18ダメージ、敵のシールドを8破壊、防8。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            b.gainPlayerShield(8);
+            if (b.enemy) b.enemy.shield = Math.max(0, (b.enemy.shield || 0) - 8);
+        }
+    },
+    {
+        id: "combo_ijichi_saigo",
+        chars: ["ijichi", "saigo"],
+        title: "【薩摩の頭脳と大器・不敗の軍略！】",
+        desc: "敵全体に14ダメージ、防10、敵剛力を解除。",
+        apply: (b) => {
+            b.dealDamageToEnemy(14);
+            b.gainPlayerShield(10);
+            if (b.enemy && b.enemy.buffStrength > 0) {
+                b.enemy.buffStrength = 0;
+            }
+        }
+    },
+    {
+        id: "combo_ijichi_kuroda",
+        chars: ["ijichi", "kuroda"],
+        title: "【薩摩軍総撃・北征の砲陣！】",
+        desc: "敵に16ダメージ、防6、次回攻撃力+6。",
+        apply: (b) => {
+            b.dealDamageToEnemy(16);
+            b.gainPlayerShield(6);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 6;
+        }
+    },
+    {
+        id: "combo_arima_okubo",
+        chars: ["arima", "okubo"],
+        title: "【精忠組結党・薩摩の志士気骨！】",
+        desc: "敵に18ダメージ、自HP3消費、25両獲得。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            b.damagePlayerDirect(3);
+            if (window.app) window.app.gold += 25;
+        }
+    },
+    {
+        id: "combo_iwazaki_goto",
+        chars: ["iwazaki", "goto"],
+        title: "【土佐商会・海運と政商の胎動！】",
+        desc: "軍資金50両獲得、防12。",
+        apply: (b) => {
+            b.gainPlayerShield(12);
+            if (window.app) window.app.gold += 50;
+        }
+    },
+    {
+        id: "combo_iwazaki_godai",
+        chars: ["iwazaki", "godai"],
+        title: "【海運と鉱山・近代財界の二大巨頭！】",
+        desc: "軍資金40両獲得、防10、列強介入度-4%。",
+        apply: (b) => {
+            b.gainPlayerShield(10);
+            if (window.app) {
+                window.app.gold += 40;
+                window.app.modifyImperialGauge(-4);
+            }
+        }
+    },
+    {
+        id: "combo_kirishima_takasugi",
+        chars: ["kirishima", "takasugi"],
+        title: "【奇兵と遊撃・長州諸隊の突進！】",
+        desc: "敵に22ダメージ、敵シールド全破壊、次回攻撃力+4。",
+        apply: (b) => {
+            b.dealDamageToEnemy(22);
+            if (b.enemy) b.enemy.shield = 0;
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 4;
+        }
+    },
+    {
+        id: "combo_maebara_takasugi",
+        chars: ["maebara", "takasugi"],
+        title: "【松陰門下の義挙・功山寺の魁！】",
+        desc: "敵に16ダメージ、カードを1枚引く、次回攻撃力+4。",
+        apply: (b) => {
+            b.dealDamageToEnemy(16);
+            b.drawCards(1);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 4;
+        }
+    },
+    {
+        id: "combo_eto_soejima",
+        chars: ["eto", "soejima"],
+        title: "【佐賀二傑・法治と外交の礎！】",
+        desc: "敵に14ダメージ、防12、敵の次攻撃力-4。",
+        apply: (b) => {
+            b.dealDamageToEnemy(14);
+            b.gainPlayerShield(12);
+            if (b.enemy) {
+                b.enemy.nextTurnStrengthDebuff = (b.enemy.nextTurnStrengthDebuff || 0) + 4;
+            }
+        }
+    },
+    {
+        id: "combo_yoshimura_izo",
+        chars: ["yoshimura", "izo"],
+        title: "【土佐勤王の天誅・暗闘の刃！】",
+        desc: "敵に18ダメージ、敵に流血3を付与。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            if (b.enemy) b.enemy.debuffBleed = (b.enemy.debuffBleed || 0) + 3;
+        }
+    },
+    {
+        id: "combo_kawamura_kuroda",
+        chars: ["kawamura", "kuroda"],
+        title: "【海防軍政の防備！】",
+        desc: "防14、敵シールド8破壊。",
+        apply: (b) => {
+            b.gainPlayerShield(14);
+            if (b.enemy) b.enemy.shield = Math.max(0, (b.enemy.shield || 0) - 8);
+        }
+    },
+    {
+        id: "combo_saigo_tanomo_sagawa",
+        chars: ["saigo_tanomo", "sagawa"],
+        title: "【会津の勇猛・家老と猛将！】",
+        desc: "敵に16ダメージ、防10、次回攻撃力+5。",
+        apply: (b) => {
+            b.dealDamageToEnemy(16);
+            b.gainPlayerShield(10);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 5;
+        }
+    },
+    {
+        id: "combo_kawamura_katsu",
+        chars: ["kawamura", "katsu"],
+        title: "【海軍伝習・薩摩と幕臣！】",
+        desc: "防14、列強介入度-4%、カードを1枚引く。",
+        apply: (b) => {
+            b.gainPlayerShield(14);
+            b.drawCards(1);
+            if (window.app) window.app.modifyImperialGauge(-4);
+        }
+    },
+    {
+        id: "combo_takechi_tanaka_shinbei",
+        chars: ["takechi", "tanaka_shinbei"],
+        title: "【薩土天誅・義兄弟の刃！】",
+        desc: "敵に 18 ダメージ、次回攻撃力 +6、流血 3 を付与、HPを 3 消費。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 6;
+            if (b.enemy) b.enemy.debuffBleed = (b.enemy.debuffBleed || 0) + 3;
+            b.damagePlayer(3);
         }
     }
 ]
