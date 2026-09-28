@@ -424,6 +424,59 @@
         </div>
     </div>
 
+    <!-- カード詳細・人物伝拡大モーダル（デッキ一覧の手前に重ねて表示） -->
+    <div id="modal-card-detail" class="game-modal modal-detail-overlay">
+        <div class="modal-backdrop" id="card-detail-backdrop"></div>
+        <div class="modal-content-box card-detail-modal-box">
+            <div class="modal-header">
+                <div class="card-detail-header-left">
+                    <span class="card-detail-sub-badge" id="card-detail-type-badge">志士</span>
+                    <h2 id="card-detail-title">札詳細・人物伝</h2>
+                </div>
+                <button id="btn-close-card-detail" class="modal-close-btn" title="閉じる">✕</button>
+            </div>
+            <div class="card-detail-body">
+                <div class="card-detail-visual-col">
+                    <div id="card-detail-enlarged-container" class="card-enlarged-wrapper">
+                        <!-- 拡大カード要素をレンダリング -->
+                    </div>
+                </div>
+                <div class="card-detail-info-col">
+                    <div class="card-detail-meta-group">
+                        <div class="card-detail-name-row">
+                            <span id="card-detail-name" class="card-detail-name">志士名</span>
+                            <span id="card-detail-rarity" class="card-detail-rarity-tag">伝説</span>
+                        </div>
+                        <div class="card-detail-badges-row" id="card-detail-badges-row">
+                            <span id="card-detail-faction" class="detail-badge-pill">陣営</span>
+                            <span id="card-detail-stats-cost" class="detail-badge-pill">コスト</span>
+                            <span id="card-detail-stats-atk" class="detail-badge-pill atk" style="display:none;"></span>
+                            <span id="card-detail-stats-def" class="detail-badge-pill def" style="display:none;"></span>
+                        </div>
+                    </div>
+
+                    <!-- 効果解説 -->
+                    <div class="card-detail-section">
+                        <h4 class="card-detail-section-title"><span class="section-icon">◆</span> 札の効果</h4>
+                        <div id="card-detail-effect" class="card-detail-effect-text"></div>
+                    </div>
+
+                    <!-- 人物伝セクション（志士カードの場合に表示） -->
+                    <div id="card-detail-bio-section" class="card-detail-section bio-section">
+                        <h4 class="card-detail-section-title"><span class="section-icon">📜</span> 人物伝（史実の軌跡）</h4>
+                        <div id="card-detail-bio" class="card-detail-bio-text"></div>
+                    </div>
+
+                    <!-- 連携・絆効果セクション -->
+                    <div id="card-detail-synergy-section" class="card-detail-section synergy-section" style="display: none;">
+                        <h4 class="card-detail-section-title"><span class="section-icon">⚔️</span> 連携・絆効果</h4>
+                        <div id="card-detail-synergy" class="card-detail-synergy-text"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- カード削除選択モーダル -->
     <div id="modal-removal" class="game-modal">
         <div class="modal-backdrop"></div>

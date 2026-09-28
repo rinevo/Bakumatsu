@@ -241,6 +241,16 @@ class BakumatsuApp {
             deckBackdrop.addEventListener('click', () => this.ui.closeDeckModal());
         }
 
+        // カード詳細モーダル閉じる
+        const btnCloseCardDetail = document.getElementById('btn-close-card-detail');
+        if (btnCloseCardDetail) {
+            btnCloseCardDetail.addEventListener('click', () => this.ui.closeCardDetailModal());
+        }
+        const cardDetailBackdrop = document.getElementById('card-detail-backdrop');
+        if (cardDetailBackdrop) {
+            cardDetailBackdrop.addEventListener('click', () => this.ui.closeCardDetailModal());
+        }
+
         // 削除モーダルキャンセル
         const btnCloseRemoval = document.getElementById('btn-close-removal');
         if (btnCloseRemoval) {

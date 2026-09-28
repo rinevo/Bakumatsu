@@ -8,6 +8,32 @@ class UIManager {
         this.app = app;
         this.selectedRemovalCallback = null;
         window.addEventListener('resize', () => this.updateHeader());
+
+        // カード詳細モーダルの閉じる操作
+        const btnCloseCardDetail = document.getElementById('btn-close-card-detail');
+        if (btnCloseCardDetail) {
+            btnCloseCardDetail.addEventListener('click', () => this.closeCardDetailModal());
+        }
+        const cardDetailBackdrop = document.getElementById('card-detail-backdrop');
+        if (cardDetailBackdrop) {
+            cardDetailBackdrop.addEventListener('click', () => this.closeCardDetailModal());
+        }
+
+        // ESCキーでモーダルを階層的に閉じる
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const detailModal = document.getElementById('modal-card-detail');
+                if (detailModal && detailModal.classList.contains('active')) {
+                    this.closeCardDetailModal();
+                    e.stopPropagation();
+                    return;
+                }
+                const deckModal = document.getElementById('modal-deck');
+                if (deckModal && deckModal.classList.contains('active')) {
+                    this.closeDeckModal();
+                }
+            }
+        });
     }
 
     // --- 上部ステータスバー更新 ---
@@ -196,6 +222,18 @@ class UIManager {
             case 'neutral': return '西洋舶来';
             case 'curse': return '不平等条約';
             default: return '';
+        }
+    }
+
+    getRarityName(rarity) {
+        switch (rarity) {
+            case 'starter': return '初期札';
+            case 'common': return '通常';
+            case 'uncommon': return '良質';
+            case 'rare': return '名品';
+            case 'legendary': return '伝奇';
+            case 'curse': return '条約';
+            default: return '一般';
         }
     }
 
@@ -857,6 +895,12 @@ class UIManager {
                 const card = GAME_DATA.cards[cardId];
                 if (card) {
                     const el = this.createCardElement(card);
+                    el.classList.add('card-clickable-detail');
+                    el.setAttribute('title', 'クリックで拡大・詳細と人物伝を表示');
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.openCardDetailModal(card);
+                    });
                     container.appendChild(el);
                 }
             });
@@ -866,7 +910,131 @@ class UIManager {
     }
 
     closeDeckModal() {
+        this.closeCardDetailModal();
         document.getElementById('modal-deck').classList.remove('active');
+    }
+
+    // --- カード詳細・人物伝拡大モーダル ---
+    openCardDetailModal(card) {
+        if (!card) return;
+        const modal = document.getElementById('modal-card-detail');
+        if (!modal) return;
+
+        // 1. 拡大カードの描画
+        const visualContainer = document.getElementById('card-detail-enlarged-container');
+        if (visualContainer) {
+            visualContainer.innerHTML = '';
+            const enlargedCard = this.createCardElement(card);
+            enlargedCard.classList.remove('card-clickable-detail');
+            visualContainer.appendChild(enlargedCard);
+        }
+
+        // 2. ヘッダー・種別バッジ
+        const typeBadge = document.getElementById('card-detail-type-badge');
+        const titleEl = document.getElementById('card-detail-title');
+        if (typeBadge) typeBadge.textContent = this.getTypeName(card.type);
+        if (titleEl) titleEl.textContent = card.type === 'shishi' ? '志士詳細・人物伝' : '札詳細情報';
+
+        // 3. 基本情報（名前・レアリティ）
+        const nameEl = document.getElementById('card-detail-name');
+        const rarityEl = document.getElementById('card-detail-rarity');
+        if (nameEl) nameEl.textContent = card.name;
+        if (rarityEl) {
+            rarityEl.textContent = this.getRarityName(card.rarity);
+            rarityEl.className = `card-detail-rarity-tag ${card.rarity || 'common'}`;
+        }
+
+        // 4. バッジ群（陣営、コスト、攻撃、防御）
+        const factionEl = document.getElementById('card-detail-faction');
+        if (factionEl) {
+            factionEl.textContent = this.getFactionName(card.faction) || '中立';
+            factionEl.className = `detail-badge-pill faction-${card.faction}`;
+        }
+
+        const costEl = document.getElementById('card-detail-stats-cost');
+        if (costEl) {
+            costEl.textContent = card.unplayable ? '使用不可' : `費用: ${card.cost ?? 0} 文`;
+        }
+
+        const atkEl = document.getElementById('card-detail-stats-atk');
+        if (atkEl) {
+            if (card.attack) {
+                atkEl.textContent = `攻撃: ${card.attack}`;
+                atkEl.style.display = 'inline-block';
+            } else {
+                atkEl.style.display = 'none';
+            }
+        }
+
+        const defEl = document.getElementById('card-detail-stats-def');
+        if (defEl) {
+            if (card.shield) {
+                defEl.textContent = `防御: ${card.shield}`;
+                defEl.style.display = 'inline-block';
+            } else {
+                defEl.style.display = 'none';
+            }
+        }
+
+        // 5. 効果テキスト
+        const effectEl = document.getElementById('card-detail-effect');
+        if (effectEl) {
+            effectEl.textContent = card.desc || '効果なし';
+        }
+
+        // 6. 人物伝（志士カードの場合）
+        const bioSection = document.getElementById('card-detail-bio-section');
+        const bioEl = document.getElementById('card-detail-bio');
+        if (card.type === 'shishi' && card.bio) {
+            if (bioSection) bioSection.style.display = 'block';
+            if (bioEl) bioEl.textContent = card.bio;
+        } else {
+            if (bioSection) bioSection.style.display = 'none';
+        }
+
+        // 7. 連携・絆効果
+        const synergySection = document.getElementById('card-detail-synergy-section');
+        const synergyEl = document.getElementById('card-detail-synergy');
+        let synergyHtml = '';
+
+        if (card.character && GAME_DATA.combos) {
+            const relatedCombos = GAME_DATA.combos.filter(cb => cb.chars && cb.chars.includes(card.character));
+            if (relatedCombos.length > 0) {
+                synergyHtml = relatedCombos.map(cb => {
+                    const partnerChars = cb.chars
+                        .filter(ch => ch !== card.character)
+                        .map(ch => {
+                            const pCard = Object.values(GAME_DATA.cards).find(c => c.character === ch);
+                            return pCard ? pCard.name.split('：')[0] : ch;
+                        })
+                        .join('・');
+                    return `<strong>${cb.title}</strong>（連携相手：${partnerChars || '自身'}）<br><span style="opacity:0.9">${cb.desc}</span>`;
+                }).join('<hr style="border:none;border-top:1px dashed rgba(0,188,212,0.3);margin:6px 0;">');
+            }
+        }
+
+        if (synergyHtml) {
+            if (synergySection) synergySection.style.display = 'block';
+            if (synergyEl) synergyEl.innerHTML = synergyHtml;
+        } else {
+            if (synergySection) synergySection.style.display = 'none';
+        }
+
+        modal.classList.add('active');
+        if (window.soundSystem) {
+            if (typeof window.soundSystem.playConnectLink === 'function') {
+                window.soundSystem.playConnectLink();
+            } else if (typeof window.soundSystem.playHyoshigi === 'function') {
+                window.soundSystem.playHyoshigi();
+            }
+        }
+    }
+
+    closeCardDetailModal() {
+        const modal = document.getElementById('modal-card-detail');
+        if (modal) {
+            modal.classList.remove('active');
+        }
     }
 
     // --- カード削除モーダル ---

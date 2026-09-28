@@ -3040,6 +3040,291 @@ body {
     box-shadow: 0 0 20px rgba(255, 51, 51, 0.8) !important;
 }
 
+/* ==========================================
+   カード詳細・人物伝拡大モーダル
+   （デッキ一覧の手前：z-index: 1000）
+   ========================================== */
+.card-clickable-detail {
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+.card-clickable-detail:hover {
+    transform: translateY(-8px) scale(1.05) !important;
+    border-color: var(--color-gold-bright) !important;
+    box-shadow: 0 10px 24px rgba(212, 175, 55, 0.55), 0 0 15px rgba(212, 175, 55, 0.3) !important;
+}
+.card-clickable-detail::after {
+    content: "🔍 詳細・人物伝";
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(18, 21, 28, 0.95);
+    border: 1px solid var(--color-gold);
+    color: var(--color-gold-bright);
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, bottom 0.2s;
+    z-index: 50;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+.card-clickable-detail:hover::after {
+    opacity: 1;
+    bottom: -18px;
+}
+
+#modal-card-detail {
+    z-index: 1000; /* デッキ一覧(950)より前面 */
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#card-detail-backdrop {
+    background: rgba(4, 6, 10, 0.82);
+    backdrop-filter: blur(6px);
+}
+
+.card-detail-modal-box {
+    width: 90%;
+    max-width: 820px;
+    max-height: 88vh;
+    max-height: 88dvh;
+    padding: 20px 24px;
+    background: linear-gradient(175deg, #171b26 0%, #0e1118 100%);
+    border: 2px solid var(--color-gold);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(212, 175, 55, 0.2);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-detail-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-detail-sub-badge {
+    background: rgba(212, 175, 55, 0.18);
+    border: 1px solid var(--color-gold);
+    color: var(--color-gold-bright);
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+}
+
+.card-detail-body {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 8px 4px 12px 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #5a4b36 rgba(10, 14, 20, 0.4);
+}
+.card-detail-body::-webkit-scrollbar {
+    width: 6px;
+}
+.card-detail-body::-webkit-scrollbar-thumb {
+    background: #5a4b36;
+    border-radius: 3px;
+}
+
+.card-detail-visual-col {
+    flex: 0 0 210px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.card-enlarged-wrapper .card-frame {
+    width: 200px;
+    height: 285px;
+    cursor: default;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.25);
+    transition: none;
+    transform: none !important;
+}
+.card-enlarged-wrapper .card-frame:hover {
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.25) !important;
+}
+.card-enlarged-wrapper .card-inner {
+    padding: 10px;
+}
+.card-enlarged-wrapper .card-name {
+    font-size: 15px;
+}
+.card-enlarged-wrapper .card-desc {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.card-detail-info-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.card-detail-meta-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.card-detail-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.card-detail-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.card-detail-rarity-tag {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: bold;
+    border: 1px solid currentColor;
+}
+.card-detail-rarity-tag.starter { color: #aaa; border-color: #777; background: rgba(255,255,255,0.05); }
+.card-detail-rarity-tag.common { color: #8bc34a; border-color: #8bc34a; background: rgba(139,195,74,0.1); }
+.card-detail-rarity-tag.uncommon { color: #00bcd4; border-color: #00bcd4; background: rgba(0,188,212,0.1); }
+.card-detail-rarity-tag.rare { color: #ffb300; border-color: #ffb300; background: rgba(255,179,0,0.1); }
+.card-detail-rarity-tag.legendary { color: #e040fb; border-color: #e040fb; background: rgba(224,64,251,0.12); }
+.card-detail-rarity-tag.curse { color: #f44336; border-color: #f44336; background: rgba(244,67,54,0.1); }
+
+.card-detail-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.detail-badge-pill {
+    font-size: 12px;
+    padding: 3px 9px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e6e6e6;
+}
+.detail-badge-pill.faction-tobaku {
+    background: rgba(168, 50, 40, 0.25);
+    border-color: #c94a3d;
+    color: #ff9b91;
+}
+.detail-badge-pill.faction-sabaku {
+    background: rgba(30, 80, 140, 0.25);
+    border-color: #3b7dc4;
+    color: #9eccfa;
+}
+.detail-badge-pill.faction-neutral {
+    background: rgba(130, 100, 30, 0.25);
+    border-color: #c9a444;
+    color: #fde89b;
+}
+.detail-badge-pill.atk {
+    background: rgba(200, 40, 40, 0.2);
+    border-color: #ff6b6b;
+    color: #ff9999;
+}
+.detail-badge-pill.def {
+    background: rgba(40, 120, 200, 0.2);
+    border-color: #4da6ff;
+    color: #a3d1ff;
+}
+
+.card-detail-section {
+    background: rgba(10, 14, 22, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 6px;
+    padding: 12px 14px;
+}
+
+.card-detail-section-title {
+    font-size: 13px;
+    color: var(--color-gold-bright);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.5px;
+}
+
+.card-detail-effect-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #eaeaea;
+}
+
+.bio-section {
+    background: rgba(28, 22, 18, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-left: 4px solid var(--color-gold-bright);
+}
+
+.card-detail-bio-text {
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: #f5eedf;
+    text-align: justify;
+    letter-spacing: 0.3px;
+    font-family: var(--font-mincho, 'Yu Mincho', 'Hiragino Mincho ProN', serif);
+}
+
+.synergy-section {
+    border-left: 4px solid #00bcd4;
+    background: rgba(0, 30, 40, 0.5);
+}
+.card-detail-synergy-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #b2ebf2;
+}
+
+@media (max-width: 680px) {
+    .card-detail-modal-box {
+        width: 95%;
+        padding: 14px;
+        max-height: 92vh;
+        max-height: 92dvh;
+    }
+    .card-detail-body {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+    .card-detail-visual-col {
+        flex: none;
+    }
+    .card-enlarged-wrapper .card-frame {
+        width: 170px;
+        height: 245px;
+    }
+    .card-detail-name {
+        font-size: 17px;
+    }
+}
+
 /* 報酬モーダル */
 .reward-box {
     max-width: 860px;
