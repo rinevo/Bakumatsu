@@ -300,14 +300,14 @@ class BakumatsuApp {
             btnRestPurge.addEventListener('click', () => this.shop.restPurgeCard());
         }
 
-        // リスタート（背景鑑賞モードへ遷移）ボタン
+        // リスタートボタン（ゲームオーバー時は直接初期画面へ、ゲームクリア時は背景鑑賞モードへ遷移）
         const btnRestart = document.getElementById('btn-restart');
         const btnRestartWin = document.getElementById('btn-restart-win');
         if (btnRestart) {
             btnRestart.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                this.enableBackdropView('screen-gameover');
+                this.switchScreen('screen-title');
             });
         }
         if (btnRestartWin) {
