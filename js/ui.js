@@ -836,6 +836,10 @@ class UIManager {
                 `;
 
                 btn.addEventListener('click', () => {
+                    // 二重クリック・連打防止（全選択肢ボタンを即座に無効化）
+                    const allChoiceBtns = choicesContainer.querySelectorAll('.btn-event-choice');
+                    allChoiceBtns.forEach(b => { b.disabled = true; });
+
                     try {
                         // 1. 通常アクションの実行
                         if (choice.action) {
@@ -852,6 +856,21 @@ class UIManager {
                     } catch (err) {
                         console.error("Event choice execution error:", err);
                     }
+
+                    // HP 0以下またはゲームオーバー判定
+                    if (this.app.isGameOver || this.app.hp <= 0) {
+                        if (!this.app.isGameOver) {
+                            this.app.handleGameOver("戦乱の荒波に呑まれ、志半ばで倒れた…");
+                        }
+                        return;
+                    }
+                    if (this.app.imperialGauge >= 100) {
+                        if (!this.app.isGameOver) {
+                            this.app.handleGameOver("列強の要求に屈し、関税自主権および主権を完全喪失…日本は保護領（植民地）と化した…");
+                        }
+                        return;
+                    }
+
                     const opinionVal = typeof choice.opinionChange === 'function'
                         ? choice.opinionChange(this.app)
                         : choice.opinionChange;

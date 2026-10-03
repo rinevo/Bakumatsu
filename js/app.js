@@ -16,6 +16,7 @@ class BakumatsuApp {
         this.currentTrend = null;
         this.currentEvent = null;
         this.nextBattleStrengthBuff = 0;
+        this.isGameOver = false;
 
         // システム
         this.battle = new BattleSystem(this);
@@ -350,6 +351,7 @@ class BakumatsuApp {
         }
 
         this.faction = faction;
+        this.isGameOver = false;
         this.imperialGauge = 0;
         this.publicOpinion = -25; // 幕開けは佐幕優勢（-25%）からスタート
         this.relics = [];
@@ -671,6 +673,10 @@ class BakumatsuApp {
     }
 
     returnToMap() {
+        if (this.isGameOver || this.hp <= 0 || this.imperialGauge >= 100) {
+            console.warn('[returnToMap 中断] ゲームオーバー状態のためマップ遷移を中止しました。');
+            return;
+        }
         this.switchScreen('screen-map');
         this.ui.renderMap();
         this.saveRun('map');
@@ -687,6 +693,7 @@ class BakumatsuApp {
     }
 
     handleGameOver(reason) {
+        this.isGameOver = true;
         this.clearSavedRun(); // 敗北時に中断セーブを消去
         const reasonEl = document.getElementById('gameover-reason');
         if (reasonEl) reasonEl.textContent = reason;
@@ -834,6 +841,8 @@ class BakumatsuApp {
         }
 
         try {
+            this.isGameOver = false;
+
             // ステータス復元
             this.faction = data.faction;
             this.hp = data.hp;
