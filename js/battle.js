@@ -686,13 +686,16 @@ class BattleSystem {
             this.playerHp = Math.max(0, this.playerHp - dmg);
             this.app.hp = this.playerHp;
 
-            const hpFill = document.getElementById('header-hp-fill');
-            if (hpFill) {
-                hpFill.classList.remove('hp-damage-flash');
-                void hpFill.offsetWidth;
-                hpFill.classList.add('hp-damage-flash');
-                setTimeout(() => hpFill.classList.remove('hp-damage-flash'), 420);
-            }
+            const hpFills = [
+                document.getElementById('header-hp-fill'),
+                document.getElementById('battle-player-hp-fill')
+            ].filter(Boolean);
+            hpFills.forEach(fill => {
+                fill.classList.remove('hp-damage-flash');
+                void fill.offsetWidth;
+                fill.classList.add('hp-damage-flash');
+                setTimeout(() => fill.classList.remove('hp-damage-flash'), 420);
+            });
 
             const battleScreen = document.getElementById('screen-battle');
             if (battleScreen) {

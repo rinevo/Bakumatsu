@@ -295,6 +295,9 @@ class UIManager {
 
         // プレイヤー戦闘情報
         const energyText = document.getElementById('battle-player-energy');
+        const playerHpFill = document.getElementById('battle-player-hp-fill');
+        const playerHpText = document.getElementById('battle-player-hp-text');
+        const shieldFill = document.getElementById('battle-player-shield-fill');
         const shieldText = document.getElementById('battle-player-shield');
         const drawCount = document.getElementById('battle-draw-count');
         const discardCount = document.getElementById('battle-discard-count');
@@ -303,7 +306,22 @@ class UIManager {
         const buffsContainer = document.getElementById('battle-player-buffs');
 
         if (energyText) energyText.textContent = `${b.playerEnergy} / ${b.playerMaxEnergy}`;
+        if (playerHpText) playerHpText.textContent = `${b.playerHp} / ${b.playerMaxHp}`;
+        if (playerHpFill) {
+            const hpRatio = b.playerMaxHp > 0 ? Math.max(0, Math.min(1, b.playerHp / b.playerMaxHp)) : 0;
+            playerHpFill.style.width = `${(hpRatio * 100).toFixed(1)}%`;
+            if (hpRatio <= 0.25) {
+                playerHpFill.classList.add('low-hp');
+            } else {
+                playerHpFill.classList.remove('low-hp');
+            }
+        }
         if (shieldText) shieldText.textContent = b.playerShield;
+        if (shieldFill) {
+            const maxRef = b.playerMaxHp > 0 ? b.playerMaxHp : 100;
+            const shieldRatio = Math.max(0, Math.min(1, b.playerShield / maxRef));
+            shieldFill.style.width = `${(shieldRatio * 100).toFixed(1)}%`;
+        }
         if (drawCount) drawCount.textContent = b.drawPile.length;
         if (discardCount) discardCount.textContent = b.discardPile.length;
         if (enemyDrawCount) enemyDrawCount.textContent = b.enemyDrawPile ? b.enemyDrawPile.length : 0;
