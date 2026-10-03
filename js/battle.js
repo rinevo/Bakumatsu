@@ -231,11 +231,73 @@ class BattleSystem {
             }
         }
 
+        // ==========================================
+        // 志士結束アライアンス（デッキ内志士の組み合わせによる常時パッシブ恩恵）
+        // ==========================================
+        this.triggerShishiAlliances();
+
         // 最初の敵Intent（手札からカード選定）
         this.pickEnemyIntent();
 
         // プレイヤー第1ターン開始
         this.startPlayerTurn();
+    }
+
+    triggerShishiAlliances() {
+        if (!this.app || !this.app.hasShishi) return;
+
+        // 1. 松下村塾・至誠天動（松陰、晋作、玄瑞、稔麿、九一、博文、有朋のうち2名以上）
+        const shokaMembers = ['yoshida', 'takasugi', 'kusaka', 'yoshida_minomaru', 'irie', 'ito', 'yamagata'];
+        const shokaCount = shokaMembers.filter(m => this.app.hasShishi(m)).length;
+        if (shokaCount >= 2) {
+            this.handDrawBonus += 1;
+            this.applyPlayerBuff('strength', 2);
+            setTimeout(() => {
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    window.particleSystem.createFloatingText("🏮【松下村塾・至誠天動】志士集結！（初手ドロー+1 / 剛力+2）", window.innerWidth / 2, window.innerHeight * 0.35, "#48bb78");
+                }
+            }, 600);
+        }
+
+        // 2. 誠の血盟・新選組中核（近藤、土方、沖田、斎藤、永倉、原田のうち2名以上）
+        const shinsenMembers = ['kondo', 'hijikata', 'okita', 'saito', 'nagakura', 'harada'];
+        const shinsenCount = shinsenMembers.filter(m => this.app.hasShishi(m)).length;
+        if (shinsenCount >= 2) {
+            this.enemyStatus.weak = (this.enemyStatus.weak || 0) + 2;
+            this.playerShield += 8;
+            setTimeout(() => {
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    window.particleSystem.createFloatingText("🗡️【誠の血盟・新選組】敵威圧！（敵脱力2 / 自軍防+8）", window.innerWidth / 2, window.innerHeight * 0.38, "#63b3ed");
+                }
+            }, 750);
+        }
+
+        // 3. 薩摩示現・精忠義気（西郷、大久保、有馬、半次郎、黒田のうち2名以上）
+        const satsumaMembers = ['saigo', 'okubo', 'arima', 'nakamura', 'kuroda'];
+        const satsumaCount = satsumaMembers.filter(m => this.app.hasShishi(m)).length;
+        if (satsumaCount >= 2) {
+            if (this.enemy.shield > 0) {
+                this.enemy.shield = Math.floor(this.enemy.shield / 2);
+            }
+            this.applyPlayerBuff('strength', 2);
+            setTimeout(() => {
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    window.particleSystem.createFloatingText("⚡【薩摩示現・精忠義気】一撃必殺の気迫！（敵防半減 / 剛力+2）", window.innerWidth / 2, window.innerHeight * 0.42, "#ed8936");
+                }
+            }, 900);
+        }
+
+        // 4. 土佐海援・天下の奔流（龍馬、中岡、半平太、象二郎、退助のうち2名以上）
+        const tosaMembers = ['ryoma', 'nakaoka', 'takechi', 'goto', 'itagaki'];
+        const tosaCount = tosaMembers.filter(m => this.app.hasShishi(m)).length;
+        if (tosaCount >= 2) {
+            this.playerEnergy += 1;
+            setTimeout(() => {
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    window.particleSystem.createFloatingText("🌊【土佐海援・天下の奔流】時代の胎動！（開幕文+1）", window.innerWidth / 2, window.innerHeight * 0.45, "#9f7aea");
+                }
+            }, 1050);
+        }
     }
 
     initEnemyDeck(enemyData) {

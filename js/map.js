@@ -278,6 +278,80 @@ class MapSystem {
 
         // 全歴史イベントノードを時系列順（発生年月の昇順）に割り当て
         this.assignChronologicalEvents(actNumber);
+
+        // 志士条件付きマス（鍵付きマス）の設定および迂回ルートの確実な保証（ソフトロック防止）
+        this.setupShishiRequirementsAndBypasses(actNumber);
+    }
+
+    setupShishiRequirementsAndBypasses(actNumber) {
+        const faction = this.app ? this.app.faction : 'tobaku';
+
+        // 1. ノードへの志士条件付与
+        this.nodes.forEach(node => {
+            node.requiredShishi = null;
+            // 関門ノード、Floor 0（開始地点）、ボスノードには絶対に鍵をかけない（安全原則）
+            if (node.isChokepoint || node.floor === 0 || node.type === 'boss') return;
+
+            if (node.type === 'event' && node.eventId) {
+                const event = GAME_DATA.events.find(e => e.id === node.eventId);
+                if (event && event.mapShishiRequirement) {
+                    const req = event.mapShishiRequirement[faction] || event.mapShishiRequirement.common;
+                    if (req && Array.isArray(req) && req.length > 0) {
+                        node.requiredShishi = req;
+                    }
+                }
+            }
+        });
+
+        // 2. フロア単位での迂回ノード存在保証（各フロアで最低1つは鍵なしノードが存在すること）
+        const maxFloor = Math.max(...this.nodes.map(n => n.floor));
+        for (let f = 1; f < maxFloor; f++) {
+            const fNodes = this.nodes.filter(n => n.floor === f);
+            if (fNodes.length <= 1) {
+                // 1本道ノードは絶対に鍵を解除（安全原則）
+                fNodes.forEach(n => n.requiredShishi = null);
+                continue;
+            }
+
+            const unblocked = fNodes.filter(n => !n.requiredShishi || n.requiredShishi.length === 0);
+            if (unblocked.length === 0) {
+                // 全ノードが鍵付きの場合は、1番目のノードの鍵を解除して迂回ルートを確保
+                fNodes[0].requiredShishi = null;
+            }
+        }
+
+        // 3. 接続単位での迂回ルート保証（前フロアのどのノードからも、少なくとも1つの非鍵ノードへ進めること）
+        for (let f = 0; f < maxFloor; f++) {
+            const currentFloorNodes = this.nodes.filter(n => n.floor === f);
+            const nextFloorNodes = this.nodes.filter(n => n.floor === f + 1);
+            const unblockedNext = nextFloorNodes.filter(n => !n.requiredShishi || n.requiredShishi.length === 0);
+
+            if (unblockedNext.length === 0) continue; // 次がボス等の場合
+
+            currentFloorNodes.forEach(pn => {
+                const connectedTargets = this.connections
+                    .filter(c => c[0] === pn.id)
+                    .map(c => c[1]);
+
+                const hasUnblockedTarget = unblockedNext.some(un => connectedTargets.includes(un.id));
+
+                if (!hasUnblockedTarget) {
+                    // 鍵なしノードへの接続がない場合、最も近い非鍵ノードへ接続線を追加
+                    const nearestUnblocked = unblockedNext.reduce((prev, curr) => {
+                        return Math.abs(curr.col - pn.col) < Math.abs(prev.col - pn.col) ? curr : prev;
+                    }, unblockedNext[0]);
+
+                    this.connections.push([pn.id, nearestUnblocked.id]);
+                }
+            });
+        }
+    }
+
+    isNodeAccessible(node) {
+        if (!node) return false;
+        if (!node.requiredShishi || node.requiredShishi.length === 0) return true;
+        if (!this.app || !this.app.hasAllShishi) return true;
+        return this.app.hasAllShishi(node.requiredShishi);
     }
 
     getSelectableNodes() {
@@ -297,6 +371,20 @@ class MapSystem {
     visitNode(nodeId) {
         const node = this.nodes.find(n => n.id === nodeId);
         if (!node) return;
+
+        // 志士条件未達の鍵付きノードには進入不可
+        if (!this.isNodeAccessible(node)) {
+            const reqNames = (node.requiredShishi || []).map(k => this.app.getShishiDisplayName(k)).join('・');
+            if (this.app.ui && this.app.ui.showToast) {
+                this.app.ui.showToast(`🔒 志士【${reqNames}】が揃っていないため進入できません！迂回ルート（他のマス）を選択してください。`, 'warning');
+            } else {
+                alert(`🔒 志士【${reqNames}】が揃っていないため進入できません！迂回ルートを選択してください。`);
+            }
+            if (window.soundSystem && window.soundSystem.playWarning) {
+                window.soundSystem.playWarning();
+            }
+            return;
+        }
 
         this.currentNodeId = nodeId;
         this.currentFloor = node.floor;

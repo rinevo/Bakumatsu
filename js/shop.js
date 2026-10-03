@@ -13,6 +13,15 @@ class ShopSystem {
     }
 
     openShop() {
+        // 商人・政商志士による来店利息ボーナス
+        if (this.app.hasShishi('iwazaki') || this.app.hasShishi('godai')) {
+            const merchantName = this.app.hasShishi('iwazaki') ? '岩崎弥太郎' : '五代友厚';
+            this.app.gold += 15;
+            if (this.app.ui && this.app.ui.showToast) {
+                this.app.ui.showToast(`💰【${merchantName}の政商手腕】軍資金の利息 +15両 を獲得！`, 'success');
+            }
+        }
+
         this.generateShopInventory();
         this.app.switchScreen('screen-shop');
         this.app.ui.renderShop();
@@ -38,6 +47,11 @@ class ShopSystem {
         let discount = 1.0;
         if (this.app.hasRelic("wado_kaichin")) discount *= 0.75;
         if (this.app.hasRelic("dutch_lexicon")) discount *= 0.80;
+
+        // 志士特権: 『岩崎弥太郎』または『五代友厚』所持で全品20%割引！
+        if (this.app.hasShishi && (this.app.hasShishi('iwazaki') || this.app.hasShishi('godai'))) {
+            discount *= 0.80;
+        }
 
         // 世論（天下の大勢）による価格補正
         discount *= this.getOpinionPriceMultiplier();
@@ -69,12 +83,17 @@ class ShopSystem {
         });
 
         // 3. 列強密貿易（ハイリスク・借款武器）
-        // 費用は0両！だが、列強介入度+20% ＆ 不平等条約呪いカードがデッキに混入
+        // 志士特権: 『勝海舟』または『小栗忠順』所持で列強介入ペナルティが半減（20%→10%）！
+        let imperialCost = 20;
+        if (this.app.hasShishi && (this.app.hasShishi('katsu') || this.app.hasShishi('oguri'))) {
+            imperialCost = 10;
+        }
+
         const smuggleWeapons = ["weapon_armstrong", "weapon_gatling", "warship_ironclad"];
         const chosenWeapon = smuggleWeapons[Math.floor(Math.random() * smuggleWeapons.length)];
         this.smuggleItem = {
             cardId: chosenWeapon,
-            imperialCost: 20,
+            imperialCost,
             curseId: "curse_extraterritoriality",
             claimed: false
         };

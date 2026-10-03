@@ -603,6 +603,46 @@ class BakumatsuApp {
         }
     }
 
+    // --- 志士所持判定システム ---
+    hasShishi(characterKey) {
+        if (!characterKey) return false;
+        return this.deck.some(cardId => {
+            if (cardId === characterKey) return true;
+            const card = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[cardId] : null;
+            return card && (card.character === characterKey || card.id === characterKey);
+        });
+    }
+
+    hasAnyShishi(keys) {
+        if (!Array.isArray(keys) || keys.length === 0) return true;
+        return keys.some(key => this.hasShishi(key));
+    }
+
+    hasAllShishi(keys) {
+        if (!Array.isArray(keys) || keys.length === 0) return true;
+        return keys.every(key => this.hasShishi(key));
+    }
+
+    getOwnedShishiList() {
+        if (typeof GAME_DATA === 'undefined' || !GAME_DATA.cards) return [];
+        return this.deck
+            .map(id => GAME_DATA.cards[id])
+            .filter(card => card && (card.type === 'shishi' || card.character));
+    }
+
+    getShishiDisplayName(characterKey) {
+        if (typeof GAME_DATA === 'undefined' || !GAME_DATA.cards) return characterKey;
+        const matchingCard = Object.values(GAME_DATA.cards).find(c => 
+            (c.character === characterKey || c.id === characterKey)
+        );
+        if (matchingCard) {
+            // "坂本龍馬：海援隊の采配" -> "坂本龍馬"
+            const colonIdx = matchingCard.name.indexOf('：');
+            return colonIdx !== -1 ? matchingCard.name.substring(0, colonIdx) : matchingCard.name;
+        }
+        return characterKey;
+    }
+
     hasRelic(relicId) {
         return this.relics.includes(relicId);
     }

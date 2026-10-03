@@ -2594,6 +2594,24 @@ const GAME_DATA = {
                     text: "【佐幕派】先陣を切って池田屋へ斬り込む",
                     effectDesc: "志士『近藤勇』を獲得。HP 38 ダメージを受けるが、ランダムなレリックを獲得。",
                     faction: "sabaku",
+                    shishiBonus: [
+                        {
+                            character: "kondo",
+                            desc: "虎徹の剛剣！被ダメージを19軽減し、次戦攻撃力+4！",
+                            apply: (app) => {
+                                app.healPlayer(19);
+                                app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                            }
+                        },
+                        {
+                            character: "hijikata",
+                            desc: "副長の後詰！被ダメージを10軽減し、20両を獲得！",
+                            apply: (app) => {
+                                app.healPlayer(10);
+                                app.gold += 20;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("kondo_kotetsu");
                         app.damagePlayer(38);
@@ -2605,6 +2623,14 @@ const GAME_DATA = {
                     text: "【佐幕派】裏手を固め、逃走者を捕縛する",
                     effectDesc: "志士『沖田総司』を獲得。カードを1枚デッキから削除し、25両 を獲得。",
                     faction: "sabaku",
+                    shishiBonus: {
+                        character: "okita",
+                        desc: "神速の三段突き！さらに追加で25両（計50両）と次戦攻撃力+3！",
+                        apply: (app) => {
+                            app.gold += 25;
+                            app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
+                        }
+                    },
                     action: (app) => {
                         app.addCardToDeck("okita_sandan");
                         app.gold += 25;
@@ -2616,6 +2642,14 @@ const GAME_DATA = {
                     text: "【討幕派】池田屋の階下で抜刀し、新選組の刃を迎え撃つ",
                     effectDesc: "志士『吉田稔麿』を獲得。HP 38 ダメージを受けるが、次の戦闘の攻撃力+4。",
                     faction: "tobaku",
+                    shishiBonus: {
+                        character: "yoshida_minomaru",
+                        desc: "松門四天王の激闘！被ダメージを19軽減し、気迫により最大HP+3！",
+                        apply: (app) => {
+                            app.healPlayer(19);
+                            app.maxHp += 3;
+                        }
+                    },
                     action: (app) => {
                         app.addCardToDeck("yoshida_minomaru");
                         app.damagePlayer(38);
@@ -2627,9 +2661,42 @@ const GAME_DATA = {
                     text: "【討幕派】深入りを避け、決死の脱出を図り情報のみ持ち帰る",
                     effectDesc: "志士『望月亀弥太』を獲得。HPを 8 回復する。",
                     faction: "tobaku",
+                    shishiBonus: {
+                        character: "mochizuki",
+                        desc: "土佐の俊足！追加でHPを12回復し、20両を獲得！",
+                        apply: (app) => {
+                            app.healPlayer(12);
+                            app.gold += 20;
+                        }
+                    },
                     action: (app) => {
                         app.addCardToDeck("mochizuki_sacrifice");
                         app.healPlayer(8);
+                    }
+                },
+                {
+                    requiredShishi: "katsura",
+                    opinionChange: 18,
+                    text: "【討幕派・桂小五郎】機転を利かせ裏路地から退避し、潜伏同志を逃がす",
+                    effectDesc: "無傷で脱出成功！HP損害なし。志士『吉田稔麿』を救出して軍資金35両と次戦攻撃力+5を獲得！",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("yoshida_minomaru");
+                        app.gold += 35;
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                    }
+                },
+                {
+                    requiredShishi: ["kondo", "hijikata"],
+                    opinionChange: -18,
+                    text: "【佐幕派・局長＆副長】完璧なる包囲と電撃突入により不逞浪士を壊滅",
+                    effectDesc: "新選組の完全制圧！HP損害はわずか10。志士『近藤勇』と『沖田総司』を両名獲得し、神器レリックを獲得！",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("kondo_kotetsu");
+                        app.addCardToDeck("okita_sandan");
+                        app.damagePlayer(10);
+                        app.obtainRandomRelic();
                     }
                 }
             ]
@@ -2645,6 +2712,15 @@ const GAME_DATA = {
                     opinionChange: 8,
                     text: "莫大な借款契約を結び、最新火器を受け取る",
                     effectDesc: "志士『井上馨』を獲得。『新式ミニエ銃』と 30両 を獲得するが、【列強介入+12%】＆呪い『治外法権の受容』が混入！",
+                    shishiBonus: {
+                        character: "ryoma",
+                        desc: "龍馬の巧みな交渉！呪い『治外法権の受容』を回避し、軍資金+20両！",
+                        apply: (app) => {
+                            const curseIdx = app.deck.indexOf('curse_extraterritoriality');
+                            if (curseIdx !== -1) app.deck.splice(curseIdx, 1);
+                            app.gold += 20;
+                        }
+                    },
                     action: (app) => {
                         app.addCardToDeck("inoue_negotiation");
                         app.addCardToDeck("weapon_minie");
@@ -2659,6 +2735,13 @@ const GAME_DATA = {
                     text: "手持ちの資金のみで通常購入する（60両）",
                     costGold: 60,
                     effectDesc: "60両を支払い、『新式ミニエ銃』を入手（列強介入なし）。",
+                    shishiBonus: {
+                        character: "inoue",
+                        desc: "長州五傑の英知！購入費用を20両払い戻し（実質40両）！",
+                        apply: (app) => {
+                            app.gold += 20;
+                        }
+                    },
                     canChoose: (app) => app.gold >= 60,
                     action: (app) => {
                         app.gold -= 60;
@@ -2669,11 +2752,28 @@ const GAME_DATA = {
                     opinionChange: 8,
                     text: "毅然と断り、主権を守る",
                     effectDesc: "志士『岩崎弥太郎』を獲得。【列強介入-4%】。気迫により最大HP+3。",
+                    shishiBonus: {
+                        character: "iwazaki",
+                        desc: "弥太郎の商魂！貿易の隙を突き40両を獲得！",
+                        apply: (app) => {
+                            app.gold += 40;
+                        }
+                    },
                     action: (app) => {
                         app.addCardToDeck("iwazaki_finance");
                         app.modifyImperialGauge(-4);
                         app.maxHp += 3;
                         app.hp += 4;
+                    }
+                },
+                {
+                    requiredShishi: "ryoma",
+                    opinionChange: 10,
+                    text: "【亀山社中】坂本龍馬の直談判により、最新兵器を特別買付する",
+                    effectDesc: "グラバーとの信頼関係により列強介入なし！『舶来ガトリング砲』を獲得し、軍資金40両を得る。",
+                    action: (app) => {
+                        app.addCardToDeck("weapon_gatling");
+                        app.gold += 40;
                     }
                 }
             ]
@@ -2690,6 +2790,16 @@ const GAME_DATA = {
                     text: "【討幕派】隠し持った高杉晋作のピストルで応戦！",
                     effectDesc: "志士『坂本龍馬』を獲得。HP 38 ダメージを受けるが、敵を撃退しレリック『西洋懐中時計』を獲得。",
                     faction: "tobaku",
+                    shishiBonus: [
+                        {
+                            character: "takasugi",
+                            desc: "晋作の贈答ピストル！奇襲反撃により被ダメージを20軽減し、次戦攻撃力+4！",
+                            apply: (app) => {
+                                app.healPlayer(20);
+                                app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("ryoma_kaiwentai");
                         app.damagePlayer(38);
@@ -2700,6 +2810,16 @@ const GAME_DATA = {
                     opinionChange: 12,
                     text: "お龍の機転に従い、裏庭から脱出する",
                     effectDesc: "志士『吉井友実』を獲得。HPを 8 回復し、30両を得る。",
+                    shishiBonus: [
+                        {
+                            character: "yoshii",
+                            desc: "吉井友実の薩摩藩邸引導！HP全快、さらに40両を追加獲得！",
+                            apply: (app) => {
+                                app.hp = app.maxHp;
+                                app.gold += 40;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("yoshii_support");
                         app.healPlayer(8);
@@ -2709,12 +2829,34 @@ const GAME_DATA = {
                 {
                     opinionChange: -12,
                     text: "【佐幕派】伏見奉行所の捕吏を指揮し、宿の包囲を固める",
-                    effectDesc: "志士『佐々木只三郎』を獲得。金+50、HPを 8 回復する。",
+                    effectDesc: "志士『佐々木只三郎』を獲得。金+30、HPを 8 回復する。",
                     faction: "sabaku",
+                    shishiBonus: [
+                        {
+                            character: "sasaki",
+                            desc: "京都見廻組の周到な包囲網！軍資金+50両、世論佐幕+8%！",
+                            apply: (app) => {
+                                app.gold += 50;
+                                app.modifyPublicOpinion(-8);
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("sasaki_patrol");
                         app.gold += 30;
                         app.healPlayer(8);
+                    }
+                },
+                {
+                    opinionChange: 15,
+                    requiredShishi: ["ryoma"],
+                    text: "🌟【坂本龍馬 限定】薩摩藩邸への決死の脱出と盟友の救援",
+                    effectDesc: "龍馬とお龍の機転により無傷で包囲網を突破！HPを30回復、軍資金50両とレリック『万国公法』を獲得！",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.healPlayer(30);
+                        app.gold += 50;
+                        app.obtainRelic("international_law");
                     }
                 }
             ]
@@ -2725,11 +2867,34 @@ const GAME_DATA = {
             importance: 3,
             title: "大政奉還の歴史的評議",
             desc: "徳川慶喜が政権を朝廷に返上するか否か、天下を揺るがす建白書が突きつけられた。",
+            mapShishiRequirement: {
+                tobaku: ["ryoma", "goto"],
+                sabaku: ["katsu"]
+            },
             choices: [
                 {
                     opinionChange: 12,
                     text: "内戦を避け、平和的政権移行を後押しする",
                     effectDesc: "志士『後藤象二郎』を獲得。【列強介入-5%】。全カードの最大HP+3＆完全回復。",
+                    shishiBonus: [
+                        {
+                            character: "ryoma",
+                            desc: "船中八策の精神！世論討幕+15%、最大HP+5＆完全回復！",
+                            apply: (app) => {
+                                app.modifyPublicOpinion(15);
+                                app.maxHp += 5;
+                                app.hp = app.maxHp;
+                            }
+                        },
+                        {
+                            character: "goto",
+                            desc: "土佐藩の政治力！軍資金60両とレリック『朝廷の密勅書』を獲得！",
+                            apply: (app) => {
+                                app.gold += 60;
+                                app.obtainRelic("imperial_decree");
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("goto_political_drive");
                         app.modifyImperialGauge(-5);
@@ -2741,10 +2906,32 @@ const GAME_DATA = {
                     opinionChange: 12,
                     text: "旧勢力の完全排除を主張し、決戦を挑む",
                     effectDesc: "志士『岩倉具視』を獲得。デッキに『アームストロング砲』を追加。次の戦闘で攻撃力倍増。",
+                    shishiBonus: [
+                        {
+                            character: "iwakura",
+                            desc: "王政復古の大号令！次戦攻撃力+8、世論討幕+25%！",
+                            apply: (app) => {
+                                app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 8;
+                                app.modifyPublicOpinion(25);
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("iwakura_imperial");
                         app.addCardToDeck("weapon_armstrong");
                         app.nextBattleStrengthBuff = 6;
+                    }
+                },
+                {
+                    opinionChange: 30,
+                    requiredShishi: ["ryoma", "goto"],
+                    text: "🌟【龍馬＆後藤象二郎 限定】『船中八策』に基づく無血の国家構想を建白",
+                    effectDesc: "徳川慶喜公と直接対話。内戦の危機を完全に回避し、世論討幕+30%、列強介入-20%、軍資金100両を獲得しHP全快！",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.modifyImperialGauge(-20);
+                        app.gold += 100;
+                        app.hp = app.maxHp;
                     }
                 }
             ]
@@ -2761,6 +2948,16 @@ const GAME_DATA = {
                     text: "【討幕派】襲撃に加勢し、幕府の中枢を揺さぶる",
                     effectDesc: "志士『有馬新七』を獲得。HPを 38 失うが、列強介入-5%と 30両を得る。",
                     faction: "tobaku",
+                    shishiBonus: [
+                        {
+                            character: "arima",
+                            desc: "精忠組の烈気！被ダメージを20軽減し、次戦攻撃力+6！",
+                            apply: (app) => {
+                                app.healPlayer(20);
+                                app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 6;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("arima_revolt");
                         app.damagePlayer(38);
@@ -2773,6 +2970,18 @@ const GAME_DATA = {
                     text: "【佐幕派】大老の駕籠を警護し、混乱を鎮める",
                     effectDesc: "志士『井伊直弼』を獲得。HPを 8 回復し、最大HP+3。",
                     faction: "sabaku",
+                    shishiBonus: [
+                        {
+                            character: "ii_naosuke",
+                            desc: "彦根藩主の断固たる威風！HP 25回復、最大HP+5、世論佐幕+15%！",
+                            apply: (app) => {
+                                app.healPlayer(25);
+                                app.maxHp += 5;
+                                app.hp = Math.min(app.maxHp, app.hp + 5);
+                                app.modifyPublicOpinion(-15);
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("ii_naosuke");
                         app.healPlayer(8);
@@ -2784,9 +2993,30 @@ const GAME_DATA = {
                     opinionChange: 12,
                     text: "現場を離れ、噂だけを持ち帰る",
                     effectDesc: "志士『田中光顕』を獲得。25両を得る。",
+                    shishiBonus: [
+                        {
+                            character: "tanaka",
+                            desc: "土佐密偵の情勢分析！軍資金+40両、列強介入-10%！",
+                            apply: (app) => {
+                                app.gold += 40;
+                                app.modifyImperialGauge(-10);
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("tanaka_intelligence");
                         app.gold += 25;
+                    }
+                },
+                {
+                    opinionChange: -25,
+                    requiredShishi: ["ii_naosuke"],
+                    text: "🌟【井伊直弼 限定】大老自ら先導し、彦根藩邸への電撃退却を敢行",
+                    effectDesc: "襲撃の機先を制して難を逃れ、幕府の威令を天下に誇示！世論佐幕-25%、HP完全回復、軍資金60両獲得！",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.hp = app.maxHp;
+                        app.gold += 60;
                     }
                 }
             ]
@@ -2797,12 +3027,35 @@ const GAME_DATA = {
             importance: 3,
             title: "薩長同盟の密約",
             desc: "犬猿の仲だった薩摩と長州が、坂本龍馬の仲介で一つの卓を囲んだ。互いの誇りを捨て、来るべき時代に備える必要がある。",
+            mapShishiRequirement: {
+                tobaku: ["ryoma", "saigo", "katsura"],
+                sabaku: ["kondo", "hijikata"]
+            },
             choices: [
                 {
                     opinionChange: 12,
                     text: "密約に署名し、共同戦線を組む",
                     effectDesc: "志士『中岡慎太郎』を獲得。『薩長同盟の密約』をデッキに加え、次の戦闘の攻撃力+4。",
                     faction: "tobaku",
+                    shishiBonus: [
+                        {
+                            character: "ryoma",
+                            desc: "龍馬の仲介力！次戦攻撃力+8、世論討幕+15%、追加軍資金50両！",
+                            apply: (app) => {
+                                app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 8;
+                                app.modifyPublicOpinion(15);
+                                app.gold += 50;
+                            }
+                        },
+                        {
+                            character: "nakaoka",
+                            desc: "陸援隊の結束！次戦シールド+15、列強介入-10%！",
+                            apply: (app) => {
+                                app.nextBattleShieldBuff = (app.nextBattleShieldBuff || 0) + 15;
+                                app.modifyImperialGauge(-10);
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("nakaoka_mediator");
                         app.addCardToDeck("satcho_secret");
@@ -2813,6 +3066,16 @@ const GAME_DATA = {
                     opinionChange: 12,
                     text: "片方に肩入れし、資金を引き出す",
                     effectDesc: "志士『小松帯刀』を獲得。30両を得るが、列強介入+20%。",
+                    shishiBonus: [
+                        {
+                            character: "komatsu",
+                            desc: "薩摩家老の財政手腕！列強介入悪化を帳消しにし、軍資金+80両！",
+                            apply: (app) => {
+                                app.modifyImperialGauge(-20);
+                                app.gold += 80;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("komatsu_coordination");
                         app.gold += 30;
@@ -2823,10 +3086,32 @@ const GAME_DATA = {
                     opinionChange: 12,
                     text: "同盟を急がず、互いの力を見極める",
                     effectDesc: "志士『桂小五郎』を獲得。HPを 8 回復し、列強介入-5%。",
+                    shishiBonus: [
+                        {
+                            character: "katsura",
+                            desc: "桂小五郎の先見性！HPを25回復、列強介入-15%！",
+                            apply: (app) => {
+                                app.healPlayer(25);
+                                app.modifyImperialGauge(-10);
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("katsura_shindo");
                         app.healPlayer(8);
                         app.modifyImperialGauge(-5);
+                    }
+                },
+                {
+                    opinionChange: 40,
+                    requiredShishi: ["ryoma", "saigo", "katsura"],
+                    text: "🌟【龍馬・西郷・小五郎 揃踏限定】薩長同盟の完全締結と倒幕軍事同盟の結成",
+                    effectDesc: "討幕の二大巨頭と盟主が完全合意！世論討幕+40%、軍資金100両、次戦攻撃力+10、神器レリック『薩長盟約の錦旗』を獲得！",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.gold += 100;
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 10;
+                        app.obtainRelic("satcho_brocade_flag");
                     }
                 }
             ]
@@ -2837,12 +3122,35 @@ const GAME_DATA = {
             importance: 3,
             title: "鳥羽・伏見の決戦、錦旗の翻転",
             desc: "淀川沿いに錦の御旗が高らかに翻り、砲煙弾雨の中、天下の大勢が一夜にして暗転する。幕府軍1万5千と薩長軍5千の激突、どちらの道を歩むか。",
+            mapShishiRequirement: {
+                tobaku: ["saigo", "yamada", "iwakura"],
+                sabaku: ["hijikata", "kondo", "sadaakira"]
+            },
             choices: [
                 {
                     opinionChange: 14,
                     text: "【討幕派】錦旗を先頭に官軍怒涛の追撃戦を敢行し、旧幕府軍を壊滅させる",
                     effectDesc: "志士『岩倉具視』と志士『山田顕義』を獲得。決死の銃撃戦でHPを 35 失い、最大HP-12。絶対的大義名分により世論が一気に討幕極限（+50%）へ到達、小判35両を獲得！",
                     faction: "tobaku",
+                    shishiBonus: [
+                        {
+                            character: "saigo",
+                            desc: "薩摩軍総指揮！被ダメージを25軽減し、最大HP減少を無効化！",
+                            apply: (app) => {
+                                app.healPlayer(25);
+                                app.maxHp += 12;
+                                app.hp += 12;
+                            }
+                        },
+                        {
+                            character: "yamada",
+                            desc: "近代兵術の用兵！次戦攻撃力+8、軍資金+50両！",
+                            apply: (app) => {
+                                app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 8;
+                                app.gold += 50;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("iwakura_imperial");
                         app.addCardToDeck("yamada_modern_army");
@@ -2856,9 +3164,27 @@ const GAME_DATA = {
                     text: "【佐幕派】淀千両松で殿軍を死守し、将軍慶喜公の脱出行を警護する",
                     effectDesc: "志士『松平定敬』を獲得。朝敵転落の激震で世論が討幕へ急転（大逆風）、追撃でHPを 32 失い、最大HP-10。徳川の信義を貫いた証として神器レリック『葵の御紋章佩刀』を獲得！",
                     faction: "sabaku",
+                    shishiBonus: [
+                        {
+                            character: "hijikata",
+                            desc: "新選組の殿軍奮戦！被ダメージを20軽減、次戦防御力+15！",
+                            apply: (app) => {
+                                app.healPlayer(20);
+                                app.nextBattleShieldBuff = (app.nextBattleShieldBuff || 0) + 15;
+                            }
+                        },
+                        {
+                            character: "kondo",
+                            desc: "局長の胆力！最大HP減少を相殺し、HP 20回復！",
+                            apply: (app) => {
+                                app.maxHp += 10;
+                                app.healPlayer(20);
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("sadaakira_guard");
-                        app.addRelic("aoi_crest_blade");
+                        app.obtainRelic("aoi_crest_blade");
                         app.maxHp = Math.max(20, app.maxHp - 10);
                         app.damagePlayer(42);
                     }
@@ -2873,6 +3199,29 @@ const GAME_DATA = {
                         app.maxHp += 3;
                         app.hp = app.maxHp;
                         app.modifyImperialGauge(-5);
+                    }
+                },
+                {
+                    opinionChange: 50,
+                    requiredShishi: ["saigo", "okubo"],
+                    text: "🌟【西郷隆盛＆大久保利通 限定】錦旗の掲揚と電撃包囲作戦",
+                    effectDesc: "一分の隙もない用兵により損害皆無で敵軍を圧倒！HPダメージ・最大HP減少なし、世論討幕+50%、軍資金80両獲得！",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.gold += 80;
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 6;
+                    }
+                },
+                {
+                    opinionChange: -30,
+                    requiredShishi: ["kondo", "hijikata"],
+                    text: "🌟【近藤勇＆土方歳三 限定】新選組死守！淀千両松の逆撃夜襲",
+                    effectDesc: "新選組が死力を尽くして薩長追撃隊を撃退！損害を半減（HPダメージ16）、世論佐幕-30%、神器レリック『誠の羽織』を獲得！",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.obtainRelic("makoto_haori");
+                        app.damagePlayer(16);
+                        app.gold += 50;
                     }
                 }
             ]
@@ -3495,9 +3844,20 @@ const GAME_DATA = {
                     text: "【討幕派】御所を目指し、鷹司邸の激戦へ突撃する",
                     effectDesc: "志士『久坂玄瑞』を獲得。朝敵指定の汚名で世論が佐幕へ傾き（大逆風）、決死の猛攻でHPを 30 失い、最大HP-10。散華の覚悟の証として神器レリック『長州の血盟録』を獲得！",
                     faction: "tobaku",
+                    shishiBonus: [
+                        {
+                            character: "kusaka",
+                            desc: "久坂玄瑞の烈士魂！被ダメージを20軽減し、最大HP減少を無効化！",
+                            apply: (app) => {
+                                app.healPlayer(20);
+                                app.maxHp += 10;
+                                app.hp += 10;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("kusaka_revolt");
-                        app.addRelic("choshu_blood_pact");
+                        app.obtainRelic("choshu_blood_pact");
                         app.maxHp = Math.max(20, app.maxHp - 10);
                         app.damagePlayer(38);
                     }
@@ -3507,6 +3867,16 @@ const GAME_DATA = {
                     text: "【討幕派】蛤御門へ肉薄し、決死の猛進を指揮する",
                     effectDesc: "志士『来島又兵衛』を獲得。朝敵指定で世論が佐幕へ傾き（大逆風）、砲煙弾雨でHPを 38 失う。次回戦闘の攻撃力+4。",
                     faction: "tobaku",
+                    shishiBonus: [
+                        {
+                            character: "kirishima",
+                            desc: "来島又兵衛の猪突猛進！被ダメージを20軽減し、次戦攻撃力+8！",
+                            apply: (app) => {
+                                app.healPlayer(20);
+                                app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 8;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("kirishima_charge");
                         app.damagePlayer(38);
@@ -3518,6 +3888,16 @@ const GAME_DATA = {
                     text: "【討幕派】包囲網を突破し、再起の密使として脱出する",
                     effectDesc: "志士『入江九一』を獲得。朝敵指定で世論が佐幕へ傾き（大逆風）、HPを 38 失う。軍資金30両を獲得。",
                     faction: "tobaku",
+                    shishiBonus: [
+                        {
+                            character: "irie",
+                            desc: "入江九一の潜行脱出！被ダメージを20軽減し、軍資金+40両！",
+                            apply: (app) => {
+                                app.healPlayer(20);
+                                app.gold += 40;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("irie_secret");
                         app.damagePlayer(38);
@@ -3529,9 +3909,21 @@ const GAME_DATA = {
                     text: "【佐幕派】蛤御門で会津藩兵を率い、長州勢の突撃を粉砕する",
                     effectDesc: "志士『松平容保：会津の義気』を獲得。禁裏死守の激闘でHPを 30 失い、最大HP-10。朝廷防衛の勲功として神器レリック『禁裏の錦旗御守』を獲得！",
                     faction: "sabaku",
+                    shishiBonus: [
+                        {
+                            character: "katamori",
+                            desc: "京都守護職の矜持！被ダメージを20軽減、最大HP減少を無効化し世論佐幕-20%！",
+                            apply: (app) => {
+                                app.healPlayer(20);
+                                app.maxHp += 10;
+                                app.hp += 10;
+                                app.modifyPublicOpinion(-20);
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("aizu_shield");
-                        app.addRelic("imperial_brocade_amulet");
+                        app.obtainRelic("imperial_brocade_amulet");
                         app.maxHp = Math.max(20, app.maxHp - 10);
                         app.damagePlayer(38);
                     }
@@ -3541,6 +3933,16 @@ const GAME_DATA = {
                     text: "【佐幕派】御所周辺の警備を固め、禁裏の延焼を防ぐ",
                     effectDesc: "志士『斎藤一』を獲得。都の消火と治安維持で軍資金70両を拠出、HPを 38 失う。次回防御+12。",
                     faction: "sabaku",
+                    shishiBonus: [
+                        {
+                            character: "saito",
+                            desc: "新選組三番隊組長の一刀！治安維持コストを0両にし、被ダメージを20軽減！",
+                            apply: (app) => {
+                                app.gold += 70;
+                                app.healPlayer(20);
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("saito_gato");
                         app.gold = Math.max(0, app.gold - 70);
@@ -3553,10 +3955,31 @@ const GAME_DATA = {
                     text: "【佐幕派】桑名藩兵と共に敵の退路を遮断し、都の治安を回復する",
                     effectDesc: "志士『松平定敬』を獲得。追撃戦でHPを 38 失う。軍資金30両を獲得。",
                     faction: "sabaku",
+                    shishiBonus: [
+                        {
+                            character: "sadaakira",
+                            desc: "桑名藩主の包囲陣！被ダメージを20軽減し、軍資金+40両！",
+                            apply: (app) => {
+                                app.healPlayer(20);
+                                app.gold += 40;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("sadaakira_guard");
                         app.damagePlayer(38);
                         app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: 10,
+                    requiredShishi: ["katsura"],
+                    text: "🌟【桂小五郎 限定】長州勢の暴発を抑え、主力を速やかに隠忍退却させる",
+                    effectDesc: "大局を見据えた知略により壊滅を免れる！自軍の損害なし（HP消費0）、世論ペナルティを無効化し、次回戦闘攻撃+6、軍資金50両獲得！",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 6;
+                        app.gold += 50;
                     }
                 }
             ]
@@ -4315,12 +4738,27 @@ const GAME_DATA = {
             importance: 3,
             title: "江戸開城前夜、最後の評議",
             desc: "江戸の町を戦火に巻き込むか、城を明け渡して人々を救うか。夜更けの評議で、最後の決断が迫られている。",
+            mapShishiRequirement: {
+                tobaku: ["saigo", "okubo"],
+                sabaku: ["katsu", "oguri"]
+            },
             choices: [
                 {
                     opinionChange: -12,
                     text: "【佐幕派】主戦派の小栗忠順と共に最後の評議を尽くす",
                     effectDesc: "志士『小栗忠順』を獲得。HPを 8 回復し、列強介入-5%。",
                     faction: "sabaku",
+                    shishiBonus: [
+                        {
+                            character: "oguri",
+                            desc: "小栗忠順の軍政財政眼！軍資金+100両、最大HP+5＆完全回復！",
+                            apply: (app) => {
+                                app.gold += 100;
+                                app.maxHp += 5;
+                                app.hp = app.maxHp;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("oguri_reform");
                         app.hp = app.maxHp;
@@ -4332,6 +4770,16 @@ const GAME_DATA = {
                     text: "【討幕派】西郷の使節として徳川の恭順を静かに見届ける",
                     effectDesc: "志士『大久保利通』を獲得。HPを 8 回復し、列強介入-5%。",
                     faction: "tobaku",
+                    shishiBonus: [
+                        {
+                            character: "okubo",
+                            desc: "大久保利通の遠謀深慮！世論討幕+25%、列強介入-15%！",
+                            apply: (app) => {
+                                app.modifyPublicOpinion(25);
+                                app.modifyImperialGauge(-15);
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("okubo_strategy");
                         app.hp = app.maxHp;
@@ -4342,6 +4790,16 @@ const GAME_DATA = {
                     opinionChange: 12,
                     text: "抗戦派を説得し、武器を接収する",
                     effectDesc: "志士『山県有朋』を獲得。次の戦闘の攻撃力+4、30両を得る。",
+                    shishiBonus: [
+                        {
+                            character: "yamagata",
+                            desc: "奇兵隊仕込みの軍政手腕！次戦攻撃力+8、軍資金+50両！",
+                            apply: (app) => {
+                                app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 8;
+                                app.gold += 50;
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("yamagata_march");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
@@ -4352,9 +4810,31 @@ const GAME_DATA = {
                     opinionChange: 12,
                     text: "商人を保護し、江戸の経済を維持する",
                     effectDesc: "志士『大隈重信』を獲得。30両を得る。",
+                    shishiBonus: [
+                        {
+                            character: "okuma",
+                            desc: "大隈重信の近代経済構想！軍資金+80両、レリック『最新式の算盤』を獲得！",
+                            apply: (app) => {
+                                app.gold += 80;
+                                app.obtainRelic("modern_abacus");
+                            }
+                        }
+                    ],
                     action: (app) => {
                         app.addCardToDeck("okuma_modernization");
                         app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: 20,
+                    requiredShishi: ["katsu"],
+                    text: "🌟【勝海舟 限定】西郷隆盛との直談判（江戸城無血開城の成立）",
+                    effectDesc: "百万の江戸庶民を戦火から救い、完全無血開城を完遂！HP完全回復、世論安定（介入度-30%）、軍資金150両、神器レリック『海軍卿の望遠鏡』を獲得！",
+                    action: (app) => {
+                        app.hp = app.maxHp;
+                        app.modifyImperialGauge(-30);
+                        app.gold += 150;
+                        app.obtainRelic("admiral_telescope");
                     }
                 }
             ]

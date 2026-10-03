@@ -576,6 +576,22 @@ class UIManager {
             }
             nodeDiv.id = `node-${node.id}`;
 
+            // 志士条件（鍵付きマス）の判定
+            let lockBadgeHtml = '';
+            const hasShishiReq = node.requiredShishi && node.requiredShishi.length > 0;
+            const isAccessible = mapSystem.isNodeAccessible(node);
+
+            if (hasShishiReq) {
+                const reqNames = node.requiredShishi.map(k => this.app.getShishiDisplayName(k)).join('・');
+                if (isAccessible) {
+                    nodeDiv.classList.add('shishi-unlocked');
+                    lockBadgeHtml = `<div class="node-lock-badge unlocked" title="【志士集結】進入可能: ${reqNames}">🔓</div>`;
+                } else {
+                    nodeDiv.classList.add('shishi-locked');
+                    lockBadgeHtml = `<div class="node-lock-badge locked" title="【要志士】${reqNames}">🔒</div>`;
+                }
+            }
+
             let titleContent = node.title;
             if (node.period && node.shortTitle) {
                 // 歴史の霧: 2フロア以上先の未訪問事件は具体的な事件名を伏せる
@@ -594,7 +610,17 @@ class UIManager {
                 }
             }
 
+            if (hasShishiReq && !node.completed) {
+                const reqNames = node.requiredShishi.map(k => this.app.getShishiDisplayName(k)).join('・');
+                if (isAccessible) {
+                    titleContent += `<span class="node-req-label unlocked">✨【${reqNames}】開錠!</span>`;
+                } else {
+                    titleContent += `<span class="node-req-label locked">🔒【要:${reqNames}】</span>`;
+                }
+            }
+
             nodeDiv.innerHTML = `
+                ${lockBadgeHtml}
                 <div class="node-icon">${node.icon}</div>
                 <div class="node-title">${titleContent}</div>
             `;
@@ -610,6 +636,9 @@ class UIManager {
             }
             if (isSelectable) {
                 nodeDiv.classList.add('selectable');
+                if (hasShishiReq && !isAccessible) {
+                    nodeDiv.classList.add('selectable-locked');
+                }
                 nodeDiv.addEventListener('click', () => {
                     mapSystem.visitNode(node.id);
                 });
@@ -723,8 +752,53 @@ class UIManager {
                 const btn = document.createElement('button');
                 btn.className = 'btn-event-choice';
 
-                const canChoose = choice.canChoose ? choice.canChoose(this.app) : true;
+                // 志士限定選択肢（requiredShishi）の判定
+                let reqShishiList = [];
+                if (choice.requiredShishi) {
+                    reqShishiList = Array.isArray(choice.requiredShishi) ? choice.requiredShishi : [choice.requiredShishi];
+                }
+                const hasRequiredShishi = reqShishiList.length === 0 || this.app.hasAllShishi(reqShishiList);
+
+                // 基本の選択可否判定
+                let canChoose = choice.canChoose ? choice.canChoose(this.app) : true;
+                if (!hasRequiredShishi) {
+                    canChoose = false;
+                }
                 btn.disabled = !canChoose;
+
+                // 志士限定バッジ
+                let shishiReqBadgeHtml = '';
+                if (reqShishiList.length > 0) {
+                    const reqNames = reqShishiList.map(k => this.app.getShishiDisplayName(k)).join('・');
+                    if (hasRequiredShishi) {
+                        btn.classList.add('special-shishi-choice');
+                        shishiReqBadgeHtml = `<span class="badge-shishi-req unlocked">✨【${reqNames} 同行】</span> `;
+                    } else {
+                        btn.classList.add('locked-shishi-choice');
+                        shishiReqBadgeHtml = `<span class="badge-shishi-req locked">🔒【要：${reqNames}】</span> `;
+                    }
+                }
+
+                // 志士所持ボーナス（shishiBonus）の判定とバッジ生成
+                let activeBonuses = [];
+                if (choice.shishiBonus) {
+                    const bonusList = Array.isArray(choice.shishiBonus) ? choice.shishiBonus : [choice.shishiBonus];
+                    bonusList.forEach(bonus => {
+                        const targetKey = bonus.character || bonus.cardId;
+                        if (targetKey && this.app.hasShishi(targetKey)) {
+                            activeBonuses.push(bonus);
+                        }
+                    });
+                }
+
+                let bonusHtml = '';
+                if (activeBonuses.length > 0) {
+                    btn.classList.add('has-shishi-bonus');
+                    bonusHtml = activeBonuses.map(b => {
+                        const shishiName = this.app.getShishiDisplayName(b.character || b.cardId);
+                        return `<div class="choice-shishi-bonus">🌟【${shishiName}の助勢】${b.desc}</div>`;
+                    }).join('');
+                }
 
                 let opinionBadgeHtml = '';
                 const rawOpinionChange = typeof choice.opinionChange === 'function'
@@ -755,13 +829,25 @@ class UIManager {
                 }
 
                 btn.innerHTML = `
-                    <div class="choice-text">${opinionBadgeHtml}${choice.text}</div>
+                    <div class="choice-text">${shishiReqBadgeHtml}${opinionBadgeHtml}${choice.text}</div>
                     <div class="choice-effect">${choice.effectDesc}</div>
+                    ${bonusHtml}
                 `;
 
                 btn.addEventListener('click', () => {
                     try {
-                        choice.action(this.app);
+                        // 1. 通常アクションの実行
+                        if (choice.action) {
+                            choice.action(this.app);
+                        }
+                        // 2. 志士ボーナスアクションの追加実行
+                        if (activeBonuses.length > 0) {
+                            activeBonuses.forEach(b => {
+                                if (typeof b.apply === 'function') {
+                                    b.apply(this.app);
+                                }
+                            });
+                        }
                     } catch (err) {
                         console.error("Event choice execution error:", err);
                     }
@@ -1151,5 +1237,22 @@ class UIManager {
     closeRewardModal() {
         document.getElementById('modal-reward').classList.remove('active');
         this.app.checkActProgressOrReturnMap();
+    }
+
+    showToast(message, type = 'info') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            document.body.appendChild(container);
+        }
+        const toast = document.createElement('div');
+        toast.className = `toast-msg toast-${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 400);
+        }, 3200);
     }
 }
