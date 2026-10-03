@@ -354,6 +354,7 @@ class UIManager {
             const enemyName = document.getElementById('battle-enemy-name');
             const enemyHpBar = document.getElementById('battle-enemy-hp-fill');
             const enemyHpText = document.getElementById('battle-enemy-hp-text');
+            const enemyShieldBar = document.getElementById('battle-enemy-shield-fill');
             const enemyShieldText = document.getElementById('battle-enemy-shield-text');
             const enemyIntent = document.getElementById('battle-enemy-intent');
             const enemyStatus = document.getElementById('battle-enemy-status');
@@ -367,7 +368,12 @@ class UIManager {
                 enemyHpBar.style.width = `${ratio * 100}%`;
             }
             if (enemyHpText) enemyHpText.textContent = `${e.hp} / ${e.maxHp}`;
-            if (enemyShieldText) enemyShieldText.textContent = e.shield;
+            if (enemyShieldText) enemyShieldText.textContent = e.shield || 0;
+            if (enemyShieldBar) {
+                const maxRef = e.maxHp > 0 ? e.maxHp : 100;
+                const shieldRatio = Math.max(0, Math.min(1, (e.shield || 0) / maxRef));
+                enemyShieldBar.style.width = `${(shieldRatio * 100).toFixed(1)}%`;
+            }
 
             // 敵Intent表示
             if (enemyIntent && e.intent) {
