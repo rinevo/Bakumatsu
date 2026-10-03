@@ -2769,17 +2769,20 @@ body {
     box-shadow: var(--shadow-red);
 }
 
+.shop-heal-box,
 .shop-removal-box {
     background: #151821;
-    border: 1px solid #3d3527;
+    border: 1px solid #2d4a3e;
     border-radius: 6px;
     padding: 12px;
 }
+.shop-heal-box h4,
 .shop-removal-box h4 {
     font-size: 13px;
-    color: var(--color-gold);
+    color: #48bb78;
     margin-bottom: 4px;
 }
+.shop-heal-box p,
 .shop-removal-box p {
     font-size: 11px;
     color: #a89e90;

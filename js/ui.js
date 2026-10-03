@@ -210,6 +210,7 @@ class UIManager {
             case 'shishi': return '志士';
             case 'tactic': return '戦術';
             case 'equip': return '装備';
+            case 'item': return '道具';
             case 'curse': return '呪い';
             default: return 'カード';
         }
@@ -956,12 +957,23 @@ class UIManager {
             smuggleContainer.appendChild(smDiv);
         }
 
-        // カード削除価格更新
-        const discount = this.app.hasRelic("wado_kaichin") ? 0.75 : 1.0;
-        const actualPrice = Math.round(shop.cardRemovalPrice * discount);
-        if (removeCardCost) removeCardCost.textContent = `${actualPrice} 両`;
-        if (removeCardBtn) {
-            removeCardBtn.disabled = (this.app.gold < actualPrice);
+        // 蘭方医の有償手当て（HP回復）の表示更新
+        const healBtn = document.getElementById('btn-shop-heal');
+        const healCostSpan = document.getElementById('shop-heal-cost');
+        const healPrice = shop.getHealPrice ? shop.getHealPrice() : 60;
+
+        if (healCostSpan) healCostSpan.textContent = `${healPrice} 両`;
+        if (healBtn) {
+            if (shop.healedInShop) {
+                healBtn.textContent = '手当て済';
+                healBtn.disabled = true;
+            } else if (this.app.hp >= this.app.maxHp) {
+                healBtn.textContent = '体力全快（手当て不要）';
+                healBtn.disabled = true;
+            } else {
+                healBtn.innerHTML = `手当てを受ける (<span id="shop-heal-cost">${healPrice} 両</span>)`;
+                healBtn.disabled = (this.app.gold < healPrice);
+            }
         }
     }
 

@@ -9,7 +9,8 @@ class ShopSystem {
         this.shopCards = [];
         this.shopRelics = [];
         this.smuggleItem = null;
-        this.cardRemovalPrice = 75;
+        this.healBasePrice = 60;
+        this.healedInShop = false;
     }
 
     openShop() {
@@ -31,6 +32,7 @@ class ShopSystem {
     generateShopInventory() {
         this.shopCards = [];
         this.shopRelics = [];
+        this.healedInShop = false;
 
         // 1. 通常カード販売（3〜4枚）
         const candidateCardIds = Object.keys(GAME_DATA.cards).filter(id => {
@@ -177,25 +179,52 @@ class ShopSystem {
         return 1.0;
     }
 
-    removeCardInShop() {
+    getHealPrice() {
         let discount = 1.0;
         if (this.app.hasRelic("wado_kaichin")) discount *= 0.75;
         if (this.app.hasRelic("dutch_lexicon")) discount *= 0.80;
+        if (this.app.hasShishi && (this.app.hasShishi('iwazaki') || this.app.hasShishi('godai'))) {
+            discount *= 0.80;
+        }
         discount *= this.getOpinionPriceMultiplier();
-        const actualPrice = Math.round(this.cardRemovalPrice * discount);
+        return Math.max(10, Math.round(this.healBasePrice * discount));
+    }
 
-        if (this.app.gold < actualPrice) {
+    buyHeal() {
+        if (this.healedInShop) {
             window.soundSystem.playWarning();
-            alert("カード削除の資金が足りません！");
+            alert("この店での手当てはすでに受けています。");
             return;
         }
 
-        this.app.openCardRemovalModal(() => {
-            this.app.gold -= actualPrice;
-            this.cardRemovalPrice += 25; // 使うたびに値上がり
-            this.app.ui.renderShop();
-            if (this.app.saveRun) this.app.saveRun('shop');
-        });
+        if (this.app.hp >= this.app.maxHp) {
+            window.soundSystem.playWarning();
+            alert("体力はすでに満全です！");
+            return;
+        }
+
+        const price = this.getHealPrice();
+        if (this.app.gold < price) {
+            window.soundSystem.playWarning();
+            alert("手当てを受ける資金（両）が足りません！");
+            return;
+        }
+
+        this.app.gold -= price;
+        this.healedInShop = true;
+        const healAmount = Math.max(1, Math.floor(this.app.maxHp * 0.30));
+        this.app.healPlayer(healAmount);
+
+        window.soundSystem.playCoin();
+        if (window.soundSystem && window.soundSystem.playTaiko) {
+            window.soundSystem.playTaiko(false);
+        }
+        if (this.app.ui && this.app.ui.showToast) {
+            this.app.ui.showToast(`💉【蘭方医の手当て】体力 +${healAmount} 回復！（残金: ${this.app.gold}両）`, 'success');
+        }
+
+        this.app.ui.renderShop();
+        if (this.app.saveRun) this.app.saveRun('shop');
     }
 
     // --- 🍵 休息画面 ---

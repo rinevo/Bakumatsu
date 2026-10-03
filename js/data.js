@@ -1764,6 +1764,65 @@ const GAME_DATA = {
             }
         },
 
+        // --- 💊 道具・回復アイテムカード（中立） ---
+        "item_wound_medicine": {
+            id: "item_wound_medicine",
+            name: "特製・生薬傷薬",
+            faction: "neutral",
+            type: "item",
+            cost: 1,
+            attack: 0,
+            shield: 4,
+            desc: "防 4 を獲得し、HP を 12 回復する。【使い切り】（使用後除外）。",
+            rarity: "common",
+            exhaust: true,
+            onPlay: (b) => {
+                b.gainPlayerShield(4);
+                b.healPlayer(12);
+                if (window.soundSystem && window.soundSystem.playTaiko) {
+                    window.soundSystem.playTaiko(false);
+                }
+            }
+        },
+        "item_mankintan": {
+            id: "item_mankintan",
+            name: "和漢名薬・萬金丹",
+            faction: "neutral",
+            type: "item",
+            cost: 1,
+            attack: 0,
+            shield: 0,
+            desc: "HP を 20 回復し、自身の弱体・脱力状態を全治癒する。【使い切り】（使用後除外）。",
+            rarity: "uncommon",
+            exhaust: true,
+            onPlay: (b) => {
+                b.healPlayer(20);
+                if (b.playerDebuffs) b.playerDebuffs = {};
+                if (window.soundSystem && window.soundSystem.playTaiko) {
+                    window.soundSystem.playTaiko(false);
+                }
+            }
+        },
+        "item_quinine": {
+            id: "item_quinine",
+            name: "蘭方秘薬・キニーネ",
+            faction: "neutral",
+            type: "item",
+            cost: 0,
+            attack: 0,
+            shield: 0,
+            desc: "HP を 28 回復し、カードを 1 枚引く。【使い切り】（使用後除外）。",
+            rarity: "rare",
+            exhaust: true,
+            onPlay: (b) => {
+                b.healPlayer(28);
+                b.drawCards(1);
+                if (window.soundSystem && window.soundSystem.playTaiko) {
+                    window.soundSystem.playTaiko(false);
+                }
+            }
+        },
+
         // --- ⚠️ 不平等条約・呪いカード ---
         "curse_bounty": {
             id: "curse_bounty",
@@ -2027,7 +2086,7 @@ const GAME_DATA = {
         "wado_kaichin": {
             id: "wado_kaichin",
             name: "古銭・和同開珎",
-            desc: "商人でのカード購入や削除の費用が常時 25% 割引される。",
+            desc: "商人でのカード購入や手当て（HP回復）の費用が常時 25% 割引される。",
             price: 130
         },
         "western_medicine": {

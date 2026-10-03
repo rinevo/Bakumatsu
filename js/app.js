@@ -279,10 +279,10 @@ class BakumatsuApp {
             btnLeaveShop.addEventListener('click', () => this.returnToMap());
         }
 
-        // ショップカード削除ボタン
-        const btnShopRemove = document.getElementById('btn-shop-remove-card');
-        if (btnShopRemove) {
-            btnShopRemove.addEventListener('click', () => this.shop.removeCardInShop());
+        // ショップ蘭方医の手当て（HP回復）ボタン
+        const btnShopHeal = document.getElementById('btn-shop-heal');
+        if (btnShopHeal) {
+            btnShopHeal.addEventListener('click', () => this.shop.buyHeal());
         }
 
         // 休息アクションボタン
