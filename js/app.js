@@ -15,6 +15,7 @@ class BakumatsuApp {
         this.relics = [];
         this.currentTrend = null;
         this.currentEvent = null;
+        this.currentAdventureEvent = null;
         this.nextBattleStrengthBuff = 0;
         this.isGameOver = false;
 
@@ -299,6 +300,12 @@ class BakumatsuApp {
         }
         if (btnRestPurge) {
             btnRestPurge.addEventListener('click', () => this.shop.restPurgeCard());
+        }
+
+        // 歴史イベント（多段階アドベンチャー）完了ボタン
+        const btnEventFinish = document.getElementById('btn-event-finish');
+        if (btnEventFinish) {
+            btnEventFinish.addEventListener('click', () => this.finishEventAndReturnToMap());
         }
 
         // リスタートボタン（ゲームオーバー時は直接初期画面へ、ゲームクリア時は背景鑑賞モードへ遷移）
@@ -829,7 +836,10 @@ class BakumatsuApp {
                 },
                 shop: {
                     goldSpentInShop: this.shop.goldSpentInShop || 0
-                }
+                },
+                eventResolution: (savedScene === 'event_resolution' && this.currentAdventureEvent && this.currentAdventureEvent.result)
+                    ? this.currentAdventureEvent.result
+                    : null
             };
             localStorage.setItem(BakumatsuApp.SAVE_KEY, JSON.stringify(saveData));
         } catch (e) {
@@ -901,6 +911,15 @@ class BakumatsuApp {
                 this.shop.openShop();
             } else if (savedScene === 'rest') {
                 this.shop.openRestSite();
+            } else if (savedScene === 'event_resolution') {
+                // 歴史事件の結果表示時点で保存されたデータ: 結果画面をそのまま復元
+                if (data.eventResolution) {
+                    this.switchScreen('screen-event');
+                    this.currentAdventureEvent = { result: data.eventResolution };
+                    this.ui.renderEventResolution(data.eventResolution);
+                } else {
+                    this.returnToMap();
+                }
             } else if (savedScene === 'event' && currentNode) {
                 this.map.launchEvent(currentNode);
             } else {
@@ -912,6 +931,299 @@ class BakumatsuApp {
             alert("セーブデータの復元中にエラーが発生しました。新しくゲームを開始してください。");
             this.clearSavedRun();
         }
+    }
+
+    // ==========================================
+    // 歴史事件：天命判定（運命の審判）システム
+    // ==========================================
+
+    startEventAdventure(eventData, baseChoice) {
+        // 確率の算出
+        const chances = this.calculateEventSuccessProbability(eventData, baseChoice);
+        
+        this.currentAdventureEvent = {
+            event: eventData,
+            baseChoice: baseChoice,
+            chances: chances,
+            result: null
+        };
+
+        // UIで天命判定（ルーレット／八卦演出）を開始
+        if (this.ui && this.ui.renderEventFateRoll) {
+            this.ui.renderEventFateRoll(this.currentAdventureEvent);
+        } else {
+            // UIがない場合は即座に判定
+            this.resolveFateRollOutcome();
+        }
+    }
+
+    calculateEventSuccessProbability(eventData, baseChoice) {
+        const text = `${baseChoice.text} ${baseChoice.effectDesc || ''} ${eventData.title || ''}`;
+        let great = 25;
+        let success = 60;
+        let fail = 15;
+        let riskCategory = 'orthodox';
+
+        if (/深入りを避け|脱出|静観|回避|退却|離脱|見送り/.test(text)) {
+            // 🛡️ 慎重・安全回避
+            riskCategory = 'safe';
+            great = 15;
+            success = 75;
+            fail = 10;
+        } else if (/斬り込|迎え撃|抜刀|突入|砲撃|討伐|襲撃|死守|激戦|強行|突破|突進|暗殺|決死/.test(text)) {
+            // 🔴 果敢・逆境決死
+            riskCategory = 'reckless';
+            great = 15;
+            success = 40;
+            fail = 45;
+        } else if (/買収|借款|商人|密貿易|密談|密議|情報|金|兵器|新式|潜入|調略|工作|裏手/.test(text)) {
+            // 🟡 中庸・情勢次第
+            riskCategory = 'intrigue';
+            great = 20;
+            success = 55;
+            fail = 25;
+        } else {
+            // 🟢 堅実・史実正道
+            riskCategory = 'orthodox';
+            great = 25;
+            success = 60;
+            fail = 15;
+        }
+
+        // 志士ボーナス（関連志士所持による加護）
+        let hasShishiBonus = false;
+        if (baseChoice.shishiBonus) {
+            const bonuses = Array.isArray(baseChoice.shishiBonus) ? baseChoice.shishiBonus : [baseChoice.shishiBonus];
+            const found = bonuses.find(b => this.hasShishi(b.character || b.cardId));
+            if (found) {
+                hasShishiBonus = true;
+                great += 10;
+                success += 10;
+                fail = Math.max(5, fail - 20);
+            }
+        }
+
+        // 世論の追い風（自軍有利50%以上）
+        const isPublicOpinionFavorable = (this.faction === 'tobaku' && this.publicOpinion >= 50) ||
+                                         (this.faction === 'sabaku' && this.publicOpinion <= -50);
+        if (isPublicOpinionFavorable) {
+            great += 5;
+            fail = Math.max(5, fail - 5);
+        }
+
+        // 確率の合計を100%に正規化
+        const total = great + success + fail;
+        great = Math.round((great / total) * 100);
+        fail = Math.max(5, Math.round((fail / total) * 100));
+        success = 100 - great - fail;
+
+        return {
+            great,
+            success,
+            fail,
+            totalSuccess: great + success,
+            riskCategory,
+            hasShishiBonus,
+            isPublicOpinionFavorable
+        };
+    }
+
+    resolveFateRollOutcome() {
+        if (!this.currentAdventureEvent) return;
+        const { event, baseChoice, chances } = this.currentAdventureEvent;
+
+        const rand = Math.random() * 100;
+        let outcome = 'success';
+
+        if (rand < chances.great) {
+            outcome = 'great';
+        } else if (rand < chances.great + chances.success) {
+            outcome = 'success';
+        } else {
+            outcome = 'failure';
+        }
+
+        const rewards = [];
+        let stampText = '史実貫徹';
+        let stampClass = 'grade-success';
+        let titleText = '';
+        let descText = '';
+
+        // 志士ボーナス（選択前に所持していた志士による助勢）を事前に抽出
+        const activeShishiBonuses = [];
+        if (baseChoice.shishiBonus) {
+            const bonuses = Array.isArray(baseChoice.shishiBonus) ? baseChoice.shishiBonus : [baseChoice.shishiBonus];
+            bonuses.forEach(b => {
+                if (this.hasShishi(b.character || b.cardId)) {
+                    activeShishiBonuses.push(b);
+                }
+            });
+        }
+
+        try {
+            if (outcome === 'great') {
+                stampText = '大業成就';
+                stampClass = 'grade-great';
+                titleText = '【大業成就】天命を掴み、歴史の偉業を成し遂げた！';
+                descText = '周到な決断と天の加護により、一切の損失を出すことなく完全なる勝利を達成！新たな志士が心服して軍列に加わり、天下に名声が轟いた！';
+
+                // アクション実行（ダメージ無効化インターセプト）
+                this.executeBaseActionForOutcome(baseChoice, 'great');
+
+                // 事前所持していた志士の助勢ボーナスを適用
+                activeShishiBonuses.forEach(b => {
+                    if (typeof b.apply === 'function') b.apply(this);
+                    rewards.push({ icon: '🌟', text: `志士の助勢: ${b.desc}` });
+                });
+
+                // 大成功ボーナス
+                this.gold += 25;
+                this.nextBattleStrengthBuff = (this.nextBattleStrengthBuff || 0) + 3;
+                this.maxHp += 2;
+                this.healPlayer(2);
+
+                const opinionBonus = this.faction === 'tobaku' ? 5 : -5;
+                this.modifyPublicOpinion(opinionBonus);
+
+                rewards.push({ icon: '🏆', text: `大業達成！志士カードを仲間に迎え入れました！` });
+                rewards.push({ icon: '✨', text: `天佑神助: 被ダメージを完全無効化（無傷達成）！` });
+                rewards.push({ icon: '💰', text: `追加の報奨金: 軍資金 <strong class="reward-highlight">+25両</strong> を獲得！` });
+                rewards.push({ icon: '🔥', text: `士気高揚: 次の戦闘の <strong class="reward-highlight">攻撃力 +3</strong> ＆ 最大HP <strong class="reward-highlight">+2</strong>！` });
+                rewards.push({ icon: '⚖️', text: `天下の大勢が自軍へさらに傾斜しました！` });
+
+            } else if (outcome === 'success') {
+                stampText = '史実貫徹';
+                stampClass = 'grade-success';
+                titleText = '【史実貫徹】史実の波乱を乗り越え、作戦は成就した';
+                descText = '様々な困難や代償に直面しながらも、覚悟を決めた行動によって史実通りの成果を掴み取った。新たな志士が頼もしい味方として合流した！';
+
+                // アクション通常実行
+                this.executeBaseActionForOutcome(baseChoice, 'success');
+
+                // 事前所持していた志士の助勢ボーナスを適用
+                activeShishiBonuses.forEach(b => {
+                    if (typeof b.apply === 'function') b.apply(this);
+                    rewards.push({ icon: '🌟', text: `志士の助勢: ${b.desc}` });
+                });
+
+                // 基本世論変動
+                const opinionVal = typeof baseChoice.opinionChange === 'function' ? baseChoice.opinionChange(this) : baseChoice.opinionChange;
+                if (typeof opinionVal === 'number' && opinionVal !== 0) {
+                    this.modifyPublicOpinion(opinionVal);
+                    const facName = opinionVal > 0 ? '討幕' : '佐幕';
+                    rewards.push({ icon: '⚖️', text: `世論が <strong class="reward-highlight">${facName}</strong> へ傾斜しました。` });
+                }
+
+                rewards.push({ icon: '⭕', text: `史実通りの成果を達成！志士カードを獲得しました。` });
+
+            } else {
+                // 失敗 (failure)
+                stampText = '作戦失敗';
+                stampClass = 'grade-failure';
+                titleText = '【作戦失敗】敵の策に嵌まり、手痛い打撃を受けた…';
+                descText = '作戦は完全に敵に看破されていた！予期せぬ伏兵と混乱により、志士の迎え入れは叶わず、深手を負って命からがら現場を脱出した…！';
+
+                // 志士獲得を阻止してアクション実行
+                this.executeBaseActionForOutcome(baseChoice, 'failure');
+
+                // 失敗ペナルティの適用
+                const baseActionStr = (baseChoice.action || '').toString();
+                const hadDamage = baseActionStr.includes('damagePlayer');
+                const penaltyDmg = hadDamage ? 0 : 15; // 元のダメージがなければペナルティ15
+                if (penaltyDmg > 0) {
+                    this.damagePlayer(penaltyDmg);
+                }
+
+                const lostGold = Math.min(this.gold, 15);
+                this.gold -= lostGold;
+
+                // 世論悪化（敵対陣営へ傾斜）
+                const adverseOpinion = this.faction === 'tobaku' ? -5 : 5;
+                this.modifyPublicOpinion(adverseOpinion);
+
+                rewards.push({ icon: '❌', text: `<span class="penalty">志士の登用ならず: 作戦失敗により志士カードは獲得できませんでした。</span>` });
+                const dmgText = penaltyDmg > 0 ? `HP ${penaltyDmg}` : '史実の激闘ダメージ';
+                rewards.push({ icon: '⚔️', text: `深手の痛手として <span class="penalty">${dmgText}</span> を消費` });
+                if (lostGold > 0) {
+                    rewards.push({ icon: '💸', text: `混乱による散逸: 軍資金 <span class="penalty">-${lostGold}両</span>` });
+                }
+                rewards.push({ icon: '⚠️', text: `作戦失敗の動揺により世論が不利に傾斜しました。` });
+            }
+        } catch (err) {
+            console.error("[Fate roll resolution error]", err);
+        }
+
+        this.ui.updateHeader();
+
+        // サウンド
+        if (window.soundSystem) {
+            if (outcome === 'great' && window.soundSystem.playVictory) {
+                window.soundSystem.playVictory();
+            } else if (outcome === 'success' && window.soundSystem.playTaiko) {
+                window.soundSystem.playTaiko(true);
+            } else if (outcome === 'failure' && window.soundSystem.playSlash) {
+                window.soundSystem.playSlash();
+            }
+        }
+
+        const resultData = {
+            outcome,
+            stampText,
+            stampClass,
+            titleText,
+            descText,
+            rewards
+        };
+
+        this.currentAdventureEvent.result = resultData;
+
+        // 選択後の結果が表示された時点で即座に自動保存（リセマラ・リロードやり直し防止）
+        this.saveRun('event_resolution');
+
+        if (this.ui && this.ui.renderEventResolution) {
+            this.ui.renderEventResolution(resultData);
+        }
+    }
+
+    executeBaseActionForOutcome(baseChoice, outcome) {
+        if (!baseChoice || !baseChoice.action) return;
+
+        const origAddCard = this.addCardToDeck.bind(this);
+        const origDamage = this.damagePlayer.bind(this);
+        const origObtainRelic = this.obtainRandomRelic ? this.obtainRandomRelic.bind(this) : null;
+        const origRemovalModal = this.openCardRemovalModal ? this.openCardRemovalModal.bind(this) : null;
+
+        if (outcome === 'great') {
+            // 大成功: HPダメージを完全無効化
+            this.damagePlayer = (amount) => {
+                // ダメージ無効化
+            };
+        } else if (outcome === 'failure') {
+            // 失敗: 志士カードの獲得、レリック入手、カード削除モーダルを完全ブロック！
+            this.addCardToDeck = (cardId) => {
+                // 志士獲得を阻止
+            };
+            if (origObtainRelic) {
+                this.obtainRandomRelic = () => { /* ブロック */ };
+            }
+            if (origRemovalModal) {
+                this.openCardRemovalModal = () => { /* ブロック */ };
+            }
+        }
+
+        try {
+            baseChoice.action(this);
+        } finally {
+            this.addCardToDeck = origAddCard;
+            this.damagePlayer = origDamage;
+            if (origObtainRelic) this.obtainRandomRelic = origObtainRelic;
+            if (origRemovalModal) this.openCardRemovalModal = origRemovalModal;
+        }
+    }
+
+    finishEventAndReturnToMap() {
+        this.currentAdventureEvent = null;
+        this.returnToMap();
     }
 
     clearSavedRun() {

@@ -737,6 +737,16 @@ class UIManager {
     // --- 歴史イベント画面描画 ---
     renderEvent(eventData) {
         this.updateHeader();
+
+        // ステージの初期化（幕壱: 初動方針をアクティブにし、判定・幕参を非表示）
+        const stageOpening = document.getElementById('event-stage-opening');
+        const stageRolling = document.getElementById('event-stage-rolling');
+        const stageResolution = document.getElementById('event-stage-resolution');
+
+        if (stageOpening) stageOpening.style.display = 'block';
+        if (stageRolling) stageRolling.style.display = 'none';
+        if (stageResolution) stageResolution.style.display = 'none';
+
         const titleEl = document.getElementById('event-title');
         const descEl = document.getElementById('event-desc');
         const choicesContainer = document.getElementById('event-choices-container');
@@ -842,75 +852,127 @@ class UIManager {
                         const factionCircle = rawOpinionChange > 0 ? "🔴" : "🔵";
 
                         if (isAdverse) {
-                            // 自軍不利なもの：赤色背景（逆風）
                             const label = `⚠️ 逆風: ${factionCircle}${targetFactionName}+${Math.abs(effectiveChange)}%`;
                             opinionBadgeHtml = `<span class="badge-opinion badge-opinion-adverse">${label}</span>`;
                         } else {
-                            // 自軍有利なもの：青色背景
                             const label = `${factionCircle} 世論: ${targetFactionName}+${Math.abs(effectiveChange)}%`;
                             opinionBadgeHtml = `<span class="badge-opinion badge-opinion-favorable">${label}</span>`;
                         }
                     }
                 }
 
+                // 史実成否確率の算出とバッジ生成
+                const chances = this.app.calculateEventSuccessProbability(eventData, choice);
+                const probBadgeHtml = `
+                    <div class="choice-probability-row">
+                        <span class="badge-prob-total">史実成否見込: ${chances.totalSuccess}%</span>
+                        <span class="badge-prob-great">大成功 ${chances.great}%</span>
+                        <span class="badge-prob-fail">失敗 ${chances.fail}%</span>
+                        <span class="badge-prob-warning">（失敗時: 志士入手不可＆痛手）</span>
+                    </div>
+                `;
+
                 btn.innerHTML = `
                     <div class="choice-text">${shishiReqBadgeHtml}${opinionBadgeHtml}${choice.text}</div>
                     <div class="choice-effect">${choice.effectDesc}</div>
                     ${bonusHtml}
+                    ${probBadgeHtml}
                 `;
 
                 btn.addEventListener('click', () => {
-                    // 二重クリック・連打防止（全選択肢ボタンを即座に無効化）
+                    // 二重クリック・連打防止
                     const allChoiceBtns = choicesContainer.querySelectorAll('.btn-event-choice');
                     allChoiceBtns.forEach(b => { b.disabled = true; });
 
-                    try {
-                        // 1. 通常アクションの実行
-                        if (choice.action) {
-                            choice.action(this.app);
-                        }
-                        // 2. 志士ボーナスアクションの追加実行
-                        if (activeBonuses.length > 0) {
-                            activeBonuses.forEach(b => {
-                                if (typeof b.apply === 'function') {
-                                    b.apply(this.app);
-                                }
-                            });
-                        }
-                    } catch (err) {
-                        console.error("Event choice execution error:", err);
-                    }
-
-                    // HP 0以下またはゲームオーバー判定
-                    if (this.app.isGameOver || this.app.hp <= 0) {
-                        if (!this.app.isGameOver) {
-                            this.app.handleGameOver("戦乱の荒波に呑まれ、志半ばで倒れた…");
-                        }
-                        return;
-                    }
-                    if (this.app.imperialGauge >= 100) {
-                        if (!this.app.isGameOver) {
-                            this.app.handleGameOver("列強の要求に屈し、関税自主権および主権を完全喪失…日本は保護領（植民地）と化した…");
-                        }
-                        return;
-                    }
-
-                    const opinionVal = typeof choice.opinionChange === 'function'
-                        ? choice.opinionChange(this.app)
-                        : choice.opinionChange;
-                    if (typeof opinionVal === 'number' && opinionVal !== 0) {
-                        this.app.modifyPublicOpinion(opinionVal);
-                    }
                     if (window.soundSystem && window.soundSystem.playTaiko) {
                         window.soundSystem.playTaiko(false);
                     }
-                    setTimeout(() => {
-                        this.app.returnToMap();
-                    }, 400);
+
+                    // 天命判定開始
+                    this.app.startEventAdventure(eventData, choice);
                 });
 
                     choicesContainer.appendChild(btn);
                 });
+        }
+    }
+
+    // --- 運命判定フェーズ（天命の審判アニメーション） 描画 ---
+    renderEventFateRoll(adventureData) {
+        this.updateHeader();
+
+        const stageOpening = document.getElementById('event-stage-opening');
+        const stageRolling = document.getElementById('event-stage-rolling');
+        const stageResolution = document.getElementById('event-stage-resolution');
+
+        if (stageOpening) stageOpening.style.display = 'none';
+        if (stageRolling) stageRolling.style.display = 'block';
+        if (stageResolution) stageResolution.style.display = 'none';
+
+        const choiceNameEl = document.getElementById('fate-roll-choice-name');
+        const chancesEl = document.getElementById('fate-roll-chances');
+
+        if (choiceNameEl) {
+            choiceNameEl.innerHTML = `<strong>選んだ決断：</strong>${adventureData.baseChoice.text}`;
+        }
+
+        if (chancesEl && adventureData.chances) {
+            const c = adventureData.chances;
+            chancesEl.innerHTML = `
+                <span>🏆 大成功 <strong>${c.great}%</strong></span> ｜ 
+                <span>⭕ 成功 <strong>${c.success}%</strong></span> ｜ 
+                <span>⚠️ 失敗 <strong>${c.fail}%</strong></span>
+            `;
+        }
+
+        // 太鼓や演出音
+        if (window.soundSystem && window.soundSystem.playHyoshigi) {
+            window.soundSystem.playHyoshigi();
+        }
+
+        // 約1.1秒後に判定結果へ進む
+        setTimeout(() => {
+            this.app.resolveFateRollOutcome();
+        }, 1100);
+    }
+
+    // --- 幕参：結末・歴史の審判 描画 ---
+    renderEventResolution(resultData) {
+        this.updateHeader();
+
+        const stageOpening = document.getElementById('event-stage-opening');
+        const stageRolling = document.getElementById('event-stage-rolling');
+        const stageResolution = document.getElementById('event-stage-resolution');
+
+        if (stageOpening) stageOpening.style.display = 'none';
+        if (stageRolling) stageRolling.style.display = 'none';
+        if (stageResolution) stageResolution.style.display = 'block';
+
+        const stampEl = document.getElementById('resolution-stamp');
+        if (stampEl) {
+            stampEl.className = `resolution-stamp ${resultData.stampClass}`;
+            stampEl.textContent = resultData.stampText;
+        }
+
+        const titleEl = document.getElementById('resolution-title');
+        if (titleEl) {
+            titleEl.textContent = resultData.titleText;
+        }
+
+        const descEl = document.getElementById('resolution-desc');
+        if (descEl) {
+            descEl.textContent = resultData.descText;
+        }
+
+        const rewardsContainer = document.getElementById('resolution-rewards-container');
+        if (rewardsContainer) {
+            rewardsContainer.innerHTML = '';
+            (resultData.rewards || []).forEach(r => {
+                const row = document.createElement('div');
+                row.className = `resolution-reward-row ${r.text.includes('penalty') ? 'penalty' : ''}`;
+                row.innerHTML = `<span class="reward-icon">${r.icon}</span><span>${r.text}</span>`;
+                rewardsContainer.appendChild(row);
+            });
         }
     }
 

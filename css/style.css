@@ -2702,6 +2702,249 @@ body {
 }
 
 /* ==========================================
+   4.1 歴史事件：天命判定（運命の審判）スタイル
+   ========================================== */
+.event-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeInStage 0.35s ease;
+}
+
+@keyframes fadeInStage {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 選択肢内の確率表示バッジ（世論バッジを目立たせるため、控えめな中間トーンに抑制） */
+.choice-probability-row {
+    margin-top: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    opacity: 0.85;
+}
+
+.badge-prob-total {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #a0a8b4;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: normal;
+}
+
+.badge-prob-great {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #8c93a0;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.badge-prob-fail {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #8c93a0;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.badge-prob-warning {
+    color: #707684;
+    font-size: 10.5px;
+    margin-left: 2px;
+}
+
+/* 天命判定アニメーション枠 */
+.fate-roll-box {
+    background: rgba(20, 24, 32, 0.9);
+    border: 2px solid var(--color-gold);
+    border-radius: 10px;
+    padding: 32px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 0 24px rgba(223, 177, 91, 0.3), inset 0 0 16px rgba(0, 0, 0, 0.7);
+    margin: 16px 0;
+}
+
+.fate-roll-badge {
+    background: linear-gradient(135deg, #b8860b, #d4af37);
+    color: #111;
+    font-size: 13px;
+    font-weight: 900;
+    padding: 4px 14px;
+    border-radius: 14px;
+    letter-spacing: 2px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.fate-roll-choice-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--color-washi);
+    max-width: 550px;
+    line-height: 1.5;
+}
+
+.fate-roll-animation-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+}
+
+.fate-roll-wheel {
+    font-size: 52px;
+    color: var(--color-gold);
+    animation: rotateWheel 1.0s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    text-shadow: 0 0 16px rgba(223, 177, 91, 0.6);
+}
+
+@keyframes rotateWheel {
+    0% { transform: rotate(0deg) scale(0.9); }
+    50% { transform: rotate(180deg) scale(1.15); }
+    100% { transform: rotate(360deg) scale(0.9); }
+}
+
+.fate-roll-status-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--color-gold-bright);
+    letter-spacing: 2px;
+    animation: pulseGlow 1s infinite alternate;
+}
+
+@keyframes pulseGlow {
+    from { opacity: 0.7; }
+    to { opacity: 1; text-shadow: 0 0 8px rgba(255, 209, 102, 0.8); }
+}
+
+.fate-roll-chances {
+    font-size: 13px;
+    color: var(--color-washi-dim);
+    display: flex;
+    gap: 12px;
+}
+
+/* 幕参：解決・論功行賞 */
+.resolution-box {
+    background: rgba(20, 24, 30, 0.85);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+    color: var(--color-washi);
+}
+
+.resolution-stamp {
+    font-size: 26px;
+    font-weight: 900;
+    padding: 8px 24px;
+    border-radius: 8px;
+    letter-spacing: 4px;
+    display: inline-block;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    animation: stampIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes stampIn {
+    0% { transform: scale(1.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.resolution-stamp.grade-great {
+    background: linear-gradient(135deg, #f39c12, #d35400);
+    border: 2px solid #f1c40f;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
+}
+
+.resolution-stamp.grade-success {
+    background: linear-gradient(135deg, #27ae60, #2980b9);
+    border: 2px solid #2ecc71;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+}
+
+.resolution-stamp.grade-failure {
+    background: linear-gradient(135deg, #c0392b, #7f1d1d);
+    border: 2px solid #e74c3c;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+}
+
+.resolution-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--color-washi);
+    margin: 10px 0 6px;
+}
+
+.resolution-desc {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--color-washi);
+    max-width: 620px;
+    margin: 0 auto 16px;
+    padding: 12px 18px;
+    background: rgba(16, 18, 24, 0.6);
+    border-radius: 6px;
+}
+
+.resolution-rewards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto 20px;
+}
+
+.resolution-reward-row {
+    background: rgba(26, 31, 41, 0.85);
+    border: 1px solid #4a4131;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 13.5px;
+    color: var(--color-gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+}
+
+.resolution-reward-row.penalty {
+    color: #ff8888;
+    border-color: #662222;
+    background: rgba(45, 20, 20, 0.85);
+}
+
+.resolution-reward-row .reward-icon {
+    font-size: 16px;
+}
+
+.resolution-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+
+
+/* ==========================================
    5. ショップ画面
    ========================================== */
 #screen-shop {

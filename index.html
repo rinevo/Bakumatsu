@@ -319,14 +319,47 @@
             </div>
         </section>
 
-        <!-- 4. 歴史イベント画面 -->
+        <!-- 4. 歴史イベント画面（天命判定・運命の審判） -->
         <section id="screen-event" class="game-screen">
-            <div class="event-parchment-box">
-                <div class="event-stamp">幕末秘録</div>
-                <h2 id="event-title" class="event-title">歴史事件名</h2>
-                <div id="event-desc" class="event-description">事件の詳細説明文…</div>
-                <div id="event-choices-container" class="event-choices-list">
-                    <!-- 選択肢が動的生成されます -->
+            <div class="event-parchment-box" id="event-parchment-box">
+                <div class="event-stamp" id="event-stamp">幕末秘録</div>
+
+                <!-- 幕壱：歴史的決断 -->
+                <div id="event-stage-opening" class="event-stage-container">
+                    <h2 id="event-title" class="event-title">歴史事件名</h2>
+                    <div id="event-desc" class="event-description">事件の詳細説明文…</div>
+                    <div class="event-stage-hint">【歴史の決断を下してください（史実成否の天命判定が発生します）】</div>
+                    <div id="event-choices-container" class="event-choices-list">
+                        <!-- 選択肢が動的生成されます -->
+                    </div>
+                </div>
+
+                <!-- 運命判定フェーズ（天命の審判アニメーション） -->
+                <div id="event-stage-rolling" class="event-stage-container" style="display: none;">
+                    <div class="fate-roll-box">
+                        <div class="fate-roll-badge">⚖️ 天命の審判</div>
+                        <div class="fate-roll-choice-name" id="fate-roll-choice-name">決断：…</div>
+                        <div class="fate-roll-animation-wrapper">
+                            <div class="fate-roll-wheel">☯</div>
+                            <div class="fate-roll-status-text" id="fate-roll-status-text">運命の神籤を引いています…</div>
+                        </div>
+                        <div class="fate-roll-chances" id="fate-roll-chances">
+                            <!-- 確率プレビュー -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 幕参：結末と歴史の審判 -->
+                <div id="event-stage-resolution" class="event-stage-container" style="display: none;">
+                    <div class="resolution-stamp" id="resolution-stamp">史実貫徹</div>
+                    <h2 id="resolution-title" class="resolution-title">歴史の転換点</h2>
+                    <div id="resolution-desc" class="resolution-desc">結末の物語描写…</div>
+                    <div id="resolution-rewards-container" class="resolution-rewards-container">
+                        <!-- 獲得した成果・代償リスト -->
+                    </div>
+                    <div class="resolution-footer">
+                        <button id="btn-event-finish" class="btn-wood large">歴史を進める（マップへ）</button>
+                    </div>
                 </div>
             </div>
         </section>
