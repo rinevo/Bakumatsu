@@ -689,7 +689,16 @@ class UIManager {
 
         if (titleEl) {
             const periodPrefix = eventData.period ? `【${eventData.period}】` : '';
-            titleEl.textContent = `${periodPrefix}${eventData.title}`;
+            let impBadge = '';
+            const imp = eventData.importance || 1;
+            if (imp === 3) {
+                impBadge = '<span class="badge-importance badge-imp-3">★★★ 天下決戦・歴史転換点</span> ';
+            } else if (imp === 2) {
+                impBadge = '<span class="badge-importance badge-imp-2">★★☆ 重大政変</span> ';
+            } else {
+                impBadge = '<span class="badge-importance badge-imp-1">★☆☆ 動乱</span> ';
+            }
+            titleEl.innerHTML = `${impBadge}${periodPrefix}${eventData.title}`;
         }
         if (descEl) descEl.textContent = eventData.desc;
 
