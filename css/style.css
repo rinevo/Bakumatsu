@@ -2727,6 +2727,26 @@ body {
     opacity: 0.85;
 }
 
+.badge-risk {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10.5px;
+    font-weight: normal;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #a0a8b4;
+}
+.badge-risk-safe,
+.badge-risk-orthodox,
+.badge-risk-intrigue,
+.badge-risk-defiance,
+.badge-risk-reckless {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #a0a8b4;
+}
+
 .badge-prob-total {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.12);

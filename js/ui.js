@@ -865,6 +865,7 @@ class UIManager {
                 const chances = this.app.calculateEventSuccessProbability(eventData, choice);
                 const probBadgeHtml = `
                     <div class="choice-probability-row">
+                        <span class="badge-risk ${chances.categoryBadgeClass || ''}">${chances.categoryLabel || '史実判定'}</span>
                         <span class="badge-prob-total">史実成否見込: ${chances.totalSuccess}%</span>
                         <span class="badge-prob-great">大成功 ${chances.great}%</span>
                         <span class="badge-prob-fail">失敗 ${chances.fail}%</span>

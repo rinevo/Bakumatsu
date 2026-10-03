@@ -4282,9 +4282,10 @@ const GAME_DATA = {
             desc: "幕府は長州へ大軍を送り、諸藩にも出兵を命じた。正面から戦うか、裏で停戦の道を探るか。",
             choices: [
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
+                    riskCategory: "reckless",
                     text: "総軍を率い、正面から攻め込む",
-                    effectDesc: "志士『西郷隆盛』を獲得。HPを 26 失うが、80両と次の戦闘の攻撃力+3を得る。",
+                    effectDesc: "志士『西郷隆盛』を獲得。HPを 26 失うが、30両と次の戦闘の攻撃力+3を得る。",
                     action: (app) => {
                         app.addCardToDeck("saigo_jigen");
                         app.damagePlayer(26);
@@ -4293,7 +4294,8 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
+                    riskCategory: "orthodox",
                     text: "停戦交渉を進め、消耗を抑える",
                     effectDesc: "志士『吉井友実』を獲得。列強介入-4%、HPを 6 回復する。",
                     action: (app) => {
@@ -4304,6 +4306,7 @@ const GAME_DATA = {
                 },
                 {
                     opinionChange: 8,
+                    riskCategory: "intrigue",
                     text: "密かに長州へ武器を流し、執政・周布政之助と共に防備を固める",
                     effectDesc: "志士『周布政之助：長州の経綸』を獲得。『新式ミニエ銃』をデッキに加え、列強介入+12%。",
                     action: (app) => {

@@ -958,36 +958,89 @@ class BakumatsuApp {
     }
 
     calculateEventSuccessProbability(eventData, baseChoice) {
-        const text = `${baseChoice.text} ${baseChoice.effectDesc || ''} ${eventData.title || ''}`;
+        // 直接指定のチェック
         let great = 25;
         let success = 60;
         let fail = 15;
         let riskCategory = 'orthodox';
 
-        if (/深入りを避け|脱出|静観|回避|退却|離脱|見送り/.test(text)) {
-            // 🛡️ 慎重・安全回避
-            riskCategory = 'safe';
-            great = 15;
-            success = 75;
-            fail = 10;
-        } else if (/斬り込|迎え撃|抜刀|突入|砲撃|討伐|襲撃|死守|激戦|強行|突破|突進|暗殺|決死/.test(text)) {
-            // 🔴 果敢・逆境決死
-            riskCategory = 'reckless';
-            great = 15;
-            success = 40;
-            fail = 45;
-        } else if (/買収|借款|商人|密貿易|密談|密議|情報|金|兵器|新式|潜入|調略|工作|裏手/.test(text)) {
-            // 🟡 中庸・情勢次第
-            riskCategory = 'intrigue';
-            great = 20;
-            success = 55;
-            fail = 25;
-        } else {
-            // 🟢 堅実・史実正道
+        if (baseChoice.chances && typeof baseChoice.chances.great === 'number') {
+            great = baseChoice.chances.great;
+            success = baseChoice.chances.success;
+            fail = baseChoice.chances.fail;
+            riskCategory = baseChoice.riskCategory || 'custom';
+        } else if (baseChoice.riskCategory) {
+            riskCategory = baseChoice.riskCategory;
+        } else if (baseChoice.isHistorical === false) {
+            riskCategory = 'defiance';
+        } else if (baseChoice.isHistorical === true) {
             riskCategory = 'orthodox';
-            great = 25;
-            success = 60;
-            fail = 15;
+        } else {
+            // キーワード自動判定
+            const text = `${baseChoice.text} ${baseChoice.effectDesc || ''} ${eventData.title || ''}`;
+            
+            if (/深入りを避け|脱出|静観|回避|退却|離脱|見送り|温存|隠忍|不戦|武器を手放す|降伏勧告|平和的|流血を止め|恭順を受け入れ|無用な流血/.test(text)) {
+                // 🛡️ 慎重・安全策
+                riskCategory = 'safe';
+            } else if (/正面から|攻め込|攻め入|斬り込|迎え撃|抜刀|突入|突撃|砲撃|襲撃|死守|激戦|強行|突破|突進|暗殺|決死|打って出|決戦を挑|一戦を交|抗戦|徹底抗戦|蜂起|挙兵|ピストル|強襲|討ち入|玉砕|散華|決起|先陣|斬首|討滅|全砲門|電撃奇襲|仇を討つ|武力討幕/.test(text)) {
+                // 🔴 逆境・無謀決戦
+                riskCategory = 'reckless';
+            } else if (/旧勢力の完全排除|旧来の兵制を維持|武士の意地を通す|同盟を見送り|鎖国を貫く|拒絶|拒否|破談|強硬に対峙|打ち払いを徹底|強硬論|断固拒否|旧態|頑として/.test(text)) {
+                // 🟠 歴史の抗い（反史実・if決断）
+                riskCategory = 'defiance';
+            } else if (/買収|借款|商人|密貿易|密談|密議|情報|金|兵器|新式|潜入|調略|工作|裏手|武器を流|武器の調達|密使|談判|周旋|密命|裏取引/.test(text)) {
+                // 🟡 謀略・周旋
+                riskCategory = 'intrigue';
+            } else {
+                // 🟢 堅実・史実正道
+                riskCategory = 'orthodox';
+            }
+        }
+
+        // カテゴリごとの基本確率（custom以外）
+        if (riskCategory !== 'custom' && (!baseChoice.chances || typeof baseChoice.chances.great !== 'number')) {
+            switch (riskCategory) {
+                case 'safe':
+                    great = 15;
+                    success = 75;
+                    fail = 10;
+                    break;
+                case 'orthodox':
+                    great = 25;
+                    success = 60;
+                    fail = 15;
+                    break;
+                case 'intrigue':
+                    great = 20;
+                    success = 50;
+                    fail = 30;
+                    break;
+                case 'defiance':
+                    great = 10;
+                    success = 35;
+                    fail = 55;
+                    break;
+                case 'reckless':
+                    great = 5;
+                    success = 20;
+                    fail = 75;
+                    break;
+                default:
+                    great = 25;
+                    success = 60;
+                    fail = 15;
+                    break;
+            }
+        }
+
+        // 呪いや大ダメージ（HP30以上損失）を伴う無謀・危険リスク補正
+        const effectText = `${baseChoice.effectDesc || ''}`;
+        const actionStr = (baseChoice.action || '').toString();
+        const hasCurse = effectText.includes('呪い') || actionStr.includes('curse_');
+        const hasHeavyDamage = /HPを?\s*(?:3[0-9]|[4-9][0-9])\s*失/.test(effectText) || /damagePlayer\((?:3[0-9]|[4-9][0-9])\)/.test(actionStr);
+        if (hasCurse || hasHeavyDamage) {
+            fail += 5;
+            success = Math.max(10, success - 5);
         }
 
         // 志士ボーナス（関連志士所持による加護）
@@ -1003,12 +1056,18 @@ class BakumatsuApp {
             }
         }
 
-        // 世論の追い風（自軍有利50%以上）
+        // 世論の追い風（自軍有利50%以上）または逆風（敵対陣営50%以上）
         const isPublicOpinionFavorable = (this.faction === 'tobaku' && this.publicOpinion >= 50) ||
                                          (this.faction === 'sabaku' && this.publicOpinion <= -50);
+        const isPublicOpinionAdverse = (this.faction === 'tobaku' && this.publicOpinion <= -50) ||
+                                       (this.faction === 'sabaku' && this.publicOpinion >= 50);
+
         if (isPublicOpinionFavorable) {
             great += 5;
             fail = Math.max(5, fail - 5);
+        } else if (isPublicOpinionAdverse) {
+            fail += 5;
+            success = Math.max(10, success - 5);
         }
 
         // 確率の合計を100%に正規化
@@ -1017,14 +1076,27 @@ class BakumatsuApp {
         fail = Math.max(5, Math.round((fail / total) * 100));
         success = 100 - great - fail;
 
+        // カテゴリ表示情報
+        const categoryMeta = {
+            safe: { label: "慎重・安全策", badgeClass: "badge-risk-safe" },
+            orthodox: { label: "史実正道", badgeClass: "badge-risk-orthodox" },
+            intrigue: { label: "謀略・周旋", badgeClass: "badge-risk-intrigue" },
+            defiance: { label: "歴史の抗い", badgeClass: "badge-risk-defiance" },
+            reckless: { label: "逆境・無謀決戦", badgeClass: "badge-risk-reckless" },
+            custom: { label: "史実の決断", badgeClass: "badge-risk-orthodox" }
+        }[riskCategory] || { label: "史実正道", badgeClass: "badge-risk-orthodox" };
+
         return {
             great,
             success,
             fail,
             totalSuccess: great + success,
             riskCategory,
+            categoryLabel: categoryMeta.label,
+            categoryBadgeClass: categoryMeta.badgeClass,
             hasShishiBonus,
-            isPublicOpinionFavorable
+            isPublicOpinionFavorable,
+            isPublicOpinionAdverse
         };
     }
 
