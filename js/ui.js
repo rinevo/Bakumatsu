@@ -1030,6 +1030,11 @@ class UIManager {
             const pipeBonusText = hasPipe ? '（志士の煙管により50%に強化）' : '（最大HPの35%）';
             healDesc.textContent = `HPを ${healAmt} 回復します。${pipeBonusText}`;
         }
+        const negotiateDesc = document.getElementById('rest-negotiate-desc');
+        if (negotiateDesc) {
+            const factionLabel = this.app.faction === 'tobaku' ? '倒幕派' : '佐幕派';
+            negotiateDesc.innerHTML = `列強介入メーターを <strong>-15%</strong> 抑制し、世論を${factionLabel}有利に <strong>10%</strong> 工作します。`;
+        }
     }
 
     // --- デッキ一覧モーダル ---

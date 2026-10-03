@@ -257,8 +257,18 @@ class ShopSystem {
     }
 
     restNegotiate() {
-        // 条約交渉・世論工作で列強介入メーターを下げる
+        // 条約交渉で列強介入メーターを鎮静化
         this.app.modifyImperialGauge(-15);
+
+        // 世論工作で自軍有利に世論を変化（討幕なら+10%、佐幕なら-10%）
+        const opinionDelta = this.app.faction === 'tobaku' ? 10 : -10;
+        this.app.modifyPublicOpinion(opinionDelta);
+
+        if (window.particleSystem && window.particleSystem.createFloatingText) {
+            const factionLabel = this.app.faction === 'tobaku' ? '倒幕支持 +10%' : '佐幕支持 +10%';
+            window.particleSystem.createFloatingText(`外交・世論工作！ 列強-15% / ${factionLabel}`, window.innerWidth / 2, window.innerHeight * 0.45, "#48bb78");
+        }
+
         window.soundSystem.playHyoshigi();
         this.leaveRestSite();
     }
