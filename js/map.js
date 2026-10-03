@@ -9,6 +9,8 @@ class MapSystem {
         this.currentAct = 1;
         this.currentFloor = 0;
         this.currentNodeId = null;
+        this.previousNodeId = null;
+        this.previousFloor = 0;
         this.nodes = [];
         this.connections = []; // [[fromId, toId]]
         this.visitedEventIds = [];
@@ -24,6 +26,8 @@ class MapSystem {
         this.currentAct = actNumber;
         this.currentFloor = 0;
         this.currentNodeId = null;
+        this.previousNodeId = null;
+        this.previousFloor = 0;
         this.nodes = [];
         this.connections = [];
 
@@ -386,6 +390,9 @@ class MapSystem {
             return;
         }
 
+        this.previousNodeId = this.currentNodeId;
+        this.previousFloor = this.currentFloor;
+
         this.currentNodeId = nodeId;
         this.currentFloor = node.floor;
         node.completed = true;
@@ -417,6 +424,17 @@ class MapSystem {
                 this.app.shop.openRestSite();
                 break;
         }
+    }
+
+    revertToPreviousNode() {
+        const currentNode = this.nodes.find(n => n.id === this.currentNodeId);
+        if (currentNode) {
+            currentNode.completed = false;
+        }
+        this.currentNodeId = this.previousNodeId;
+        this.currentFloor = (this.previousFloor !== undefined && this.previousFloor !== null)
+            ? this.previousFloor
+            : (this.currentNodeId ? (this.nodes.find(n => n.id === this.currentNodeId)?.floor || 0) : 0);
     }
 
     launchTreasure(node) {

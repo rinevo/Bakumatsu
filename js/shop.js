@@ -11,22 +11,49 @@ class ShopSystem {
         this.smuggleItem = null;
         this.healBasePrice = 60;
         this.healedInShop = false;
+        this.goldSpentInShop = 0; // 今回の来店で消費した資金額
     }
 
     openShop() {
-        // 商人・政商志士による来店利息ボーナス
-        if (this.app.hasShishi('iwazaki') || this.app.hasShishi('godai')) {
-            const merchantName = this.app.hasShishi('iwazaki') ? '岩崎弥太郎' : '五代友厚';
-            this.app.gold += 15;
-            if (this.app.ui && this.app.ui.showToast) {
-                this.app.ui.showToast(`💰【${merchantName}の政商手腕】軍資金の利息 +15両 を獲得！`, 'success');
+        this.goldSpentInShop = 0;
+
+        // 現在のマップノードを確認し、既に生成済みの在庫があれば復元してリロール（ガチャ）を防止
+        const currentNode = this.app.map.nodes.find(n => n.id === this.app.map.currentNodeId);
+        if (currentNode && currentNode.shopInventory) {
+            this.shopCards = currentNode.shopInventory.shopCards;
+            this.shopRelics = currentNode.shopInventory.shopRelics;
+            this.smuggleItem = currentNode.shopInventory.smuggleItem;
+            this.healedInShop = currentNode.shopInventory.healedInShop || false;
+        } else {
+            this.generateShopInventory();
+            if (currentNode) {
+                currentNode.shopInventory = {
+                    shopCards: this.shopCards,
+                    shopRelics: this.shopRelics,
+                    smuggleItem: this.smuggleItem,
+                    healedInShop: false
+                };
             }
         }
 
-        this.generateShopInventory();
         this.app.switchScreen('screen-shop');
         this.app.ui.renderShop();
         window.soundSystem.playCoin();
+    }
+
+    applyMerchantInterest() {
+        const currentNode = this.app.map.nodes.find(n => n.id === this.app.map.currentNodeId);
+        // このノードで既に利息受領済みの場合は多重獲得しない
+        if (currentNode && currentNode.interestClaimed) return;
+
+        if (this.app.hasShishi('iwazaki') || this.app.hasShishi('godai')) {
+            const merchantName = this.app.hasShishi('iwazaki') ? '岩崎弥太郎' : '五代友厚';
+            this.app.gold += 15;
+            if (currentNode) currentNode.interestClaimed = true;
+            if (this.app.ui && this.app.ui.showToast) {
+                this.app.ui.showToast(`💰【${merchantName}の政商手腕】軍資金取引の利息 +15両 を獲得！`, 'success');
+            }
+        }
     }
 
     generateShopInventory() {
@@ -112,7 +139,9 @@ class ShopSystem {
         }
 
         this.app.gold -= item.price;
+        this.goldSpentInShop += item.price;
         item.purchased = true;
+        this.applyMerchantInterest();
         this.app.addCardToDeck(item.cardId);
 
         window.soundSystem.playCoin();
@@ -131,7 +160,9 @@ class ShopSystem {
         }
 
         this.app.gold -= item.price;
+        this.goldSpentInShop += item.price;
         item.purchased = true;
+        this.applyMerchantInterest();
         this.app.obtainRelic(item.relicId);
 
         window.soundSystem.playCoin();
@@ -211,7 +242,13 @@ class ShopSystem {
         }
 
         this.app.gold -= price;
+        this.goldSpentInShop += price;
         this.healedInShop = true;
+        const currentNode = this.app.map.nodes.find(n => n.id === this.app.map.currentNodeId);
+        if (currentNode && currentNode.shopInventory) {
+            currentNode.shopInventory.healedInShop = true;
+        }
+        this.applyMerchantInterest();
         const healAmount = Math.max(1, Math.floor(this.app.maxHp * 0.30));
         this.app.healPlayer(healAmount);
 
@@ -225,6 +262,26 @@ class ShopSystem {
 
         this.app.ui.renderShop();
         if (this.app.saveRun) this.app.saveRun('shop');
+    }
+
+    leaveShop() {
+        if (this.goldSpentInShop > 0) {
+            // 資金を消費して購入完了したため、街道を進軍（次フロアへ）
+            if (this.app.ui && this.app.ui.showToast) {
+                this.app.ui.showToast("🛒 商人との取引を終え、街道を進みます。", "info");
+            }
+            this.app.returnToMap();
+        } else {
+            // 未購入（資金未消費）のため、元のマスに引き戻す
+            this.app.map.revertToPreviousNode();
+            if (window.soundSystem && window.soundSystem.playHyoshigi) {
+                window.soundSystem.playHyoshigi();
+            }
+            if (this.app.ui && this.app.ui.showToast) {
+                this.app.ui.showToast("↩️ 何も購入しなかったため、元の地点へ引き返しました。（戦場を避けて通過することはできません）", "warning");
+            }
+            this.app.returnToMap();
+        }
     }
 
     // --- 🍵 休息画面 ---

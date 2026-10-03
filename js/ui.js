@@ -1018,6 +1018,34 @@ class UIManager {
                 healBtn.disabled = (this.app.gold < healPrice);
             }
         }
+
+        // 離脱ボタン・警告ヒントの更新
+        this.updateShopLeaveButton();
+    }
+
+    updateShopLeaveButton() {
+        const btnLeaveShop = document.getElementById('btn-leave-shop');
+        const hint = document.getElementById('shop-leave-hint');
+        if (!btnLeaveShop) return;
+
+        const goldSpent = this.app.shop.goldSpentInShop || 0;
+        if (goldSpent > 0) {
+            btnLeaveShop.textContent = '店を後にする（街道へ進む）';
+            btnLeaveShop.classList.remove('btn-retreat');
+            btnLeaveShop.classList.add('btn-proceed');
+            if (hint) {
+                hint.textContent = '✅ 調達を完了しました。街道を進軍できます。';
+                hint.className = 'shop-leave-hint ready';
+            }
+        } else {
+            btnLeaveShop.textContent = '店を後にする（元のマスへ引き返す）';
+            btnLeaveShop.classList.add('btn-retreat');
+            btnLeaveShop.classList.remove('btn-proceed');
+            if (hint) {
+                hint.textContent = '⚠️ 何も購入しない場合、進軍できず元の地点へ引き返します。';
+                hint.className = 'shop-leave-hint warning';
+            }
+        }
     }
 
     // --- 休息画面描画 ---

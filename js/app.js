@@ -277,7 +277,7 @@ class BakumatsuApp {
         // ショップ退出ボタン
         const btnLeaveShop = document.getElementById('btn-leave-shop');
         if (btnLeaveShop) {
-            btnLeaveShop.addEventListener('click', () => this.returnToMap());
+            btnLeaveShop.addEventListener('click', () => this.shop.leaveShop());
         }
 
         // ショップ蘭方医の手当て（HP回復）ボタン
@@ -821,9 +821,14 @@ class BakumatsuApp {
                     currentAct: this.map.currentAct,
                     currentFloor: this.map.currentFloor,
                     currentNodeId: this.map.currentNodeId,
+                    previousNodeId: this.map.previousNodeId,
+                    previousFloor: this.map.previousFloor,
                     nodes: this.map.nodes,
                     connections: this.map.connections,
                     visitedEventIds: this.map.visitedEventIds || []
+                },
+                shop: {
+                    goldSpentInShop: this.shop.goldSpentInShop || 0
                 }
             };
             localStorage.setItem(BakumatsuApp.SAVE_KEY, JSON.stringify(saveData));
@@ -866,9 +871,18 @@ class BakumatsuApp {
                 this.map.currentAct = data.map.currentAct || 1;
                 this.map.currentFloor = data.map.currentFloor || 0;
                 this.map.currentNodeId = data.map.currentNodeId || null;
+                this.map.previousNodeId = data.map.previousNodeId !== undefined ? data.map.previousNodeId : null;
+                this.map.previousFloor = data.map.previousFloor !== undefined ? data.map.previousFloor : 0;
                 this.map.nodes = data.map.nodes || [];
                 this.map.connections = data.map.connections || [];
                 this.map.visitedEventIds = data.map.visitedEventIds || [];
+            }
+
+            // ショップ状態復元
+            if (data.shop) {
+                this.shop.goldSpentInShop = data.shop.goldSpentInShop || 0;
+            } else {
+                this.shop.goldSpentInShop = 0;
             }
 
             // 音声アンロック＆効果音
