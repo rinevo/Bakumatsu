@@ -2159,7 +2159,199 @@ const GAME_DATA = {
                 b.dealDamageToEnemy(7);
                 b.gainPlayerShield(8);
             }
-        }
+        },
+        "yamamoto_yae": {
+            id: "yamamoto_yae",
+            name: "山本八重：不抜の銃姫",
+            faction: "sabaku",
+            character: "yae",
+            type: "shishi",
+            subType: "samurai",
+            cost: 1,
+            attack: 9,
+            shield: 5,
+            desc: "敵に 9 ダメージ、防 5。手札の「兵器」カードの枚数×3 追加ダメージ。敵のシールドを 4 破壊。",
+            rarity: "rare",
+            onPlay: (b, self) => {
+                let bonus = 0;
+                if (b.hand) {
+                    bonus = b.hand.filter(c => c.type === 'equip').length * 3;
+                }
+                if (b.enemy && b.enemy.shield > 0) {
+                    b.enemy.shield = Math.max(0, b.enemy.shield - 4);
+                }
+                b.dealDamageToEnemy(9 + bonus);
+                b.gainPlayerShield(5);
+            }
+        },
+
+        // --- 1853-1864年期 追加志士カード（討幕2名、佐幕2名） ---
+        "fujita_toko": {
+            id: "fujita_toko",
+            name: "藤田東湖：回天の気概",
+            faction: "tobaku",
+            character: "toko",
+            type: "shishi",
+            subType: "leader",
+            cost: 2,
+            attack: 11,
+            shield: 9,
+            desc: "敵に 11 ダメージ、防 9。味方全体の攻撃力をこの戦闘中 +3。列強介入 -3%。",
+            rarity: "legendary",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(11);
+                b.gainPlayerShield(9);
+                b.applyPlayerBuff("strength", 3);
+                b.modifyImperialGauge(-3);
+            }
+        },
+        "hashimoto_sanai": {
+            id: "hashimoto_sanai",
+            name: "橋本左内：啓発の先見",
+            faction: "tobaku",
+            character: "sanai",
+            type: "shishi",
+            subType: "tactician",
+            cost: 1,
+            attack: 6,
+            shield: 8,
+            desc: "敵に 6 ダメージ、防 8。カードを2枚引く。敵に「脱力 2」を付与する。",
+            rarity: "rare",
+            killedBySabaku: true, // 安政の大獄で斬首
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(6);
+                b.gainPlayerShield(8);
+                b.drawCards(2);
+                b.applyStatusToEnemy("weak", 2);
+            }
+        },
+        "kawaji_toshiakira": {
+            id: "kawaji_toshiakira",
+            name: "川路聖謨：至誠の勘定",
+            faction: "sabaku",
+            character: "kawaji",
+            type: "shishi",
+            subType: "tactician",
+            cost: 1,
+            attack: 4,
+            shield: 13,
+            desc: "敵に 4 ダメージ、防 13。列強介入メーターを 5% 下げる。手札を1枚引く。",
+            rarity: "rare",
+            killedByTobaku: true, // 江戸開城に際し自刃
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(4);
+                b.gainPlayerShield(13);
+                b.modifyImperialGauge(-5);
+                b.drawCards(1);
+            }
+        },
+        "serizawa_kamo": {
+            id: "serizawa_kamo",
+            name: "芹沢鴨：豪剣の狂瀾",
+            faction: "sabaku",
+            character: "serizawa",
+            type: "shishi",
+            subType: "samurai",
+            cost: 2,
+            attack: 16,
+            shield: 4,
+            desc: "敵に 16 ダメージ、防 4。自軍HPを 4 消費するが、敵シールドを 6 破壊する。",
+            rarity: "rare",
+            killedBySabaku: true, // 新選組内部粛清により八木邸で暗殺
+            onPlay: (b, self) => {
+                if (b.enemy && b.enemy.shield > 0) {
+                    b.enemy.shield = Math.max(0, b.enemy.shield - 6);
+                }
+                b.dealDamageToEnemy(16);
+                b.gainPlayerShield(4);
+                b.damagePlayer(4);
+            }
+        },
+
+        // --- 1853-1864年期 追加志士カード第2弾（討幕2名、佐幕2名） ---
+        "shimazu_hisamitsu": {
+            id: "shimazu_hisamitsu",
+            name: "島津久光：率兵の国父",
+            faction: "tobaku",
+            character: "hisamitsu",
+            type: "shishi",
+            subType: "leader",
+            cost: 2,
+            attack: 8,
+            shield: 14,
+            desc: "敵に 8 ダメージ、防 14。味方全体の攻撃力をこの戦闘中 +3。軍資金 25両 獲得。",
+            rarity: "legendary",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(8);
+                b.gainPlayerShield(14);
+                b.applyPlayerBuff("strength", 3);
+                if (window.bakumatsuApp) window.bakumatsuApp.gold += 25;
+            }
+        },
+        "kawakami_gensai": {
+            id: "kawakami_gensai",
+            name: "河上彦斎：神速の居合",
+            faction: "tobaku",
+            character: "gensai",
+            type: "shishi",
+            subType: "samurai",
+            cost: 1,
+            attack: 14,
+            shield: 0,
+            desc: "敵に 14 ダメージ。敵シールドを 5 貫通。敵が「脆弱」状態なら追加 6 ダメージ。",
+            rarity: "rare",
+            killedBySabaku: true, // 明治初年に斬首刑死
+            onPlay: (b, self) => {
+                let dmg = 14;
+                if (b.enemy && b.enemy.vulnerable > 0) {
+                    dmg += 6;
+                }
+                if (b.enemy && b.enemy.shield > 0) {
+                    b.enemy.shield = Math.max(0, b.enemy.shield - 5);
+                }
+                b.dealDamageToEnemy(dmg);
+            }
+        },
+        "ando_nobumasa": {
+            id: "ando_nobumasa",
+            name: "安藤信正：公武合体の老中",
+            faction: "sabaku",
+            character: "ando",
+            type: "shishi",
+            subType: "tactician",
+            cost: 1,
+            attack: 4,
+            shield: 14,
+            desc: "敵に 4 ダメージ、防 14。列強介入メーターを 4% 下げる。手札を1枚引く。",
+            rarity: "rare",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(4);
+                b.gainPlayerShield(14);
+                b.modifyImperialGauge(-4);
+                b.drawCards(1);
+            }
+        },
+        "tsutsui_masanori": {
+            id: "tsutsui_masanori",
+            name: "筒井政憲：老練の談判",
+            faction: "sabaku",
+            character: "tsutsui",
+            type: "shishi",
+            subType: "tactician",
+            cost: 1,
+            attack: 5,
+            shield: 11,
+            desc: "敵に 5 ダメージ、防 11。敵の攻撃意図を 4 低下させる。列強介入 -3%。",
+            rarity: "uncommon",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(5);
+                b.gainPlayerShield(11);
+                if (b.enemy && b.enemy.intent) {
+                    b.enemy.intent.damage = Math.max(0, (b.enemy.intent.damage || 0) - 4);
+                }
+                b.modifyImperialGauge(-3);
+            }
+        },
     },
 
     // ==========================================
@@ -3875,6 +4067,970 @@ const GAME_DATA = {
                         app.addCardToDeck("omura_reform");
                         app.modifyImperialGauge(-4);
                         app.gold += 25;
+                    }
+                }
+            ]
+        },
+
+        // --- 1853-1864年期 追加歴史事件（14件） ---
+        {
+            id: "event_shimoda_putiatin_treaty",
+            act: 1,
+            importance: 2,
+            title: "日露通好条約、プチャーチンと川路聖謨の至誠",
+            desc: "嘉永七年、下田長楽寺。安政東海地震の津波でロシア軍艦ディアナ号が難破する中、勘定奉行・川路聖謨らは人道的な救助活動を指揮。至誠をもってロシア提督プチャーチンと折衝し、国境画定と開港を定めた『日露通好条約』に調印した。",
+            choices: [
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】川路聖謨の至誠の外交に随行し、北方警備と国境の談判を完遂する",
+                    effectDesc: "志士『川路聖謨：至誠の勘定』を獲得。列強介入 -5%、防 12 獲得。",
+                    faction: "sabaku",
+                    shishiBonus: {
+                        character: "kawaji",
+                        desc: "至誠の外交！列強介入をさらに 4% 鎮静化！",
+                        apply: (app) => {
+                            app.modifyImperialGauge(-4);
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("kawaji_toshiakira");
+                        app.modifyImperialGauge(-5);
+                        app.healPlayer(6);
+                    }
+                },
+                {
+                    opinionChange: -5,
+                    text: "【佐幕派】難破したロシア水兵のために戸田村で洋式帆船『ヘダ号』の建造を支援する",
+                    effectDesc: "志士『水野忠徳』を獲得。軍資金 25両 獲得、列強介入 -3%。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("mizuno_magistrate");
+                        app.gold += 25;
+                        app.modifyImperialGauge(-3);
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】露艦遭難の報を受け、北方警備と海防の機密情報を密かに収集する",
+                    effectDesc: "志士『佐久間象山』を獲得。次戦攻撃力 +4、軍資金 20両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("sakuma_gunnery");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                        app.gold += 20;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_fujita_toko_anzai",
+            act: 1,
+            importance: 2,
+            title: "回天詩史、藤田東湖と尊皇攘夷の熱気",
+            desc: "ペリー来航に揺れる水戸藩邸。徳川斉昭の腹心・藤田東湖が著した『正気歌』『回天詩史』は天下の尊皇攘夷志士たちを激しく鼓舞し、吉田松陰や西郷隆盛をはじめ幕末の志士たちの精神的指針となっていた。",
+            choices: [
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】東湖の書斎に参じ、尊皇攘夷の大義と回天の気概を胸に刻む",
+                    effectDesc: "志士『藤田東湖：回天の気概』を獲得。全軍士気が奮い立ち次回攻撃力 +5、世論討幕 8%。",
+                    faction: "tobaku",
+                    shishiBonus: {
+                        character: "toko",
+                        desc: "回天の気概！次戦開始時に味方攻撃力+4！",
+                        apply: (app) => {
+                            app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("fujita_toko");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】水戸学の教えを同志たちへ伝え、破約攘夷の連判を広げる",
+                    effectDesc: "志士『武田耕雲斎』を獲得。手札上限 +1、軍資金 20両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("takeda_kounsai");
+                        app.gold += 20;
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】水戸激派の過激化を警戒し、老中首座・阿部正弘の調停策を支える",
+                    effectDesc: "志士『阿部正弘』を獲得。防 12、列強介入 -4%。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("abe_defense");
+                        app.modifyImperialGauge(-4);
+                        app.healPlayer(8);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_boicho_treaty",
+            act: 1,
+            importance: 1,
+            title: "日蘭追加条約、長崎出島の通商改革",
+            desc: "安政四年十二月、長崎。幕府はオランダと日蘭追加条約を結び、二百余年続いた出島における貿易独占の撤廃と貿易自由化への一歩を踏み出した。近代造船技術や医学の導入が一層加速する。",
+            choices: [
+                {
+                    opinionChange: -5,
+                    text: "【佐幕派】オランダ通詞らと交渉し、最新式の海軍造船書と近代兵器を輸入する",
+                    effectDesc: "志士『木村芥舟』を獲得。兵器『新式ミニエ銃』を獲得、列強介入 -2%。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("kimura_navy");
+                        app.addCardToDeck("weapon_minie");
+                        app.modifyImperialGauge(-2);
+                    }
+                },
+                {
+                    opinionChange: 5,
+                    text: "【討幕派】出島を通じて西洋の近代医学と化学知識を取り入れ、洋式製薬を行う",
+                    effectDesc: "『和漢名薬・萬金丹』を獲得。HP を 20 回復し、軍資金 30両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("item_mankintan");
+                        app.healPlayer(20);
+                        app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "長崎会所の財政改革を推進し、貿易利潤を蓄財する",
+                    effectDesc: "軍資金 50両 獲得、HP を 6 回復。",
+                    action: (app) => {
+                        app.gold += 50;
+                        app.healPlayer(6);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_sanai_hitotsubashi_plot",
+            act: 1,
+            importance: 3,
+            title: "将軍継嗣問題、橋本左内と一橋派の密謀",
+            desc: "安政四年から五年、十三代将軍家定の病状悪化に伴い、英邁な一橋慶喜を推す「一橋派」と紀州慶福を推す「南紀派」が激突。福井藩士・橋本左内は西郷隆盛らと結び、朝廷と幕府を巻き込んだ一大擁立工作に奔走する。",
+            choices: [
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】左内と共に京・江戸を往復し、開明君主・慶喜擁立の密勅工作を進める",
+                    effectDesc: "志士『橋本左内：啓発の先見』を獲得。カードを2枚引く、軍資金 25両 獲得。",
+                    faction: "tobaku",
+                    shishiBonus: {
+                        character: "sanai",
+                        desc: "啓発の先見！次戦の手札上限+1、初期ドロー+1！",
+                        apply: (app) => {
+                            app.drawCardsBonus = (app.drawCardsBonus || 0) + 1;
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("hashimoto_sanai");
+                        app.gold += 25;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】薩摩藩の西郷隆盛と提携し、京都の近衛家・公卿勢力への働きかけを強める",
+                    effectDesc: "志士『西郷隆盛』を獲得。次回攻撃力 +5、HP 8 回復。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("saigo_jigen");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                        app.healPlayer(8);
+                    }
+                },
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】大老・井伊直弼の断行を支持し、血統重視の南紀派（徳川慶福）で幕府の統制を固める",
+                    effectDesc: "志士『井伊直弼』を獲得。防 15、軍資金 40両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("ii_naosuke");
+                        app.gold += 40;
+                        app.healPlayer(10);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_boshin_chokuji_edo",
+            act: 1,
+            importance: 3,
+            title: "戊午の密勅、水戸藩への直接降下と幕府震撼",
+            desc: "安政五年八月、孝明天皇は幕府の無勅許調印に激怒し、幕府を飛び越えて水戸藩へ直接『戊午の密勅』を下した。幕藩体制の根幹を揺るがす前代未聞の事態に、大老・井伊直弼は激怒し、安政の大獄の引き金が引かれる。",
+            choices: [
+                {
+                    opinionChange: 12,
+                    text: "【討幕派】密勅の趣旨を諸藩に伝達し、尊皇攘夷の全国的蜂起の機運を醸成する",
+                    effectDesc: "志士『武田耕雲斎』を獲得。世論討幕 12%、全軍攻撃力 +4。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("takeda_kounsai");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                    }
+                },
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】長州の松下村塾へ密勅の写しを送り、吉田松陰らと今後の行動を協議する",
+                    effectDesc: "志士『吉田松陰』を獲得。手札上限 +1、軍資金 20両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("yoshida_teaching");
+                        app.gold += 20;
+                    }
+                },
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】幕府の威信を守るため、密勅の返納を水戸藩に強く要求し統制を強化する",
+                    effectDesc: "志士『松平春嶽』を獲得。防 16、軍資金 35両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("shungaku_council");
+                        app.gold += 35;
+                        app.healPlayer(8);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_kurofune_kanrinmaru_voyage",
+            act: 1,
+            importance: 2,
+            title: "咸臨丸の快挙、勝海舟と福沢諭吉の太平洋横断",
+            desc: "万延元年正月、日米修好通商条約批准使節の護衛艦として、幕府軍艦『咸臨丸』が浦賀を出港。勝海舟を艦長格とし、ジョン万次郎や福沢諭吉らが乗艦。日本人初の手による太平洋横断を見事に成し遂げサンフランシスコへ到達した。",
+            choices: [
+                {
+                    opinionChange: -5,
+                    text: "【佐幕派】咸臨丸の航行を完遂し、サンフランシスコで最新の航海測量技術を習得する",
+                    effectDesc: "志士『ジョン万次郎』を獲得。列強介入 -5%、軍資金 35両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("john_manjiro");
+                        app.modifyImperialGauge(-5);
+                        app.gold += 35;
+                    }
+                },
+                {
+                    opinionChange: -5,
+                    text: "【佐幕派】勝海舟と共に米国の民主制度や造船所を視察し、大局の海防論を確立する",
+                    effectDesc: "志士『勝海舟』を獲得。防 12、手札を2枚引く。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("katsu_kaishu");
+                        app.healPlayer(8);
+                    }
+                },
+                {
+                    opinionChange: 5,
+                    text: "【討幕派】使節団から持ち帰られた世界地理・憲政制度の書物を極秘に入手して学ぶ",
+                    effectDesc: "志士『大隈重信』を獲得。軍資金 25両 獲得、文 1 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("okuma_modernization");
+                        app.gold += 25;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_tosa_kinnoto_formation",
+            act: 1,
+            importance: 2,
+            title: "土佐勤王党結成、武市半平太と盟約の血判",
+            desc: "文久元年八月、江戸築地土佐藩邸。武市半平太は坂本龍馬、吉村寅太郎、中岡慎太郎ら同志と血判の盟約を結び『土佐勤王党』を結成。一領具足の郷士身分から立ち上がり、一挙に二百名近い一大尊攘勢力へと急成長を遂げる。",
+            choices: [
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】血判盟約に署名し、武市半平太と共に土佐藩論の尊皇攘夷化を誓い合う",
+                    effectDesc: "志士『武市半平太：勤王の刃』を獲得。世論討幕 10%、次戦攻撃力 +5。",
+                    faction: "tobaku",
+                    shishiBonus: {
+                        character: "takechi",
+                        desc: "勤王の誓い！次戦攻撃力+4、列強介入-3%！",
+                        apply: (app) => {
+                            app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                            app.modifyImperialGauge(-3);
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("takechi_ideology");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】岡田以蔵ら腕利き志士を率いて京洛へ潜入し、天誅の刃で尊攘派の足場を固める",
+                    effectDesc: "志士『岡田以蔵』を獲得。敵に 15 ダメージを与える準備を整える。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("okada_izo");
+                        app.gold += 20;
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】土佐藩主・山内容堂の公武合体路線を支持し、過激な郷士派閥を牽制する",
+                    effectDesc: "志士『山内容堂』を獲得。防 14、軍資金 30両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("yodo_political_balance");
+                        app.gold += 30;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_azabu_heuskens_assassination",
+            act: 1,
+            importance: 1,
+            title: "ヒュースケン暗殺、赤羽橋の襲撃",
+            desc: "万延元年十二月、江戸麻布。米国公使館通訳ヒュースケンがプロイセン宿舎からの帰途、赤羽橋付近で薩摩尊攘派浪士らの襲撃を受け落命。各国公使館が横浜へ退去するなど、幕府の治安管理と外交関係に深刻な危機が訪れる。",
+            choices: [
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】攘夷の決行として襲撃を支援し、異国勢力の江戸駐留を動揺させる",
+                    effectDesc: "志士『平野国臣』を獲得。列強介入 +10% だが、世論討幕 8%上昇。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("hirano_kuniomi");
+                        app.modifyImperialGauge(10);
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】公使館警備を直ちに強化し、各国との全面衝突を回避すべく賠償交渉を行う",
+                    effectDesc: "志士『永井尚志』を獲得。軍資金 40両 を失うが、列強介入 -6%。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("nagai_retreat");
+                        app.gold = Math.max(0, app.gold - 40);
+                        app.modifyImperialGauge(-6);
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "江戸市中の警戒態勢を敷き、自軍の守りを固める",
+                    effectDesc: "防 12、HP を 10 回復する。",
+                    action: (app) => {
+                        app.healPlayer(10);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_tozenji_incident",
+            act: 1,
+            importance: 2,
+            title: "東禅寺事件、水戸浪士の英公使館急襲",
+            desc: "文久元年五月、高輪・東禅寺。イギリス仮公使館として使われていた寺院に水戸脱藩の有志ら14名が抜刀して討ち入る。公使オールコックは脱出したものの館員が負傷。幕府の警備責任を問われ、対英関係は一触即発の危機に陥る。",
+            choices: [
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】破約攘夷の義挙として水戸浪士の脱走路を援護する",
+                    effectDesc: "志士『相楽総三』を獲得。次戦攻撃力 +4、列強介入 +8%。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("sagara_souzou");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                        app.modifyImperialGauge(8);
+                    }
+                },
+                {
+                    opinionChange: -10,
+                    text: "【佐幕派】幕府警護隊として身を挺して公使館を守り、浪士らを鎮圧・捕縛する",
+                    effectDesc: "志士『高橋泥舟』を獲得。防 15、軍資金 30両 獲得、列強介入 -5%。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("takahashi_guard");
+                        app.gold += 30;
+                        app.modifyImperialGauge(-5);
+                    }
+                },
+                {
+                    opinionChange: -5,
+                    text: "【佐幕派】英国側と賠償交渉を進め、幕府の国際信義を辛うじて維持する",
+                    effectDesc: "軍資金 35両 消費、列強介入 -8%、HP 8 回復。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.gold = Math.max(0, app.gold - 35);
+                        app.modifyImperialGauge(-8);
+                        app.healPlayer(8);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_bunkyu_reform",
+            act: 1,
+            importance: 3,
+            title: "文久の改革、幕府職制改編と参勤交代の緩和",
+            desc: "文久二年閏八月、島津久光の率兵上洛と勅使大原重徳の江戸下向を受け、幕府は未曾有の制度改革を断行。一橋慶喜が将軍後見職、松平春嶽が政事総裁職、松平容保が京都守護職に就任し、参勤交代の義務を三年に一度に大幅緩和した。",
+            choices: [
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】政事総裁職・松平春嶽と共に幕府の近代軍制改革と公武合体政権を推進する",
+                    effectDesc: "志士『松平春嶽：公議の守り』を獲得。手札上限 +1、防 14 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("shungaku_council");
+                        app.healPlayer(10);
+                    }
+                },
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】会津藩主・松平容保の京都守護職拝命に同行し、治安維持の重責を担う",
+                    effectDesc: "志士『松平容保』を獲得。防 18、軍資金 30両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("aizu_shield");
+                        app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: 12,
+                    text: "【討幕派】参勤交代の緩和を利用して諸藩主の妻子を国許へ帰国させ、挙兵準備を加速する",
+                    effectDesc: "志士『桂小五郎』を獲得。次回攻撃力 +5、軍資金 40両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("katsura_shindo");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                        app.gold += 40;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_yoshida_toyo_assassination",
+            act: 1,
+            importance: 2,
+            title: "土佐追手門の暗殺、吉田東洋暗殺事件",
+            desc: "文久二年四月八日夜、高知城下・追手筋。藩政の全権を握り門閥打破・開明政策を推し進めていた参政・吉田東洋が、武市半平太率いる土佐勤王党の刺客（那須信吾ら）によって雨の夜道で刺殺された。土佐藩論は一気に尊皇攘夷へ傾く。",
+            choices: [
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】武市半平太の指示を受け、襲撃の退路を確保して勤王党の天下を掴む",
+                    effectDesc: "志士『武市半平太』を獲得。世論討幕 10%、次戦攻撃力 +5。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("takechi_ideology");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】刺客たちの逃亡を助け、長州の久坂玄瑞ら尊攘派との連絡路を開く",
+                    effectDesc: "志士『久坂玄瑞』を獲得。軍資金 25両 獲得、HP 8 回復。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("kusaka_revolt");
+                        app.gold += 25;
+                        app.healPlayer(8);
+                    }
+                },
+                {
+                    opinionChange: -10,
+                    text: "【佐幕派】東洋派の残党（後藤象二郎ら）を保護し、過激派の暴発を調査・糾問する",
+                    effectDesc: "志士『後藤象二郎』を獲得。防 12、軍資金 35両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("goto_political_drive");
+                        app.gold += 35;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_kamo_jinja_gyokou",
+            act: 1,
+            importance: 2,
+            title: "賀茂神社行幸、孝明天皇の攘夷親征祈願",
+            desc: "文久三年三月十一日、京都。孝明天皇は将軍・徳川家茂らを従え、230年ぶりとなる行幸を賀茂神社へ挙行。自ら攘夷の成就を祈願した。天皇と将軍が並び進む荘厳な隊列に京洛の市民は熱狂し、尊皇攘夷の熱気は最高潮に達する。",
+            choices: [
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】行幸の隊列に加わり、朝廷主導の破約攘夷断行を天下に宣言する",
+                    effectDesc: "志士『三条実美』を獲得。世論討幕 10%、全軍攻撃力 +4。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("sanjo_court");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                    }
+                },
+                {
+                    opinionChange: -10,
+                    text: "【佐幕派】将軍家茂の供奉列を完璧に警護し、徳川の威光と朝廷への恭順を示す",
+                    effectDesc: "志士『徳川慶喜』を獲得。防 16、軍資金 30両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("tokugawa_yoshinobu");
+                        app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "行幸警備の混乱に乗じ、京洛の治安維持網を再編成する",
+                    effectDesc: "HP を 15 回復し、シールド 10 獲得。",
+                    action: (app) => {
+                        app.healPlayer(15);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_roshigumi_departure",
+            act: 1,
+            importance: 2,
+            title: "浪士組の出立、清河八郎と壬生浪士の分岐",
+            desc: "文久三年二月、将軍家茂警護を名目に江戸小石川・伝通院で結成された『浪士組』二百余名が中山道を進軍して上洛。しかし首謀者・清河八郎は京都新徳寺で真の目的は討幕攘夷であると宣言。これに反対した近藤勇・芹沢鴨らは京都に残留し、のちの新選組の母体となった。",
+            choices: [
+                {
+                    opinionChange: -10,
+                    text: "【佐幕派】清河の策謀に猛反発し、芹沢鴨・近藤勇と共に京都に残留して会津藩に尽忠を誓う",
+                    effectDesc: "志士『芹沢鴨：豪剣の狂瀾』を獲得。剛剣の威圧で次戦攻撃力 +6、HP 8 消費。",
+                    faction: "sabaku",
+                    shishiBonus: {
+                        character: "serizawa",
+                        desc: "筆頭局長の狂瀾！次戦攻撃力+4、敵シールド4破壊！",
+                        apply: (app) => {
+                            app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("serizawa_kamo");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 6;
+                        app.damagePlayer(8);
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】近藤・土方ら試衛館派の統制を固め、壬生屯所で守護職の命を待つ",
+                    effectDesc: "志士『土方歳三』を獲得。防 12、軍資金 25両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("hijikata_fukucho");
+                        app.gold += 25;
+                    }
+                },
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】清河八郎の大胆不敵な策を支持し、江戸へ引き返して幕府瓦解の工作を画策する",
+                    effectDesc: "志士『清河八郎』を獲得。世論討幕 10%、軍資金 30両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("kiyokawa_leader");
+                        app.gold += 30;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_tennozan_maki_stand",
+            act: 1,
+            importance: 3,
+            title: "天王山の自刃、真木和泉と十七烈士の殉難",
+            desc: "元治元年七月、禁門の変に敗れた長州軍。久留米出身の尊王指導者・真木和泉は十七名の同志と共に天王山に籠城。追撃する会津・新選組の大軍を前に弾薬尽き果てるまで戦い抜き、最後は小屋に火を放ち全員潔く自刃・散華した。",
+            choices: [
+                {
+                    opinionChange: 12,
+                    text: "【討幕派】天王山の煙を見上げ、十七烈士の遺志を継いで討幕の復讐を誓う",
+                    effectDesc: "志士『真木和泉：尊王の檄文』を獲得。悲壮なる覚悟で次戦攻撃力 +6、世論討幕 12%。",
+                    faction: "tobaku",
+                    shishiBonus: {
+                        character: "maki",
+                        desc: "大義殉難の熱血！全軍の攻撃力+5！",
+                        apply: (app) => {
+                            app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("maki_revolt");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 6;
+                    }
+                },
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】山麓の追撃包囲網の隙を突き、生き残った長州兵や負傷者を安全に脱出させる",
+                    effectDesc: "志士『品川弥二郎』を獲得。HP を 12 回復し、軍資金 20両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("shinagawa_signal");
+                        app.healPlayer(12);
+                        app.gold += 20;
+                    }
+                },
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】会津藩・新選組部隊として天王山を完全制圧し、京洛の治安維持を完了する",
+                    effectDesc: "志士『斎藤一』を獲得。防 15、軍資金 40両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("saito_gato");
+                        app.gold += 40;
+                        app.healPlayer(8);
+                    }
+                }
+            ]
+        },
+
+        // --- 1853-1864年期 追加歴史事件第2弾（8件） ---
+        {
+            id: "event_daiba_construction",
+            act: 1,
+            importance: 2,
+            title: "品川台場の築造、江川太郎左衛門の海防陣",
+            desc: "嘉永六年八月、ペリー再来に備える江戸幕府。韮山代官・江川太郎左衛門の建議により、品川沖に海堡（砲台）を連続築造する空前の大工事『台場建設』が急ピッチで進められた。江戸湾防備の砲門が海を睨む。",
+            choices: [
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】台場砲台の築造指揮を補佐し、最新式反射炉鋳造カノン砲を配備する",
+                    effectDesc: "志士『阿部正弘』を獲得。防 15、列強介入 -4%、軍資金 25両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("abe_defense");
+                        app.healPlayer(8);
+                        app.modifyImperialGauge(-4);
+                        app.gold += 25;
+                    }
+                },
+                {
+                    opinionChange: -5,
+                    text: "【佐幕派】台場警備の旗本・幕府歩兵を統制し、海防の厳戒態勢を整える",
+                    effectDesc: "志士『筒井政憲：老練の談判』を獲得。防 12、手札上限 +1。",
+                    faction: "sabaku",
+                    shishiBonus: {
+                        character: "tsutsui",
+                        desc: "老練の海防陣！シールド 12 獲得！",
+                        apply: (app) => {
+                            app.healPlayer(10);
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("tsutsui_masanori");
+                        app.healPlayer(8);
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】沿岸砲台の構造と防備の弱点を偵察し、将来の海防自立の資とする",
+                    effectDesc: "志士『佐久間象山』を獲得。次戦攻撃力 +4、軍資金 20両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("sakuma_gunnery");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                        app.gold += 20;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_rus_japan_shimoda_talks",
+            act: 1,
+            importance: 2,
+            title: "下田の露日談判、筒井政憲とプチャーチンの儀礼",
+            desc: "嘉永七年十一月、下田。ロシア提督プチャーチンとの間で国境・通商を定める歴史的会談が開かれた。筆頭全権の老臣・筒井政憲は川路聖謨と共に堂々たる威厳と温厚な至誠でロシア使節に接し、互いの信頼を深めていく。",
+            choices: [
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】筒井政憲の重厚な談判を支え、北方国境を択捉島と得撫島の間と画定させる",
+                    effectDesc: "志士『筒井政憲：老練の談判』を獲得。列強介入 -5%、軍資金 30両 獲得。",
+                    faction: "sabaku",
+                    shishiBonus: {
+                        character: "tsutsui",
+                        desc: "老練の談判！列強介入をさらに 4% 鎮静化！",
+                        apply: (app) => {
+                            app.modifyImperialGauge(-4);
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("tsutsui_masanori");
+                        app.modifyImperialGauge(-5);
+                        app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】川路聖謨と共に実務交渉を詰め、下田・箱館・長崎の三港開港を取りまとめる",
+                    effectDesc: "志士『川路聖謨』を獲得。防 14、列強介入 -4%。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("kawaji_toshiakira");
+                        app.modifyImperialGauge(-4);
+                        app.healPlayer(8);
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】幕府の条約外交の全貌を監視し、通商条項がもたらす国論動揺を分析する",
+                    effectDesc: "志士『橋本左内』を獲得。カードを2枚引く、軍資金 25両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("hashimoto_sanai");
+                        app.gold += 25;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_tekijuku_flourish",
+            act: 1,
+            importance: 1,
+            title: "大坂適塾の隆盛、緒方洪庵と俊英たちの蘭学",
+            desc: "安政年間、大坂船場・適塾。蘭医・緒方洪庵の私塾には福沢諭吉、大村益次郎、橋本左内ら全国から俊英が集い、夜を徹して原書を読み競い合っていた。この小さな町塾こそが、日本の近代化を担う巨星たちの揺籃であった。",
+            choices: [
+                {
+                    opinionChange: 5,
+                    text: "【討幕派】適塾の洋学教育に学び、西洋兵学・解剖学の最新知識を吸収する",
+                    effectDesc: "志士『大村益次郎』を獲得。文 1 獲得、HP を 10 回復する。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("omura_reform");
+                        app.healPlayer(10);
+                    }
+                },
+                {
+                    opinionChange: 5,
+                    text: "【討幕派】福井藩の秀才・橋本左内ら同志と交わり、天下国家の経綸を熱く論じ合う",
+                    effectDesc: "志士『橋本左内』を獲得。手札上限 +1、軍資金 20両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("hashimoto_sanai");
+                        app.gold += 20;
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "適塾調合の特製牛痘種と蘭方薬を入手し、陣中の防疫・治療に備える",
+                    effectDesc: "『和漢名薬・萬金丹』を獲得。HP を 25 回復する。",
+                    action: (app) => {
+                        app.addCardToDeck("item_mankintan");
+                        app.healPlayer(25);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_kazunomiya_kobu_gattai",
+            act: 1,
+            importance: 3,
+            title: "和宮降嫁、安藤信正の公武合体大計",
+            desc: "文久元年十月、孝明天皇の皇妹・和宮が十四代将軍家茂の御台所として江戸へ御降嫁。大老・井伊直弼没後の幕政を担う老中・安藤信正らは、幕府と朝廷を融和させる『公武合体』により難局を打開せんとするが、過激尊攘派の怒りを買う。",
+            choices: [
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】老中・安藤信正の公武合体路線を固守し、朝廷と幕府の絆で国論を統一する",
+                    effectDesc: "志士『安藤信正：公武合体の老中』を獲得。防 16、列強介入 -5%、世論佐幕 12%。",
+                    faction: "sabaku",
+                    shishiBonus: {
+                        character: "ando",
+                        desc: "公武合体の結束！防 15、軍資金 35両 獲得！",
+                        apply: (app) => {
+                            app.healPlayer(12);
+                            app.gold += 35;
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("ando_nobumasa");
+                        app.modifyImperialGauge(-5);
+                        app.healPlayer(8);
+                    }
+                },
+                {
+                    opinionChange: -10,
+                    text: "【佐幕派】中山道の御降嫁行列を厳重に警護し、不逞浪士の妨害を未然に防ぐ",
+                    effectDesc: "志士『松平春嶽』を獲得。防 14、軍資金 30両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("shungaku_council");
+                        app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: 12,
+                    text: "【討幕派】朝廷を傀儡化する幕府の謀略と糾弾し、水戸浪士らと共に坂下門外へ結集する",
+                    effectDesc: "志士『武田耕雲斎』を獲得。世論討幕 12%、全軍攻撃力 +5。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("takeda_kounsai");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_hisamitsu_joraku_seichugumi",
+            act: 1,
+            importance: 3,
+            title: "島津久光の上洛、千名の率兵と誠忠組の動天",
+            desc: "文久二年三月、薩摩藩主の父・島津久光が千余名の精鋭兵を率いて鹿児島を発進。京都へ進軍した。大久保利通ら誠忠組を従え、幕政改革の勅使護衛を掲げて天下の政治の中枢へ躍り出る。この威勢に京洛の諸大名は息を呑んだ。",
+            choices: [
+                {
+                    opinionChange: 12,
+                    text: "【討幕派】島津久光の薩摩軍列に合流し、率兵上洛の威勢で京都の主導権を握る",
+                    effectDesc: "志士『島津久光：率兵の国父』を獲得。全軍攻撃力 +5、軍資金 35両 獲得、世論討幕 12%。",
+                    faction: "tobaku",
+                    shishiBonus: {
+                        character: "hisamitsu",
+                        desc: "国父の示現！味方剛力+4、軍資金 30両 獲得！",
+                        apply: (app) => {
+                            app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                            app.gold += 30;
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("shimazu_hisamitsu");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                        app.gold += 35;
+                    }
+                },
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】大久保利通と共に朝廷公卿との周旋を進め、勅使下向の工作をまとめる",
+                    effectDesc: "志士『大久保利通』を獲得。防 12、手札を2枚引く。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("okubo_strategy");
+                        app.healPlayer(8);
+                    }
+                },
+                {
+                    opinionChange: -10,
+                    text: "【佐幕派】薩摩の大軍上洛を警戒し、京都所司代・京都見廻役の警備態勢を整える",
+                    effectDesc: "志士『松平容保』を獲得。防 16、軍資金 30両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("aizu_shield");
+                        app.gold += 30;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_choshu_koto_policy",
+            act: 1,
+            importance: 2,
+            title: "長州藩の航海遠略策、長井雅楽と破約攘夷の激突",
+            desc: "文久元年、長州藩直講・長井雅楽が公武合体と開国進取を唱える『航海遠略策』を幕府・朝廷に上奏。一時は藩論の主流となるも、久坂玄瑞や桂小五郎ら松陰門下の尊攘派が猛烈に反発。藩論を巡る命がけの権力闘争が勃発する。",
+            choices: [
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】久坂玄瑞・桂小五郎を支持して航海遠略策を覆し、破約攘夷を長州藩是とする",
+                    effectDesc: "志士『久坂玄瑞：禁門の進撃』を獲得。次戦攻撃力 +5、世論討幕 10%。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("kusaka_revolt");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】周布政之助と共に藩政改革を進め、松下村塾系の若手志士を要職に抜擢する",
+                    effectDesc: "志士『周布政之助』を獲得。防 10、軍資金 25両 獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("sufu_reform");
+                        app.gold += 25;
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】長井雅楽の穏健開国策を幕府側から後援し、過激攘夷派の台頭を抑え込む",
+                    effectDesc: "志士『永井尚志』を獲得。防 12、軍資金 35両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("nagai_retreat");
+                        app.gold += 35;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_kobe_kaigun_sorenjo_founding",
+            act: 1,
+            importance: 2,
+            title: "神戸海軍操練所の創設、勝海舟と諸藩脱藩志士の集結",
+            desc: "文久三年四月、勝海舟の建白により神戸村に海軍操練所と私塾が設立された。幕府直参のみならず、坂本龍馬、陸奥宗光、岡田以蔵ら全国の脱藩志士が身分を問わず集結。黒船に対峙する近代的日本海軍の夢がここに始まった。",
+            choices: [
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】坂本龍馬と共に操練所の塾頭として諸藩の志士を束ね、海運の夢を育む",
+                    effectDesc: "志士『坂本龍馬：海援隊の采配』を獲得。カードを2枚引く、列強介入 -3%。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("ryoma_kaiwentai");
+                        app.modifyImperialGauge(-3);
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】軍艦奉行・勝海舟の近代海軍構想を財政的に支援し、幕府艦隊を強化する",
+                    effectDesc: "志士『勝海舟』を獲得。防 14、軍資金 30両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("katsu_kaishu");
+                        app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "操練所で蒸気機関の操縦術と最新測量術を学び、自軍の技術力を高める",
+                    effectDesc: "手札上限 +1、最大HP +3、HP を 12 回復。",
+                    action: (app) => {
+                        app.maxHp += 3;
+                        app.healPlayer(12);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_shimonoseki_bombardment_four_nations",
+            act: 1,
+            importance: 3,
+            title: "下関四カ国連合艦隊砲撃、長州の完敗と開国への転換",
+            desc: "元治元年八月、英・仏・米・蘭の軍艦17隻が下関海峡へ来航。下関の長州砲台へ猛烈な艦砲射撃を浴びせ、陸戦隊を上陸させて占領した。高杉晋作が講和使節として乗り込み、賠償交渉を乗り切る中、長州は攘夷の不可能を悟り開国・倒幕へと急転換する。",
+            choices: [
+                {
+                    opinionChange: 12,
+                    text: "【討幕派】神速の居合で前線突撃を敢行し、河上彦斎らと共に上陸部隊へ奇襲を仕掛ける",
+                    effectDesc: "志士『河上彦斎：神速の居合』を獲得。敵に大ダメージを与える準備を整える。HP 24 消費、次戦攻撃力 +6。",
+                    faction: "tobaku",
+                    shishiBonus: {
+                        character: "gensai",
+                        desc: "神速の抜刀！次戦攻撃力+5、敵シールド全破壊！",
+                        apply: (app) => {
+                            app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("kawakami_gensai");
+                        app.damagePlayer(24);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 6;
+                    }
+                },
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】高杉晋作・伊藤博文・井上馨の講和交渉を支え、領土割譲要求を完全阻止する",
+                    effectDesc: "志士『高杉晋作』を獲得。軍資金 30両 獲得、列強介入 -5%。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("takasugi_kiheitai");
+                        app.gold += 30;
+                        app.modifyImperialGauge(-5);
+                    }
+                },
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】長州の攘夷暴発の壊滅を確認し、第一次長州征討の幕府進軍令を発する",
+                    effectDesc: "志士『小笠原長行』を獲得。防 16、軍資金 40両 獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("ogasawara_minister");
+                        app.gold += 40;
+                        app.healPlayer(10);
                     }
                 }
             ]
@@ -9961,6 +11117,56 @@ const GAME_DATA = {
                     }
                 }
             ]
+        },
+        {
+            id: "event_yae_spencer",
+            act: 3,
+            importance: 2,
+            title: "鶴ヶ城の銃姫、山本八重のスペンサー銃",
+            desc: "慶応四年八月、砲煙渦巻く会津鶴ヶ城。男装に身を包み断髪した山本八重が、当時最新鋭の七連発スペンサー銃を携えて本丸の城壁に立った。夜襲の敵兵へ向け、正確無比の連射が轟く。",
+            choices: [
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】八重のスペンサー銃の乱射に加勢し、夜襲の敵兵を狙撃して本丸を守り抜く",
+                    effectDesc: "志士『山本八重：不抜の銃姫』を獲得。激しい銃撃戦で HP 26 ダメージを受けるが、次回攻撃力 +5、世論佐幕 8%。",
+                    faction: "sabaku",
+                    shishiBonus: {
+                        character: "yae",
+                        desc: "正確無比の照準！被ダメージを半減し、次戦攻撃力+3！",
+                        apply: (app) => {
+                            app.healPlayer(13);
+                            app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("yamamoto_yae");
+                        app.damagePlayer(26);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】兄・覚馬の洋学知識を活かして弾薬調合を指揮し、城内の兵站を維持する",
+                    effectDesc: "志士『山本覚馬』を獲得。HP を 8 回復し、軍資金 30両 を獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("yamamoto_research");
+                        app.healPlayer(8);
+                        app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】城壁からの驚異的な連射砲火を警戒し、アームストロング砲陣地から牽制射撃を加える",
+                    effectDesc: "志士『山田顕義』を獲得。『アームストロング砲』をデッキに加え、軍資金 25両 を獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("yamada_modern_army");
+                        app.addCardToDeck("weapon_armstrong");
+                        app.gold += 25;
+                    }
+                }
+            ]
         }
     ],
 
@@ -10177,6 +11383,95 @@ const GAME_DATA = {
         apply: (b) => {
             b.dealDamageToEnemy(12);
             b.applyStatusToEnemy("bleed", 3);
+        }
+    },
+
+    {
+        id: "combo_hisamitsu_saigo",
+        chars: ["hisamitsu", "saigo"],
+        title: "【薩摩の国父と巨魁・示現の威風！】",
+        desc: "敵に 24 ダメージ、防 12、軍資金 25両 獲得。",
+        apply: (b) => {
+            b.dealDamageToEnemy(24);
+            b.gainPlayerShield(12);
+            if (window.bakumatsuApp) window.bakumatsuApp.gold += 25;
+        }
+    },
+    {
+        id: "combo_hisamitsu_nariakira",
+        chars: ["hisamitsu", "nariakira"],
+        title: "【島津の血脈・集成と率兵！】",
+        desc: "防 18、文 +1、手札の全カードのコスト -1（次ターン）。",
+        apply: (b) => {
+            b.gainPlayerShield(18);
+            b.player.energy = (b.player.energy || 0) + 1;
+        }
+    },
+    {
+        id: "combo_gensai_sakuma",
+        chars: ["gensai", "sakuma"],
+        title: "【開国の碩学と人斬り・運命の白刃！】",
+        desc: "敵に 26 ダメージ、敵シールド全破壊。",
+        apply: (b) => {
+            if (b.enemy) b.enemy.shield = 0;
+            b.dealDamageToEnemy(26);
+        }
+    },
+    {
+        id: "combo_gensai_izo",
+        chars: ["gensai", "izo"],
+        title: "【幕末二大凶刃・神速と天誅！】",
+        desc: "敵に 22 ダメージ、敵に「流血 4」「脆弱 2」付与。",
+        apply: (b) => {
+            b.dealDamageToEnemy(22);
+            b.applyStatusToEnemy("bleed", 4);
+            b.applyStatusToEnemy("vulnerable", 2);
+        }
+    },
+    {
+        id: "combo_ando_ii",
+        chars: ["ando", "ii_naosuke"],
+        title: "【幕閣の執政・大老と老中！】",
+        desc: "防 22、敵の攻撃意図を半減、世論佐幕 5%。",
+        apply: (b) => {
+            b.gainPlayerShield(22);
+            if (b.enemy && b.enemy.intent) {
+                b.enemy.intent.damage = Math.floor((b.enemy.intent.damage || 0) / 2);
+            }
+            b.modifyPublicOpinion(-5);
+        }
+    },
+    {
+        id: "combo_ando_shungaku",
+        chars: ["ando", "shungaku"],
+        title: "【公武合体大計・幕政再建の策！】",
+        desc: "防 18、列強介入 -5%、カードを2枚引く。",
+        apply: (b) => {
+            b.gainPlayerShield(18);
+            b.modifyImperialGauge(-5);
+            b.drawCards(2);
+        }
+    },
+    {
+        id: "combo_tsutsui_kawaji",
+        chars: ["tsutsui", "kawaji"],
+        title: "【下田条約全権・至誠の二老臣！】",
+        desc: "防 20、文 +1、列強介入 -6%。",
+        apply: (b) => {
+            b.gainPlayerShield(20);
+            b.player.energy = (b.player.energy || 0) + 1;
+            b.modifyImperialGauge(-6);
+        }
+    },
+    {
+        id: "combo_tsutsui_mizuno",
+        chars: ["tsutsui", "mizuno"],
+        title: "【幕府老臣と敏腕奉行・外政の経綸！】",
+        desc: "敵に 12 ダメージ、防 15、カードを1枚引く。",
+        apply: (b) => {
+            b.dealDamageToEnemy(12);
+            b.gainPlayerShield(15);
+            b.drawCards(1);
         }
     },
     {
@@ -12406,15 +13701,152 @@ const GAME_DATA = {
             b.dealDamageToEnemy(22);
             b.applyStatusToEnemy("vulnerable", 2);
         }
-    }
+    },
+    {
+        id: "combo_yae_kakuma",
+        chars: ["yae", "yamamoto"],
+        title: "【山本兄妹・洋学と連発銃！】",
+        desc: "敵に 18 ダメージ、防 10、列強介入 -3%。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            b.gainPlayerShield(10);
+            b.modifyImperialGauge(-3);
+        }
+    },
+    {
+        id: "combo_yae_takeko",
+        chars: ["yae", "takeko"],
+        title: "【会津二藍・薙刀と連発銃！】",
+        desc: "敵に 20 ダメージ、敵シールド全破壊。",
+        apply: (b) => {
+            b.dealDamageToEnemy(20);
+            if (b.enemy) b.enemy.shield = 0;
+        }
+    },
+
+    {
+        id: "combo_toko_takeda",
+        chars: ["toko", "takeda_kounsai"],
+        title: "【水戸両雄・回天の義旗！】",
+        desc: "敵に 22 ダメージ、味方剛力 +3、世論討幕 5%。",
+        apply: (b) => {
+            b.dealDamageToEnemy(22);
+            b.applyPlayerBuff("strength", 3);
+            b.modifyPublicOpinion(5);
+        }
+    },
+    {
+        id: "combo_toko_shoin",
+        chars: ["toko", "yoshida"],
+        title: "【志士覚醒・正気の系譜！】",
+        desc: "防 14、文 +1、カードを2枚引く。",
+        apply: (b) => {
+            b.gainPlayerShield(14);
+            b.player.energy = (b.player.energy || 0) + 1;
+            b.drawCards(2);
+        }
+    },
+    {
+        id: "combo_sanai_shungaku",
+        chars: ["sanai", "shungaku"],
+        title: "【越前名君と俊英・啓発の政道！】",
+        desc: "防 18、敵脱力 2、手札上限 +1。",
+        apply: (b) => {
+            b.gainPlayerShield(18);
+            b.applyStatusToEnemy("weak", 2);
+            b.drawCards(1);
+        }
+    },
+    {
+        id: "combo_sanai_saigo",
+        chars: ["sanai", "saigo"],
+        title: "【一橋派密契・天下の奔走！】",
+        desc: "敵に 20 ダメージ、敵脆弱 2、軍資金 25両 獲得。",
+        apply: (b) => {
+            b.dealDamageToEnemy(20);
+            b.applyStatusToEnemy("vulnerable", 2);
+            if (window.bakumatsuApp) window.bakumatsuApp.gold += 25;
+        }
+    },
+    {
+        id: "combo_kawaji_mizuno",
+        chars: ["kawaji", "mizuno"],
+        title: "【安政の実務・至誠の勘定！】",
+        desc: "防 16、列強介入 -6%、カードを1枚引く。",
+        apply: (b) => {
+            b.gainPlayerShield(16);
+            b.modifyImperialGauge(-6);
+            b.drawCards(1);
+        }
+    },
+    {
+        id: "combo_kawaji_abe",
+        chars: ["kawaji", "abe"],
+        title: "【老中首座と名奉行・国難の経綸！】",
+        desc: "防 20、文 +1、列強介入 -5%。",
+        apply: (b) => {
+            b.gainPlayerShield(20);
+            b.player.energy = (b.player.energy || 0) + 1;
+            b.modifyImperialGauge(-5);
+        }
+    },
+    {
+        id: "combo_serizawa_kondo",
+        chars: ["serizawa", "kondo"],
+        title: "【壬生浪士組・両局長の豪剣！】",
+        desc: "敵に 24 ダメージ、敵シールド 8 破壊。",
+        apply: (b) => {
+            if (b.enemy && b.enemy.shield > 0) {
+                b.enemy.shield = Math.max(0, b.enemy.shield - 8);
+            }
+            b.dealDamageToEnemy(24);
+        }
+    },
+    {
+        id: "combo_serizawa_kiyokawa",
+        chars: ["serizawa", "kiyokawa"],
+        title: "【浪士組上洛・京洛の破乱！】",
+        desc: "敵に 18 ダメージ、防 10、敵に「流血 3」付与。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            b.gainPlayerShield(10);
+            b.applyStatusToEnemy("bleed", 3);
+        }
+    },
 ]
 };
 
 // ==========================================
-// 全139件 歴史事件の史実メタデータ定義
+// 全140件 歴史事件の史実メタデータ定義
 // （発生年、月、表示期間、マップ用短縮タイトル）
 // ==========================================
 GAME_DATA.eventMeta = {
+
+    // 1853-1864年期 追加歴史事件メタデータ第2弾（8件）
+    "event_daiba_construction": { year: 1853, month: 8, period: "1853年8月", shortTitle: "品川台場築造" },
+    "event_rus_japan_shimoda_talks": { year: 1854, month: 11, period: "1854年11月", shortTitle: "下田露日談判" },
+    "event_tekijuku_flourish": { year: 1856, month: 5, period: "1856年5月", shortTitle: "大坂適塾隆盛" },
+    "event_kazunomiya_kobu_gattai": { year: 1861, month: 10, period: "1861年10月", shortTitle: "和宮降嫁" },
+    "event_hisamitsu_joraku_seichugumi": { year: 1862, month: 3, period: "1862年3月", shortTitle: "島津久光上洛" },
+    "event_choshu_koto_policy": { year: 1861, month: 4, period: "1861年4月", shortTitle: "航海遠略策" },
+    "event_kobe_kaigun_sorenjo_founding": { year: 1863, month: 4, period: "1863年4月", shortTitle: "神戸操練所創設" },
+    "event_shimonoseki_bombardment_four_nations": { year: 1864, month: 8, period: "1864年8月", shortTitle: "下関四カ国砲撃" },
+
+    // 1853-1864年期 追加歴史事件メタデータ（14件）
+    "event_shimoda_putiatin_treaty": { year: 1854, month: 12, period: "1854年12月", shortTitle: "日露通好条約" },
+    "event_fujita_toko_anzai": { year: 1855, month: 2, period: "1855年2月", shortTitle: "回天詩史" },
+    "event_boicho_treaty": { year: 1857, month: 12, period: "1857年12月", shortTitle: "日蘭追加条約" },
+    "event_sanai_hitotsubashi_plot": { year: 1858, month: 3, period: "1858年3月", shortTitle: "一橋派密謀" },
+    "event_boshin_chokuji_edo": { year: 1858, month: 8, period: "1858年8月", shortTitle: "戊午の密勅" },
+    "event_kurofune_kanrinmaru_voyage": { year: 1860, month: 1, period: "1860年1月", shortTitle: "咸臨丸横断" },
+    "event_tosa_kinnoto_formation": { year: 1861, month: 8, period: "1861年8月", shortTitle: "土佐勤王党" },
+    "event_azabu_heuskens_assassination": { year: 1861, month: 12, period: "1861年12月", shortTitle: "ヒュースケン暗殺" },
+    "event_tozenji_incident": { year: 1861, month: 5, period: "1861年5月", shortTitle: "東禅寺事件" },
+    "event_bunkyu_reform": { year: 1862, month: 8, period: "1862年8月", shortTitle: "文久の改革" },
+    "event_yoshida_toyo_assassination": { year: 1862, month: 4, period: "1862年4月", shortTitle: "吉田東洋暗殺" },
+    "event_kamo_jinja_gyokou": { year: 1863, month: 3, period: "1863年3月", shortTitle: "賀茂神社行幸" },
+    "event_roshigumi_departure": { year: 1863, month: 2, period: "1863年2月", shortTitle: "浪士組出立" },
+    "event_tennozan_maki_stand": { year: 1864, month: 7, period: "1864年7月", shortTitle: "天王山自刃" },
     // 新規追加歴史事件メタデータ（8件）
     "event_shuseikan_project": { year: 1851, month: 4, period: "1851年4月", shortTitle: "集成館事業" },
     "event_manjiro_return": { year: 1851, month: 10, period: "1851年10月", shortTitle: "万次郎帰航" },
@@ -12424,6 +13856,7 @@ GAME_DATA.eventMeta = {
     "event_yoshinobu_kyoujun": { year: 1868, month: 2, period: "1868年2月", shortTitle: "慶喜公恭順" },
     "event_dajokan_satsu": { year: 1868, month: 5, period: "1868年5月", shortTitle: "太政官札" },
     "event_aizu_nadeshiko": { year: 1868, month: 8, period: "1868年8月", shortTitle: "会津娘子隊" },
+    "event_yae_spencer": { year: 1868, month: 8, period: "1868年8月", shortTitle: "八重スペンサー銃" },
     "event_sakuma_assassination": { year: 1864, month: 7, period: "1864年7月", shortTitle: "佐久間象山暗殺" },
     "event_sannan_seppuku": { year: 1865, month: 2, period: "1865年2月", shortTitle: "山南敬助の切腹" },
     "event_izo_execution": { year: 1865, month: 5, period: "1865年5月", shortTitle: "土佐勤王党の獄" },
@@ -13282,7 +14715,18 @@ GAME_DATA.shishiBios = {
     "tokugawa_yoshinobu": "江戸幕府第15代征夷大将軍（徳川慶喜）。水戸徳川家出身の一橋家当主。卓越した知謀で国難に立ち向かい、土佐藩の建白を容れて「大政奉還」を決断。鳥羽・伏見の戦い後は主戦論を退けて自ら上野寛永寺・水戸で謹慎・恭順を徹底し、江戸無血開城と日本の内乱終息を導いた最後の将軍。",
     "nakano_takeko": "会津藩士の娘。江戸三大道場・玄武館で薙刀・撃剣・書道を修めた才色兼備の女剣士。戊辰戦争の会津城下戦において武家の女性たちを率いて自発的に「娘子隊」を結成。白装束に薙刀を手に新政府軍の銃列へ決死の突撃を敢行し、柳橋の激闘にて銃弾を受け21歳の若さで散華した。",
     "iwase_tadanari": "江戸幕府旗本・外国奉行・目付。俊才をもって知られ、ペリー来航後の外交を一手に担う。初代米国総領事ハリスと粘り強い交渉を展開して日米修好通商条約の条文を起草、「条約の理財」と称された。安政の五カ国条約を主導したが、将軍継嗣問題で井伊直弼に疎まれ安政の大獄で失脚・蟄居となった。",
-    "hattori_takeo": "播磨赤穂出身の新選組撃剣師範・柔術師範。二刀流の達人として恐れられた。伊東甲子太郎らとともに新選組を離脱して御陵衛士（高台寺党）を結成。油小路の変において伊東の遺体を収容に訪れ新選組の伏兵と激突。背中に民家の塀を背負い、多勢の隊士を相手に孤軍奮戦して壮烈な最期を遂げた。"
+    "hattori_takeo": "播磨赤穂出身の新選組撃剣師範・柔術師範。二刀流の達人として恐れられた。伊東甲子太郎らとともに新選組を離脱して御陵衛士（高台寺党）を結成。油小路の変において伊東の遺体を収容に訪れ新選組の伏兵と激突。背中に民家の塀を背負い、多勢の隊士を相手に孤軍奮戦して壮烈な最期を遂げた。",
+    "yamamoto_yae": "会津藩砲術師範・山本権八の娘で山本覚馬の妹。会津戦争に際して断髪男装し、兄から贈られた最新鋭の七連発スペンサー銃を手に鶴ヶ城に籠城。夜襲に際して自ら銃撃戦を指揮して新政府軍を撃退、「幕末のジャンヌ・ダルク」と称された。維新後は京都へ移り、新島襄と結婚して同志社英学校（現・同志社大学）の創立を支えた。日清・日露戦争では篤志看護婦として従軍し、女性として初となる叙勲を受けた。",
+
+    "fujita_toko": "水戸藩主・徳川斉昭の腹心として藩政改革を牽引した碩学。『正気歌』『回天詩史』を著して尊皇攘夷思想を体系化し、吉田松陰や西郷隆盛ら幕末志士に絶大な影響を与えた。安政江戸地震において母を助け出そうとして圧死し、志半ばで世を去った。",
+    "hashimoto_sanai": "越前福井藩士・蘭方医。若くして『啓発録』を著し、藩主・松平春嶽の側近として藩政改革を推進。将軍継嗣問題では一橋慶喜の擁立を企て西郷隆盛らと奔走した。開国進取と殖産興業を唱えた大器であったが、大老・井伊直弼による安政の大獄で捕縛され26歳で刑死した。",
+    "kawaji_toshiakira": "江戸幕府勘定奉行。三河国出身。卓越した行政手腕を買われ、ペリー来航時には海岸防禦御用掛、日露交渉では幕府全権として下田でロシア提督プチャーチンと交渉し『日露通好条約』を締結。至誠を尽くした人格はロシア側からも高く賞賛された。江戸城開城に際して自刃を遂げた。",
+    "serizawa_kamo": "水戸郷士出身で新選組筆頭局長。神道無念流免許皆伝の剛剣で、文久3年に清河八郎の浪士組に参加して上洛。清河の離反後は近藤勇らと共に京都に残留して壬生浪士組を結成した。粗暴な言動や刃傷沙汰が重なり、会津藩の密命を受けた近藤・土方らによって八木邸にて暗殺された。",
+
+    "shimazu_hisamitsu": "薩摩藩主・島津忠義の実父（薩摩藩国父）。兄・斉彬の遺志を継ぎ藩政を主導。文久2年に千余名の兵を率いて上洛し、勅使を奉じて幕政改革（文久の改革）を断行させた。寺田屋騒動では過激尊攘派を鎮圧。生麦事件や薩英戦争を経験して軍備近代化を進め、薩長同盟と明治維新の基盤を築いた。",
+    "kawakami_gensai": "肥後熊本藩士。「幕末四大人斬り」の一人に数えられる神速の居合の達人。尊皇攘夷思想を奉じ、長州藩の久坂玄瑞や宮部鼎蔵らと交わる。元治元年、白昼の京都三条木屋町で開国論者の巨頭・佐久間象山を白刃一閃で暗殺。鳥羽・伏見の戦いにも従軍したが、明治維新後の開国新政に反対して斬首された。",
+    "ando_nobumasa": "陸奥磐城平藩主・江戸幕府老中。大老・井伊直弼が桜田門外の変で暗殺された後、老中首座として幕政を担当。皇妹・和宮の将軍徳川家茂への降嫁を推進し、公武合体によって幕府の威信回復を図った。これに反発する水戸脱藩浪士らに坂下門外で襲撃されて負傷（坂下門外の変）、失脚した。",
+    "tsutsui_masanori": "江戸幕府旗本・槍奉行・西丸留守居・大目付。温厚誠実な人柄と深い見識で信頼を集めた名臣。嘉永7年、ロシア使節プチャーチンとの下田交渉において筆頭全権を務め、川路聖謨と共に至誠をもって『日露通好条約』に調印した。国境画定や開港交渉において日本の主権確立に貢献した。",
 };
 
 // 全志士カードに人物伝（bio）を自動付与
