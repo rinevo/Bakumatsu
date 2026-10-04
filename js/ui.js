@@ -22,6 +22,12 @@ class UIManager {
         // ESCキーでモーダルを階層的に閉じる
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                const deathModal = document.getElementById('modal-shishi-death');
+                if (deathModal && deathModal.classList.contains('active')) {
+                    this.closeShishiDeathModal();
+                    e.stopPropagation();
+                    return;
+                }
                 const detailModal = document.getElementById('modal-card-detail');
                 if (detailModal && detailModal.classList.contains('active')) {
                     this.closeCardDetailModal();
@@ -645,6 +651,19 @@ class UIManager {
                 }
             }
 
+            // 命運マス（志士落命・生死分岐）の判定
+            let fateBadgeHtml = '';
+            const isOwnedFate = node.isOwnedFateNode || (node.deathShishiCardId && this.app.deck && this.app.deck.includes(node.deathShishiCardId));
+            if (node.isFateNode && !node.completed) {
+                if (isOwnedFate) {
+                    nodeDiv.classList.add('owned-fate-node');
+                    fateBadgeHtml = `<div class="node-fate-badge owned" title="【⚠️ 志士の命運】通過すると『${node.deathShishiWarning || '志士'}』が落命します！">⚠️ 命運:${node.deathShishiWarning || '志士'}</div>`;
+                } else {
+                    nodeDiv.classList.add('fate-node');
+                    fateBadgeHtml = `<div class="node-fate-badge" title="【史実命運】『${node.deathShishiWarning || '志士'}』の生死分岐点">命運:${node.deathShishiWarning || '志士'}</div>`;
+                }
+            }
+
             let titleContent = node.title;
             if (node.period && node.shortTitle) {
                 // 歴史の霧: 2フロア以上先の未訪問事件は具体的な事件名を伏せる
@@ -673,6 +692,7 @@ class UIManager {
             }
 
             nodeDiv.innerHTML = `
+                ${fateBadgeHtml}
                 ${lockBadgeHtml}
                 <div class="node-icon">${node.icon}</div>
                 <div class="node-title">${titleContent}</div>
@@ -1433,5 +1453,87 @@ class UIManager {
             toast.classList.add('fade-out');
             setTimeout(() => toast.remove(), 400);
         }, 3200);
+    }
+
+    // --- 志士落命（散華）通知モーダル ---
+    showShishiDeathModal(deadInfoList, onClose = null) {
+        if (!Array.isArray(deadInfoList) || deadInfoList.length === 0) {
+            if (typeof onClose === 'function') onClose();
+            return;
+        }
+
+        const modal = document.getElementById('modal-shishi-death');
+        const listContainer = document.getElementById('shishi-death-list');
+        const btnConfirm = document.getElementById('btn-confirm-shishi-death');
+        const btnClose = document.getElementById('btn-close-shishi-death');
+        const backdrop = document.getElementById('shishi-death-backdrop');
+
+        if (!modal || !listContainer) {
+            if (typeof onClose === 'function') onClose();
+            return;
+        }
+
+        listContainer.innerHTML = '';
+
+        deadInfoList.forEach(info => {
+            const cardObj = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards && GAME_DATA.cards[info.cardId]) || {};
+            const cardName = info.name || cardObj.name || info.cardId;
+            const cardImg = cardObj.image || 'assets/cards/placeholder.png';
+            const reason = info.reason || '歴史の死線により落命';
+            const eventTitle = info.eventTitle || '歴史事件';
+            const lastWords = info.lastWords || '';
+
+            const item = document.createElement('div');
+            item.className = 'shishi-death-card-item';
+            item.innerHTML = `
+                <div class="death-card-visual">
+                    <img src="${cardImg}" alt="${cardName}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'90\\' height=\\'128\\' viewBox=\\'0 0 90 128\\'><rect width=\\'90\\' height=\\'128\\' fill=\\'%231a1a1a\\'/><text x=\\'45\\' y=\\'64\\' fill=\\'%23888\\' font-size=\\'12\\' text-anchor=\\'middle\\' dominant-baseline=\\'central\\'>${encodeURIComponent(cardName)}</text></svg>'">
+                    <div class="death-fallen-tag">散華・消滅</div>
+                </div>
+                <div class="death-card-info">
+                    <div class="death-card-name-row">
+                        <span class="death-card-name">${cardName}</span>
+                        <span class="death-status-badge">落命・入手不可</span>
+                    </div>
+                    <div class="death-reason-box">
+                        <strong>【落命原因】</strong> ${reason}（契機: ${eventTitle}）
+                    </div>
+                    ${lastWords ? `<div class="death-lastwords">「${lastWords}」</div>` : ''}
+                </div>
+            `;
+            listContainer.appendChild(item);
+        });
+
+        modal.classList.add('active');
+
+        // 音声効果
+        if (window.soundSystem) {
+            if (window.soundSystem.playWarning) {
+                window.soundSystem.playWarning();
+            } else if (window.soundSystem.playTaiko) {
+                window.soundSystem.playTaiko(true);
+            }
+        }
+
+        const handleClose = () => {
+            modal.classList.remove('active');
+            if (btnConfirm) btnConfirm.removeEventListener('click', handleClose);
+            if (btnClose) btnClose.removeEventListener('click', handleClose);
+            if (backdrop) backdrop.removeEventListener('click', handleClose);
+            if (typeof onClose === 'function') {
+                onClose();
+            }
+        };
+
+        if (btnConfirm) btnConfirm.addEventListener('click', handleClose);
+        if (btnClose) btnClose.addEventListener('click', handleClose);
+        if (backdrop) backdrop.addEventListener('click', handleClose);
+    }
+
+    closeShishiDeathModal() {
+        const modal = document.getElementById('modal-shishi-death');
+        if (modal) {
+            modal.classList.remove('active');
+        }
     }
 }

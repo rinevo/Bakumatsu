@@ -585,6 +585,30 @@
         </div>
     </div>
 
+    <!-- 志士落命通知モーダル -->
+    <div id="modal-shishi-death" class="game-modal modal-death-overlay">
+        <div class="modal-backdrop" id="shishi-death-backdrop"></div>
+        <div class="modal-content-box death-modal-box">
+            <div class="modal-header death-modal-header">
+                <div class="death-header-badge">散華・落命</div>
+                <h2>【歴史の非情】志士が落命しました</h2>
+                <button id="btn-close-shishi-death" class="modal-close-btn" title="閉じる">✕</button>
+            </div>
+            <div class="death-modal-body">
+                <p class="death-modal-lead">
+                    歴史の激流と過酷なる運命により、以下の志士が命を落としました。<br>
+                    対象の志士カードは<strong class="highlight-loss">山札から消滅</strong>し、以降入手不可となります。
+                </p>
+                <div id="shishi-death-list" class="shishi-death-list">
+                    <!-- 動的挿入 -->
+                </div>
+            </div>
+            <div class="death-modal-footer">
+                <button id="btn-confirm-shishi-death" class="btn-wood large btn-death-confirm">無念の死を受け止め、歩みを進める</button>
+            </div>
+        </div>
+    </div>
+
     <!-- スクリプトの読み込み（依存順序に注意：独立したファイル） -->
     <script src="js/audio.js?v=1728006500"></script>
     <script src="js/particles.js?v=1728006500"></script>

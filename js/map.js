@@ -397,6 +397,62 @@ class MapSystem {
         this.currentFloor = node.floor;
         node.completed = true;
 
+        // --- 志士死亡判定（通過・迂回および年代経過） ---
+        if (node.sortKey) {
+            this.app.currentSortKey = Math.max(this.app.currentSortKey || 0, node.sortKey);
+        }
+
+        const deathsToTrigger = [];
+
+        // 1. 通過・迂回されたイベントノードの判定
+        // （現在のフロア以下の未完了イベントマスで、今回選ばれなかったマス）
+        const skippedEventNodes = this.nodes.filter(n =>
+            n.type === 'event' &&
+            !n.completed &&
+            n.id !== nodeId &&
+            n.floor <= this.currentFloor
+        );
+
+        skippedEventNodes.forEach(sn => {
+            if (sn.eventId && GAME_DATA.shishiDeaths) {
+                Object.values(GAME_DATA.shishiDeaths).forEach(deathDef => {
+                    if (deathDef.eventId === sn.eventId) {
+                        const cId = deathDef.cardId;
+                        if (!this.app.isShishiSaved(cId) && !this.app.isShishiDead(cId)) {
+                            deathsToTrigger.push({
+                                cardId: cId,
+                                reason: `歴史事件『${sn.shortTitle || sn.title || deathDef.eventTitle}』の地を通過したため、史実の運命により落命`,
+                                eventTitle: sn.shortTitle || sn.title || deathDef.eventTitle
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        // 2. 年代経過（currentSortKey）による死亡判定
+        if (this.app.currentSortKey && GAME_DATA.shishiDeaths) {
+            Object.values(GAME_DATA.shishiDeaths).forEach(deathDef => {
+                const cId = deathDef.cardId;
+                if (deathDef.deathSortKey && deathDef.deathSortKey < this.app.currentSortKey) {
+                    if (!this.app.isShishiSaved(cId) && !this.app.isShishiDead(cId)) {
+                        if (!deathsToTrigger.some(d => d.cardId === cId)) {
+                            deathsToTrigger.push({
+                                cardId: cId,
+                                reason: `史実の年月（${deathDef.year}年${deathDef.month}月）を経過したため落命`,
+                                eventTitle: deathDef.eventTitle
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        // 死亡処理実行（プレイヤー所持カードが落命した場合はモーダル表示＆デッキ除外）
+        if (deathsToTrigger.length > 0) {
+            this.app.handleShishiDeaths(deathsToTrigger);
+        }
+
         window.soundSystem.playTaiko(false);
 
         // ノード突入時の進行状況自動セーブ
@@ -569,6 +625,17 @@ class MapSystem {
         const allChokeEventIds = MapSystem.ALL_CHOKEPOINT_EVENT_IDS;
         const chokeId = MapSystem.CHOKEPOINT_EVENTS[actNumber];
 
+        // プレイヤー所持志士のうち、まだ生存確定・死亡していない志士の死亡イベントIDを抽出
+        const ownedCardIds = new Set(this.app && this.app.deck ? this.app.deck : []);
+        const urgentDeathEventIds = new Set();
+        if (GAME_DATA.shishiDeaths) {
+            Object.values(GAME_DATA.shishiDeaths).forEach(d => {
+                if (ownedCardIds.has(d.cardId) && !this.app.isShishiSaved(d.cardId) && !this.app.isShishiDead(d.cardId)) {
+                    urgentDeathEventIds.add(d.eventId);
+                }
+            });
+        }
+
         // 道中イベント用の候補プール（四境戦争などの関門専用イベントは絶対に除外）
         const generalActEvents = actEvents.filter(e => !allChokeEventIds.has(e.id));
 
@@ -605,8 +672,16 @@ class MapSystem {
                 }
             }
 
-            // 年代順（sortKey）を最優先としつつ、同年代内では自陣営向け選択肢を持つものを優先
+            // 優先度ソート:
+            // 1. 所持志士の命運がかかった事件（urgentDeathEventIds）を最優先で出現させる！
+            // 2. 年代順（sortKey）
+            // 3. 自陣営向け選択肢を持つものを優先
             candidates.sort((a, b) => {
+                const aUrgent = urgentDeathEventIds.has(a.id);
+                const bUrgent = urgentDeathEventIds.has(b.id);
+                if (aUrgent && !bUrgent) return -1;
+                if (!aUrgent && bUrgent) return 1;
+
                 const diff = (a.sortKey || 0) - (b.sortKey || 0);
                 if (diff !== 0) return diff;
                 if (faction) {
@@ -627,6 +702,19 @@ class MapSystem {
                 node.shortTitle = selected.shortTitle || selected.title;
                 node.title = `${node.period}\n${node.shortTitle}`;
                 node.sortKey = selected.sortKey || 0;
+
+                // 志士命運メタデータをノードに付与
+                if (GAME_DATA.shishiDeaths) {
+                    const deathEntry = Object.values(GAME_DATA.shishiDeaths).find(d => d.eventId === selected.id);
+                    if (deathEntry) {
+                        node.isFateNode = true;
+                        node.deathShishiCardId = deathEntry.cardId;
+                        node.deathShishiWarning = deathEntry.name;
+                        if (ownedCardIds.has(deathEntry.cardId)) {
+                            node.isOwnedFateNode = true;
+                        }
+                    }
+                }
             }
         });
     }

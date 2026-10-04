@@ -16,8 +16,11 @@ class BakumatsuApp {
         this.currentTrend = null;
         this.currentEvent = null;
         this.currentAdventureEvent = null;
-        this.nextBattleStrengthBuff = 0;
         this.isGameOver = false;
+        this.savedShishi = new Set();
+        this.deadShishi = new Set();
+        this.currentSortKey = 0;
+        this.pendingSurvivalFailureDeaths = null;
 
         // システム
         this.battle = new BattleSystem(this);
@@ -363,6 +366,10 @@ class BakumatsuApp {
         this.publicOpinion = -25; // 幕開けは佐幕優勢（-25%）からスタート
         this.relics = [];
         this.nextBattleStrengthBuff = 0;
+        this.savedShishi = new Set();
+        this.deadShishi = new Set();
+        this.currentSortKey = 0;
+        this.pendingSurvivalFailureDeaths = null;
 
         window.soundSystem.init();
         window.soundSystem.playTaiko(true);
@@ -593,6 +600,10 @@ class BakumatsuApp {
     }
 
     addCardToDeck(cardId) {
+        if (this.isShishiDead(cardId)) {
+            console.warn(`[志士死亡] 『${cardId}』は歴史上落命したため、デッキに加えることはできません。`);
+            return false;
+        }
         if (typeof GAME_DATA !== 'undefined' && GAME_DATA.canFactionAcquireCard) {
             if (!GAME_DATA.canFactionAcquireCard(cardId, this.faction)) {
                 const card = GAME_DATA.cards[cardId];
@@ -603,6 +614,68 @@ class BakumatsuApp {
         }
         this.deck.push(cardId);
         return true;
+    }
+
+    // --- 志士生死・生存ルート管理システム ---
+    markShishiSurvived(cardId) {
+        if (!this.savedShishi) this.savedShishi = new Set();
+        this.savedShishi.add(cardId);
+        if (this.deadShishi) this.deadShishi.delete(cardId);
+    }
+
+    isShishiDead(cardId) {
+        return Boolean(this.deadShishi && this.deadShishi.has(cardId));
+    }
+
+    isShishiSaved(cardId) {
+        return Boolean(this.savedShishi && this.savedShishi.has(cardId));
+    }
+
+    killShishi(cardId, reason = '歴史の死線により落命', eventTitle = '歴史事件') {
+        if (!this.deadShishi) this.deadShishi = new Set();
+        if (this.isShishiSaved(cardId)) return null;
+
+        const wasOwned = this.deck.includes(cardId);
+        if (wasOwned) {
+            this.deck = this.deck.filter(id => id !== cardId);
+        }
+        this.deadShishi.add(cardId);
+
+        const deathDef = (GAME_DATA.shishiDeaths && GAME_DATA.shishiDeaths[cardId]) || {};
+        const cardObj = (GAME_DATA.cards && GAME_DATA.cards[cardId]) || {};
+        const deathInfo = {
+            cardId,
+            name: deathDef.name || cardObj.name || cardId,
+            reason: deathDef.reason || reason,
+            eventTitle: deathDef.eventTitle || eventTitle,
+            lastWords: deathDef.lastWords || '',
+            wasOwned
+        };
+        return deathInfo;
+    }
+
+    handleShishiDeaths(deathsList) {
+        if (!Array.isArray(deathsList) || deathsList.length === 0) return;
+        const processed = [];
+        deathsList.forEach(item => {
+            const cardId = typeof item === 'string' ? item : item.cardId;
+            const reason = typeof item === 'object' ? item.reason : undefined;
+            const eventTitle = typeof item === 'object' ? item.eventTitle : undefined;
+            const res = this.killShishi(cardId, reason, eventTitle);
+            if (res) processed.push(res);
+        });
+
+        // プレイヤーが所持していた志士の死亡通知
+        const ownedDeaths = processed.filter(p => p.wasOwned);
+        if (ownedDeaths.length > 0) {
+            if (this.ui && this.ui.showShishiDeathModal) {
+                this.ui.showShishiDeathModal(ownedDeaths);
+            }
+            if (window.soundSystem && window.soundSystem.playWarning) {
+                window.soundSystem.playWarning();
+            }
+        }
+        this.ui.updateHeader();
     }
 
     obtainRelic(relicId) {
@@ -822,6 +895,9 @@ class BakumatsuApp {
                 publicOpinion: typeof this.publicOpinion === 'number' ? this.publicOpinion : -25,
                 deck: [...this.deck],
                 relics: [...this.relics],
+                savedShishi: Array.from(this.savedShishi || []),
+                deadShishi: Array.from(this.deadShishi || []),
+                currentSortKey: this.currentSortKey || 0,
                 trendId: this.currentTrend ? this.currentTrend.id : null,
                 nextBattleStrengthBuff: this.nextBattleStrengthBuff || 0,
                 map: {
@@ -867,6 +943,10 @@ class BakumatsuApp {
             this.publicOpinion = typeof data.publicOpinion === 'number' ? data.publicOpinion : -25;
             this.deck = Array.isArray(data.deck) ? [...data.deck] : [];
             this.relics = Array.isArray(data.relics) ? [...data.relics] : [];
+            this.savedShishi = new Set(Array.isArray(data.savedShishi) ? data.savedShishi : []);
+            this.deadShishi = new Set(Array.isArray(data.deadShishi) ? data.deadShishi : []);
+            this.currentSortKey = data.currentSortKey || 0;
+            this.pendingSurvivalFailureDeaths = null;
             this.nextBattleStrengthBuff = data.nextBattleStrengthBuff || 0;
 
             // トレンド復元
@@ -1210,6 +1290,10 @@ class BakumatsuApp {
                 const opinionBonus = this.faction === 'tobaku' ? 5 : -5;
                 this.modifyPublicOpinion(opinionBonus);
 
+                if (baseChoice.isSurvivalRoute) {
+                    rewards.unshift({ icon: '🕊️', text: `<strong>【史実改変・生存達成】</strong>志士の死線を乗り越え、歴史の運命を覆しました！` });
+                }
+
                 rewards.push({ icon: '🏆', text: `大業達成！志士カードを仲間に迎え入れました！` });
                 rewards.push({ icon: '✨', text: `天佑神助: 被ダメージを完全無効化（無傷達成）！` });
                 rewards.push({ icon: '💰', text: `追加の報奨金: 軍資金 <strong class="reward-highlight">+25両</strong> を獲得！` });
@@ -1230,6 +1314,11 @@ class BakumatsuApp {
                     if (typeof b.apply === 'function') b.apply(this);
                     rewards.push({ icon: '🌟', text: `志士の助勢: ${b.desc}` });
                 });
+
+                // 生存ルート達成表示
+                if (baseChoice.isSurvivalRoute) {
+                    rewards.unshift({ icon: '🕊️', text: `<strong>【史実改変・生存達成】</strong>志士の死線を乗り越え、歴史の運命を覆しました！` });
+                }
 
                 // 基本世論変動
                 const opinionVal = typeof baseChoice.opinionChange === 'function' ? baseChoice.opinionChange(this) : baseChoice.opinionChange;
@@ -1281,6 +1370,19 @@ class BakumatsuApp {
 
                 // 志士獲得を阻止してアクション実行
                 this.executeBaseActionForOutcome(baseChoice, 'failure');
+
+                // 生存ルート選択肢での失敗：救出失敗・即座に死亡
+                if (baseChoice.isSurvivalRoute && Array.isArray(baseChoice.targetShishi)) {
+                    const deadNow = [];
+                    baseChoice.targetShishi.forEach(cId => {
+                        const res = this.killShishi(cId, '救出作戦失敗により死線にて落命', event?.title);
+                        if (res && res.wasOwned) deadNow.push(res);
+                    });
+                    rewards.unshift({ icon: '🥀', text: `<span class="penalty">【救出失敗】志士の命を救うことができず、無念の落命となりました（山札から消滅）。</span>` });
+                    if (deadNow.length > 0) {
+                        this.pendingSurvivalFailureDeaths = deadNow;
+                    }
+                }
 
                 // 失敗ペナルティの適用
                 const baseActionStr = (baseChoice.action || '').toString();
@@ -1397,6 +1499,13 @@ class BakumatsuApp {
     finishEventAndReturnToMap() {
         this.currentAdventureEvent = null;
         this.returnToMap();
+        if (this.pendingSurvivalFailureDeaths && this.pendingSurvivalFailureDeaths.length > 0) {
+            const deadList = this.pendingSurvivalFailureDeaths;
+            this.pendingSurvivalFailureDeaths = null;
+            if (this.ui && this.ui.showShishiDeathModal) {
+                this.ui.showShishiDeathModal(deadList);
+            }
+        }
     }
 
     clearSavedRun() {

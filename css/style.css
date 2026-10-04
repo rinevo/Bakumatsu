@@ -4636,3 +4636,251 @@ body {
     from { opacity: 0; transform: translateY(-16px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ==========================================
+   志士落命（散華）通知モーダル ＆ マップ命運ノード
+   ========================================== */
+.modal-death-overlay {
+    z-index: 10050;
+}
+
+.death-modal-box {
+    max-width: 680px;
+    width: 90%;
+    background: linear-gradient(135deg, #1c1417 0%, #100b0d 100%);
+    border: 2px solid #8b1e22;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(139, 30, 34, 0.5);
+    color: #ebdcd6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.death-modal-header {
+    background: linear-gradient(90deg, #420d11 0%, #1f080a 100%);
+    border-bottom: 2px solid #8b1e22;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.death-header-badge {
+    background: #8b1e22;
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 2px;
+    border: 1px solid #ff4444;
+    animation: deathBadgePulse 2s infinite ease-in-out;
+}
+
+@keyframes deathBadgePulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(255, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 12px rgba(255, 68, 68, 0.8); }
+}
+
+.death-modal-header h2 {
+    font-size: 18px;
+    margin: 0;
+    color: #ffd8d8;
+    font-family: var(--font-mincho, "Yu Mincho", serif);
+    letter-spacing: 1px;
+}
+
+.death-modal-body {
+    padding: 20px;
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+.death-modal-lead {
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+    color: #d1b8b8;
+    background: rgba(40, 10, 12, 0.4);
+    padding: 10px 14px;
+    border-left: 4px solid #8b1e22;
+    border-radius: 0 4px 4px 0;
+}
+
+.highlight-loss {
+    color: #ff5555;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.shishi-death-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.shishi-death-card-item {
+    display: flex;
+    gap: 16px;
+    background: rgba(25, 18, 20, 0.85);
+    border: 1px solid #5a2024;
+    border-radius: 6px;
+    padding: 12px;
+    align-items: center;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.death-card-visual {
+    flex-shrink: 0;
+    width: 90px;
+    height: 128px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 2px solid #4a3335;
+    filter: grayscale(100%) contrast(110%);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    position: relative;
+    background: #111;
+}
+
+.death-card-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.death-card-visual .death-fallen-tag {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(100, 10, 15, 0.9);
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    padding: 2px 0;
+    letter-spacing: 1px;
+}
+
+.death-card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.death-card-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.death-card-name {
+    font-size: 17px;
+    font-weight: bold;
+    color: #fce8e8;
+    font-family: var(--font-mincho, "Yu Mincho", serif);
+}
+
+.death-status-badge {
+    background: #420f12;
+    color: #ff8888;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid #731b20;
+}
+
+.death-reason-box {
+    font-size: 12.5px;
+    color: #c9afaf;
+    line-height: 1.4;
+}
+
+.death-reason-box strong {
+    color: #e68585;
+}
+
+.death-lastwords {
+    font-size: 12px;
+    font-style: italic;
+    color: #b59595;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 6px 10px;
+    border-radius: 4px;
+    border-left: 2px solid #5a2024;
+    margin-top: 2px;
+}
+
+.death-modal-footer {
+    padding: 14px 20px;
+    background: rgba(15, 10, 12, 0.9);
+    border-top: 1px solid #3a1518;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-death-confirm {
+    background: linear-gradient(180deg, #6b181c 0%, #420d11 100%) !important;
+    border: 1px solid #9e2a2f !important;
+    color: #ffe6e6 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 10px rgba(158, 42, 47, 0.4) !important;
+    font-weight: bold;
+}
+.btn-death-confirm:hover {
+    background: linear-gradient(180deg, #872025 0%, #541116 100%) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 68, 68, 0.6) !important;
+}
+
+/* マップ上の命運ノード（志士の生死がかかる歴史事件マス） */
+.map-node.fate-node {
+    border-color: #d68910;
+}
+
+.map-node.owned-fate-node {
+    border-color: #e74c3c !important;
+    animation: ownedFatePulse 1.8s infinite ease-in-out;
+}
+
+@keyframes ownedFatePulse {
+    0%, 100% {
+        box-shadow: 0 0 6px rgba(231, 76, 60, 0.6), inset 0 0 4px rgba(231, 76, 60, 0.3);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 16px rgba(231, 76, 60, 0.95), inset 0 0 8px rgba(231, 76, 60, 0.5);
+        transform: scale(1.06);
+    }
+}
+
+.node-fate-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(120, 20, 25, 0.95);
+    color: #fff;
+    font-size: 8px;
+    font-weight: bold;
+    padding: 1px 5px;
+    border-radius: 8px;
+    white-space: nowrap;
+    border: 1px solid #ff4444;
+    pointer-events: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+    z-index: 5;
+    letter-spacing: 0.5px;
+}
+
+.node-fate-badge.owned {
+    background: linear-gradient(90deg, #b01b22, #7d1217);
+    border-color: #ff7777;
+    animation: fateBadgeBounce 2s infinite ease-in-out;
+}
+
+@keyframes fateBadgeBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-2px); }
+}
+

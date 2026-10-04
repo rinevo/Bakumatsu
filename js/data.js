@@ -12,6 +12,10 @@ const GAME_DATA = {
     canFactionAcquireCard: function(cardId, faction) {
         const card = this.cards[cardId];
         if (!card) return true;
+        // 史実死亡した志士は以降入手不可
+        if (typeof window !== 'undefined' && window.bakumatsuApp && window.bakumatsuApp.deadShishi && window.bakumatsuApp.deadShishi.has(cardId)) {
+            return false;
+        }
         if (faction === 'tobaku' && card.killedByTobaku) return false;
         if (faction === 'sabaku' && card.killedBySabaku) return false;
         return true;
@@ -2651,6 +2655,20 @@ const GAME_DATA = {
             desc: "三条小橋の旅籠「池田屋」に不逞志士が集結しているとの報せが入った。夜雨の中、提灯の明かりが揺れる。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["yoshida_minomaru","mochizuki_sacrifice"],
+                    opinionChange: 12,
+                    text: "【🕊️ 生存ルート】池田屋の表口へ突入し、新選組の猛攻を身を挺して食い止め稔麿と亀弥太を脱出させる",
+                    effectDesc: "【生存ルート】志士『吉田稔麿』と『望月亀弥太』の両名を救出！HP 38 ダメージを受けるが、両名は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("yoshida_minomaru");
+                        if (!app.deck.includes("yoshida_minomaru")) app.addCardToDeck("yoshida_minomaru");
+                        app.markShishiSurvived("mochizuki_sacrifice");
+                        if (!app.deck.includes("mochizuki_sacrifice")) app.addCardToDeck("mochizuki_sacrifice");
+                        app.damagePlayer(38);
+                    }
+                },
+                {
                     opinionChange: -12,
                     text: "【佐幕派】先陣を切って池田屋へ斬り込む",
                     effectDesc: "志士『近藤勇』を獲得。HP 38 ダメージを受けるが、ランダムなレリックを獲得。",
@@ -3005,6 +3023,18 @@ const GAME_DATA = {
             desc: "江戸城桜田門の外に、井伊直弼の駕籠を待ち伏せる人影がある。雪に紛れて刀を抜くか、騒乱を未然に止めるか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["ii_naosuke"],
+                    opinionChange: -10,
+                    text: "【🕊️ 生存ルート】大老駕籠の前に身を投げ出して水戸浪士の白刃を払い、井伊直弼を城内へ退避させる",
+                    effectDesc: "【生存ルート】志士『井伊直弼』を救出し歴史改変！HP 35 ダメージを受けるが、直弼は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("ii_naosuke");
+                        if (!app.deck.includes("ii_naosuke")) app.addCardToDeck("ii_naosuke");
+                        app.damagePlayer(35);
+                    }
+                },
+                {
                     opinionChange: 12,
                     text: "【討幕派】襲撃に加勢し、幕府の中枢を揺さぶる",
                     effectDesc: "志士『有馬新七』を獲得。HPを 38 失うが、列強介入-5%と 30両を得る。",
@@ -3211,6 +3241,18 @@ const GAME_DATA = {
                 sabaku: ["hijikata", "kondo", "sadaakira"]
             },
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["sasaki_patrol"],
+                    opinionChange: -8,
+                    text: "【🕊️ 生存ルート】樟葉の激戦で官軍の銃火に晒された佐々木只三郎を盾となって護衛し後方へ後送する",
+                    effectDesc: "【生存ルート】志士『佐々木只三郎』を救出！HP 35 ダメージを受けるが、佐々木は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("sasaki_patrol");
+                        if (!app.deck.includes("sasaki_patrol")) app.addCardToDeck("sasaki_patrol");
+                        app.damagePlayer(35);
+                    }
+                },
                 {
                     opinionChange: 14,
                     text: "【討幕派】錦旗を先頭に官軍怒涛の追撃戦を敢行し、旧幕府軍を壊滅させる",
@@ -3492,6 +3534,18 @@ const GAME_DATA = {
             desc: "海からの艦砲射撃が五稜郭を揺らす。残された兵力を一気に燃やすか、守りを固めて一日でも長く持ちこたえるか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["iba_duel"],
+                    opinionChange: -8,
+                    text: "【🕊️ 生存ルート】服毒自刃を図る伊庭八郎の手から薬を奪い、榎本武揚と共に新時代への生き延びを説得する",
+                    effectDesc: "【生存ルート】志士『伊庭八郎』を救出！HP 28 ダメージを受けるが、伊庭は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("iba_duel");
+                        if (!app.deck.includes("iba_duel")) app.addCardToDeck("iba_duel");
+                        app.damagePlayer(28);
+                    }
+                },
+                {
                     opinionChange: -12,
                     text: "【佐幕派】榎本武揚と共に五稜郭の全砲門を開き、最後の決戦に挑む",
                     effectDesc: "志士『榎本武揚』を獲得。HPを 38 失うが、次回戦闘の攻撃力+4。",
@@ -3760,6 +3814,18 @@ const GAME_DATA = {
             desc: "幕府の大規模な弾圧が始まり、志士たちは身を隠している。沈黙して難を逃れるか、仲間を救うため動くか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["yoshida_teaching"],
+                    opinionChange: 10,
+                    text: "【🕊️ 生存ルート】伝馬町牢屋敷の警備を強襲し、処刑寸前の吉田松陰を密かに脱出させる",
+                    effectDesc: "【生存ルート】志士『吉田松陰』を救出し歴史改変！HP 35 ダメージを受けるが、松陰は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("yoshida_teaching");
+                        if (!app.deck.includes("yoshida_teaching")) app.addCardToDeck("yoshida_teaching");
+                        app.damagePlayer(35);
+                    }
+                },
+                {
                     opinionChange: 12,
                     text: "【討幕派】松下村塾の志を受け継ぎ、地下組織を守る",
                     effectDesc: "志士『吉田松陰』を獲得。HPを 38 失うが、列強介入-5%。",
@@ -3923,6 +3989,24 @@ const GAME_DATA = {
             desc: "長州軍が御所へ迫り、門前はたちまち戦場となった。天下の主導権と朝敵の汚名が交錯する不可避の大激戦。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["kusaka_revolt","kirishima_charge","maki_revolt","irie_secret"],
+                    opinionChange: 15,
+                    text: "【🕊️ 生存ルート】鷹司邸と蛤御門の死線へ斬り込み、自刃寸前の久坂・来島・真木・入江らを強引に脱出させる",
+                    effectDesc: "【生存ルート】禁門の四志士『久坂玄瑞』『来島又兵衛』『真木和泉』『入江九一』を総力救出！HP 40 ダメージを受けるが、全員生存確定！",
+                    action: (app) => {
+                        app.markShishiSurvived("kusaka_revolt");
+                        if (!app.deck.includes("kusaka_revolt")) app.addCardToDeck("kusaka_revolt");
+                        app.markShishiSurvived("kirishima_charge");
+                        if (!app.deck.includes("kirishima_charge")) app.addCardToDeck("kirishima_charge");
+                        app.markShishiSurvived("maki_revolt");
+                        if (!app.deck.includes("maki_revolt")) app.addCardToDeck("maki_revolt");
+                        app.markShishiSurvived("irie_secret");
+                        if (!app.deck.includes("irie_secret")) app.addCardToDeck("irie_secret");
+                        app.damagePlayer(40);
+                    }
+                },
+                {
                     opinionChange: -48,
                     text: "【討幕派】御所を目指し、鷹司邸の激戦へ突撃する",
                     effectDesc: "志士『久坂玄瑞』を獲得。朝敵指定の汚名で世論が佐幕へ傾き（大逆風）、決死の猛攻でHPを 30 失い、最大HP-10。散華の覚悟の証として神器レリック『長州の血盟録』を獲得！",
@@ -4074,6 +4158,18 @@ const GAME_DATA = {
             title: "天誅組の変、山中の旗",
             desc: "大和の山中で、討幕を掲げた若者たちが決起した。大義に応じるか、無謀な蜂起を止めるか。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["yoshimura_revolt"],
+                    opinionChange: 10,
+                    text: "【🕊️ 生存ルート】鷲家口の包囲網を死力で突破し、負傷した吉村寅太郎を背負って十津川深山へ逃れる",
+                    effectDesc: "【生存ルート】志士『吉村寅太郎』を救出！HP 32 ダメージを受けるが、吉村は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("yoshimura_revolt");
+                        if (!app.deck.includes("yoshimura_revolt")) app.addCardToDeck("yoshimura_revolt");
+                        app.damagePlayer(32);
+                    }
+                },
                 {
                     opinionChange: 8,
                     text: "大和五条へ急行し、挙兵に加わる",
@@ -4305,6 +4401,20 @@ const GAME_DATA = {
             title: "第一次長州征討、進軍の命",
             desc: "幕府は長州へ大軍を送り、諸藩にも出兵を命じた。正面から戦うか、裏で停戦の道を探るか。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["sufu_reform"],
+                    opinionChange: 8,
+                    costGold: 30,
+                    canChoose: (app) => app.gold >= 30,
+                    text: "【🕊️ 生存ルート】自刃を決意した周布政之助を必死に説得し、松下村塾の門弟らの未来のため生き延びさせる",
+                    effectDesc: "【生存ルート】志士『周布政之助』を説得し生存確定！軍資金 30両 を消費し世論討幕+8%、周布は生存確定となる。",
+                    action: (app) => {
+                        app.markShishiSurvived("sufu_reform");
+                        if (!app.deck.includes("sufu_reform")) app.addCardToDeck("sufu_reform");
+                        app.gold -= 30;
+                    }
+                },
                 {
                     opinionChange: -8,
                     riskCategory: "reckless",
@@ -5117,6 +5227,21 @@ const GAME_DATA = {
             desc: "海外派兵をめぐって新政府の重鎮たちが激しく対立した。武力で威信を示すか、国内の改革を優先するか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["eto_reform"],
+                    opinionChange: 10,
+                    costGold: 35,
+                    canChoose: (app) => app.gold >= 35,
+                    text: "【🕊️ 生存ルート】佐賀の乱で敗走した江藤新平を捕縛網から救い出し、新政府司法省の顧問として復権させる",
+                    effectDesc: "【生存ルート】志士『江藤新平』を救出！軍資金 35両 とHP 20 を消費するが、江藤は生存確定となる！",
+                    action: (app) => {
+                        app.markShishiSurvived("eto_reform");
+                        if (!app.deck.includes("eto_reform")) app.addCardToDeck("eto_reform");
+                        app.gold -= 35;
+                        app.damagePlayer(20);
+                    }
+                },
+                {
                     opinionChange: 12,
                     text: "派兵を支持し、軍の力を示す",
                     effectDesc: "志士『江藤新平』を獲得。次の戦闘の攻撃力+4、HPを 38 失う。",
@@ -5200,6 +5325,18 @@ const GAME_DATA = {
             title: "横井小楠、国是の建白",
             desc: "実学を重んじる改革案が評議の場に提出された。諸藩の利害を越えて、国全体の仕組みを作れるか。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["yokoi_philosophy"],
+                    opinionChange: 8,
+                    text: "【🕊️ 生存ルート】京都寺町丸太町の辻で襲撃された横井小楠の前に躍り出て、刺客の凶刃を打ち払う",
+                    effectDesc: "【生存ルート】志士『横井小楠』を救出！HP 30 ダメージを受けるが、横井は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("yokoi_philosophy");
+                        if (!app.deck.includes("yokoi_philosophy")) app.addCardToDeck("yokoi_philosophy");
+                        app.damagePlayer(30);
+                    }
+                },
                 {
                     opinionChange: 8,
                     text: "公議政体の確立を目指し、諸大名を説得する",
@@ -5431,6 +5568,18 @@ const GAME_DATA = {
             desc: "藩内の急進派を抑えるため、薩摩では厳しい処分が検討されている。秩序を守るか、志士をかばうか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["arima_revolt"],
+                    opinionChange: 10,
+                    text: "【🕊️ 生存ルート】寺田屋の同士討ちに割って入り、有馬新七を裏階段から強引に脱出させる",
+                    effectDesc: "【生存ルート】志士『有馬新七』を救出！HP 30 ダメージを受けるが、有馬は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("arima_revolt");
+                        if (!app.deck.includes("arima_revolt")) app.addCardToDeck("arima_revolt");
+                        app.damagePlayer(30);
+                    }
+                },
+                {
                     opinionChange: 12,
                     text: "藩の命に従い、統制を強める",
                     effectDesc: "志士『大久保利通』を獲得。列強介入-5%、最大HP+3。",
@@ -5643,6 +5792,21 @@ const GAME_DATA = {
             desc: "長岡城をめぐる攻防で、最新兵器と旧来の武士道がぶつかる。城を守るか、反撃のために兵を温存するか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["kawai_artillery"],
+                    opinionChange: -8,
+                    costGold: 35,
+                    canChoose: (app) => app.gold >= 35,
+                    text: "【🕊️ 生存ルート】八十里越えの退却途上で河井継之助の被弾傷に最新西洋外科手術を施し一命を救う",
+                    effectDesc: "【生存ルート】志士『河井継之助』を救出！軍資金 35両 とHP 20 を消費するが、河井は生存確定となりデッキに残留！",
+                    action: (app) => {
+                        app.markShishiSurvived("kawai_artillery");
+                        if (!app.deck.includes("kawai_artillery")) app.addCardToDeck("kawai_artillery");
+                        app.gold -= 35;
+                        app.damagePlayer(20);
+                    }
+                },
+                {
                     opinionChange: -8,
                     text: "【佐幕派】河井継之助のガトリング砲兵陣地を守り、敵の進軍を止める",
                     effectDesc: "志士『河井継之助』を獲得。HPを 26 失うが、次の戦闘の攻撃力+3。",
@@ -5774,6 +5938,18 @@ const GAME_DATA = {
             desc: "江戸の町を守るため、新たな治安組織の編成が進められている。厳しい規律か、町人との協力か。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["kiyokawa_leader"],
+                    opinionChange: -5,
+                    text: "【🕊️ 生存ルート】麻布一の橋の刺客急襲を事前に察知し、清河八郎を護衛して血路を開く",
+                    effectDesc: "【生存ルート】志士『清河八郎』を救出！HP 30 ダメージを受けるが、清河は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("kiyokawa_leader");
+                        if (!app.deck.includes("kiyokawa_leader")) app.addCardToDeck("kiyokawa_leader");
+                        app.damagePlayer(30);
+                    }
+                },
+                {
                     opinionChange: -5,
                     text: "浪士たちを糾合し、新たな部隊を作る",
                     effectDesc: "志士『清河八郎』を獲得。次の戦闘の攻撃力+2、HPを 16 失う。",
@@ -5823,6 +5999,20 @@ const GAME_DATA = {
             title: "会津藩降伏、城下の朝",
             desc: "長い籠城の末、会津は降伏を決断する。戦いを終わらせるか、最後まで抗うか。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["kayano_sacrifice"],
+                    opinionChange: -5,
+                    costGold: 40,
+                    canChoose: (app) => app.gold >= 40,
+                    text: "【🕊️ 生存ルート】新政府軍参謀へ直談判し、家老・萱野権兵衛の殉難切腹を助命して会津復興の任へ就かせる",
+                    effectDesc: "【生存ルート】志士『萱野権兵衛』を救出し生存確定！軍資金 40両 を消費するが、萱野は生存確定となる。",
+                    action: (app) => {
+                        app.markShishiSurvived("kayano_sacrifice");
+                        if (!app.deck.includes("kayano_sacrifice")) app.addCardToDeck("kayano_sacrifice");
+                        app.gold -= 40;
+                    }
+                },
                 {
                     opinionChange: -8,
                     text: "降伏を受け入れ、民の命を守る",
@@ -5929,6 +6119,20 @@ const GAME_DATA = {
             desc: "京都の宿で、時代を動かした志士が襲撃を受けた。悲しみを力に変えるか、身を隠して計画を守るか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["ryoma_kaiwentai","nakaoka_mediator"],
+                    opinionChange: 0,
+                    text: "【🕊️ 生存ルート】二階奥の間へ急行し、刺客の白刃を身を挺して受け止め龍馬と慎太郎を救出する",
+                    effectDesc: "【生存ルート】志士『坂本龍馬』と『中岡慎太郎』を救出！HP 38 ダメージを受けるが、両名は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("ryoma_kaiwentai");
+                        if (!app.deck.includes("ryoma_kaiwentai")) app.addCardToDeck("ryoma_kaiwentai");
+                        app.markShishiSurvived("nakaoka_mediator");
+                        if (!app.deck.includes("nakaoka_mediator")) app.addCardToDeck("nakaoka_mediator");
+                        app.damagePlayer(38);
+                    }
+                },
+                {
                     opinionChange: 8,
                     text: "【討幕派】海援隊・陸援隊の仇を討つべく、敵の拠点へ踏み込む",
                     effectDesc: "志士『田中光顕』を獲得。HPを 26 失うが、次の戦闘の攻撃力+3。",
@@ -6030,6 +6234,18 @@ const GAME_DATA = {
             title: "太政官制度、行政の再編",
             desc: "新政府の役所を整え、複雑な政務を分担する制度が議論されている。中央集権か、現場の裁量か。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["hirosawa_alliance"],
+                    opinionChange: 8,
+                    text: "【🕊️ 生存ルート】市ヶ谷私邸への刺客潜入を察知して迎撃し、広沢真臣の暗殺計画を未然に阻止する",
+                    effectDesc: "【生存ルート】志士『広沢真臣』を救出！HP 30 ダメージを受けるが、広沢は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("hirosawa_alliance");
+                        if (!app.deck.includes("hirosawa_alliance")) app.addCardToDeck("hirosawa_alliance");
+                        app.damagePlayer(30);
+                    }
+                },
                 {
                     opinionChange: 5,
                     text: "中央の役所を整え、改革を統一する",
@@ -6151,6 +6367,22 @@ const GAME_DATA = {
             title: "西南戦争、士族の決起",
             desc: "不満を募らせた士族が故郷で兵を挙げた。反乱に加わるか、政府軍として鎮めるか。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["saigo_jigen","nakamura_charge","sagawa_cavalry"],
+                    opinionChange: 0,
+                    text: "【🕊️ 生存ルート】城山の最終決戦で官軍包囲網を電撃突破し、西郷・中村・佐川の全員を海外へ亡命救出する",
+                    effectDesc: "【生存ルート】英雄『西郷隆盛』『中村半次郎』『佐川官兵衛』を奇跡の救出！HP 42 ダメージを受けるが、全員生存確定！",
+                    action: (app) => {
+                        app.markShishiSurvived("saigo_jigen");
+                        if (!app.deck.includes("saigo_jigen")) app.addCardToDeck("saigo_jigen");
+                        app.markShishiSurvived("nakamura_charge");
+                        if (!app.deck.includes("nakamura_charge")) app.addCardToDeck("nakamura_charge");
+                        app.markShishiSurvived("sagawa_cavalry");
+                        if (!app.deck.includes("sagawa_cavalry")) app.addCardToDeck("sagawa_cavalry");
+                        app.damagePlayer(42);
+                    }
+                },
                 {
                     opinionChange: 12,
                     text: "西郷隆盛・中村半次郎と共に決起する",
@@ -6364,6 +6596,18 @@ const GAME_DATA = {
             title: "陸軍省設置、軍政の整備",
             desc: "陸軍を統括する新たな役所が設置され、軍の指揮系統が整えられようとしている。中央集権か、地方軍の裁量か。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["omura_reform"],
+                    opinionChange: 8,
+                    text: "【🕊️ 生存ルート】京都木屋町の旅館を包囲した刺客団を事前に撃退し、大村益次郎を無傷で救出する",
+                    effectDesc: "【生存ルート】志士『大村益次郎』を救出！HP 35 ダメージを受けるが、大村は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("omura_reform");
+                        if (!app.deck.includes("omura_reform")) app.addCardToDeck("omura_reform");
+                        app.damagePlayer(35);
+                    }
+                },
                 {
                     opinionChange: 5,
                     text: "陸軍省の下、中央で軍指揮を統一する",
@@ -7099,6 +7343,18 @@ const GAME_DATA = {
             desc: "箱館総攻撃の苛烈な砲火の中、弁天台場に孤立した同志を救うべく土方歳三が馬を駆る。「我この柵にありて退く者を斬らん！」と叫ぶ鬼の副長の気魄に、何を応えるか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["hijikata_fukucho"],
+                    opinionChange: -10,
+                    text: "【🕊️ 生存ルート】一本木関門の激戦で銃撃を受けた土方歳三を即座に馬から抱き起こし野戦病院へ搬送する",
+                    effectDesc: "【生存ルート】志士『土方歳三』を救出！HP 38 ダメージを受けるが、鬼の副長・土方歳三は奇跡的に生還し生存確定！",
+                    action: (app) => {
+                        app.markShishiSurvived("hijikata_fukucho");
+                        if (!app.deck.includes("hijikata_fukucho")) app.addCardToDeck("hijikata_fukucho");
+                        app.damagePlayer(38);
+                    }
+                },
+                {
                     opinionChange: -12,
                     text: "【佐幕派】土方歳三と共に先陣を切り、敵の砲兵陣地へ斬り込む",
                     effectDesc: "志士『土方歳三』を獲得。HPを 38 失うが、次回戦闘の攻撃力+4。",
@@ -7388,6 +7644,20 @@ const GAME_DATA = {
             desc: "新選組から分離した御陵衛士と新選組本隊が、油小路の辻で激突した。かつての同志たちの交錯する信念に、どう向き合うか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["ito_kasshitaro","todo_heisuke"],
+                    opinionChange: 0,
+                    text: "【🕊️ 生存ルート】油小路の暗闘に割って入り、新選組の包囲を切り裂いて伊東甲子太郎と藤堂平助を救出する",
+                    effectDesc: "【生存ルート】志士『伊東甲子太郎』と『藤堂平助』を救出！HP 35 ダメージを受けるが、両名は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("ito_kasshitaro");
+                        if (!app.deck.includes("ito_kasshitaro")) app.addCardToDeck("ito_kasshitaro");
+                        app.markShishiSurvived("todo_heisuke");
+                        if (!app.deck.includes("todo_heisuke")) app.addCardToDeck("todo_heisuke");
+                        app.damagePlayer(35);
+                    }
+                },
+                {
                     opinionChange: -8,
                     text: "【佐幕派】新選組本隊に加わり、油小路の辻で御陵衛士を包囲する",
                     effectDesc: "志士『藤堂平助』を獲得。HPを 26 失うが、次回戦闘の攻撃力+3。",
@@ -7490,6 +7760,18 @@ const GAME_DATA = {
             title: "上野戦争、彰義隊の死守",
             desc: "江戸城開城の後、徳川の義に殉ぜんと彰義隊が上野・寛永寺の山に集結した。新政府軍の総攻撃が迫る黒門口の激戦に、何を期するか。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["harada_spear"],
+                    opinionChange: -8,
+                    text: "【🕊️ 生存ルート】寛永寺黒門口の砲煙をかいくぐり、重傷の原田左之助を担ぎ出して安全圏へ離脱する",
+                    effectDesc: "【生存ルート】志士『原田左之助』を救出！HP 35 ダメージを受けるが、原田は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("harada_spear");
+                        if (!app.deck.includes("harada_spear")) app.addCardToDeck("harada_spear");
+                        app.damagePlayer(35);
+                    }
+                },
                 {
                     opinionChange: -12,
                     text: "【佐幕派】黒門口にて原田左之助と共に槍を振るい、最後まで死守する",
@@ -7706,6 +7988,18 @@ const GAME_DATA = {
             desc: "新政府軍の装甲艦「甲鉄」を奪取すべく、箱館海軍の「回天」が宮古湾へ突入した。甲賀源吾や土方歳三らが敢行する敵艦斬り込み作戦にどう参戦するか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["koga_naval"],
+                    opinionChange: -8,
+                    text: "【🕊️ 生存ルート】甲鉄艦のガトリング掃射から回天艦長・甲賀源吾を身を挺して庇い操舵室へ押し戻す",
+                    effectDesc: "【生存ルート】志士『甲賀源吾』を救出！HP 35 ダメージを受けるが、甲賀は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("koga_naval");
+                        if (!app.deck.includes("koga_naval")) app.addCardToDeck("koga_naval");
+                        app.damagePlayer(35);
+                    }
+                },
+                {
                     opinionChange: -8,
                     text: "【佐幕派】回天艦長・甲賀源吾と共に敵艦甲板へ突入し、操舵室を制圧する",
                     effectDesc: "志士『甲賀源吾』を獲得。HPを 26 失うが、次回戦闘の攻撃力+3。",
@@ -7757,6 +8051,18 @@ const GAME_DATA = {
             title: "京都暗殺風雲、人斬り以蔵の太刀",
             desc: "「天誅」の嵐が吹き荒れる京の都で、土佐勤王党の刺客・岡田以蔵の太刀が凶刃となって闇を裂く。冷徹な人斬りとして恐れられる剣客の前に、どう対峙するか。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["tanaka_assassin"],
+                    opinionChange: 8,
+                    text: "【🕊️ 生存ルート】町奉行所への連行を阻止し、自刃を止めさせて田中新兵衛を薩摩藩邸へ匿う",
+                    effectDesc: "【生存ルート】志士『田中新兵衛』を救出！HP 28 ダメージを受けるが、新兵衛は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("tanaka_assassin");
+                        if (!app.deck.includes("tanaka_assassin")) app.addCardToDeck("tanaka_assassin");
+                        app.damagePlayer(28);
+                    }
+                },
                 {
                     opinionChange: 12,
                     text: "【討幕派】武市半平太の密命に応じ、天誅の刃で佐幕要人を討つ",
@@ -7847,6 +8153,18 @@ const GAME_DATA = {
             desc: "水戸学の尊皇攘夷思想を掲げ、武田耕雲斎や藤田小四郎らが筑波山にて義旗を掲げた。幕府の専横を糾弾し、日光参拝を経て京都へ直訴せんとする一党の進軍に、天下の志士たちは何を思うか。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["takeda_kounsai"],
+                    opinionChange: 10,
+                    text: "【🕊️ 生存ルート】敦賀の降伏本陣を電撃急襲し、処刑前の武田耕雲斎を救出して越前山中へ退避させる",
+                    effectDesc: "【生存ルート】志士『武田耕雲斎』を救出！HP 35 ダメージを受けるが、耕雲斎は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("takeda_kounsai");
+                        if (!app.deck.includes("takeda_kounsai")) app.addCardToDeck("takeda_kounsai");
+                        app.damagePlayer(35);
+                    }
+                },
+                {
                     opinionChange: 8,
                     text: "【討幕派】筑波山の義旗に参じ、武田耕雲斎と共に日光・京都へ進軍する",
                     faction: "tobaku",
@@ -7932,6 +8250,20 @@ const GAME_DATA = {
             title: "赤報隊の進軍、年貢半減の布告",
             desc: "鳥羽・伏見の勝報を受け、相楽総三率いる赤報隊が東山道先鋒として出陣した。『年貢半減』の大号令に信濃・東山道の民衆は熱狂するが、急進的な義挙に新政府軍本隊との不協和音も生じ始める。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["sagara_souzou"],
+                    opinionChange: 10,
+                    costGold: 30,
+                    canChoose: (app) => app.gold >= 30,
+                    text: "【🕊️ 生存ルート】下諏訪宿の処刑場へ急行し、官軍使者を説得して相楽総三の処刑を中止させ身柄を引き取る",
+                    effectDesc: "【生存ルート】志士『相楽総三』を救出！軍資金 30両 を支払い世論討幕+10%、相楽は生存確定となる。",
+                    action: (app) => {
+                        app.markShishiSurvived("sagara_souzou");
+                        if (!app.deck.includes("sagara_souzou")) app.addCardToDeck("sagara_souzou");
+                        app.gold -= 30;
+                    }
+                },
                 {
                     opinionChange: 8,
                     text: "【討幕派】相楽総三率いる赤報隊の先鋒に加わり、年貢半減の旗を掲げて信濃路を疾走する",
@@ -8205,6 +8537,18 @@ const GAME_DATA = {
             desc: "大雨の夜、壬生・八木邸。度重なる乱暴狼藉で会津藩より見切りをつけられた筆頭局長・芹沢鴨を誅殺すべく、近藤勇・土方歳三・沖田総司らが抜刀して奥座敷へ踏み込む。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["sasaki_escort"],
+                    opinionChange: -5,
+                    text: "【🕊️ 生存ルート】隊中内紛の刃傷から佐々木愛次郎らを救い出し、新選組の粛清の嵐から逃がす",
+                    effectDesc: "【生存ルート】志士『佐々木愛次郎』を救出！HP 25 ダメージを受けるが、愛次郎は生存確定となる。",
+                    action: (app) => {
+                        app.markShishiSurvived("sasaki_escort");
+                        if (!app.deck.includes("sasaki_escort")) app.addCardToDeck("sasaki_escort");
+                        app.damagePlayer(25);
+                    }
+                },
+                {
                     opinionChange: -12,
                     text: "【佐幕派】土方・沖田と共に豪雨の闇に紛れて八木邸へ斬り込み、芹沢を一刀両断する",
                     effectDesc: "志士『近藤勇』を獲得。豪剣の返り討ちにより HP 32 ダメージを受けるが、次戦攻撃力 +5、レリックを獲得。",
@@ -8257,6 +8601,18 @@ const GAME_DATA = {
             title: "功山寺挙兵、回天の烽火",
             desc: "元治元年師走、雪降る長州功山寺。「是よりは長州男児の腕前お見せ申すべく候！」高杉晋作がわずか84騎で白馬に跨り決起した。保守派に掌握された藩論を覆す乾坤一擲の賭け。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["akane_negotiation"],
+                    opinionChange: 8,
+                    text: "【🕊️ 生存ルート】奇兵隊の誤解を解き、和平周旋に尽力した赤禰武人を処刑の刃から救い出す",
+                    effectDesc: "【生存ルート】志士『赤禰武人』の冤罪を晴らし生存確定！HP 25 ダメージを受けるが、赤禰は生存確定となる。",
+                    action: (app) => {
+                        app.markShishiSurvived("akane_negotiation");
+                        if (!app.deck.includes("akane_negotiation")) app.addCardToDeck("akane_negotiation");
+                        app.damagePlayer(25);
+                    }
+                },
                 {
                     opinionChange: 12,
                     text: "【討幕派】晋作の決起に参陣し、奇兵隊と共に下関会所を電撃急襲する",
@@ -8445,6 +8801,18 @@ const GAME_DATA = {
             title: "流山の訣別、近藤勇の出頭",
             desc: "慶応四年四月、下総流山の陣屋。新政府軍に包囲された新選組本陣にて、局長・近藤勇は偽名「大久保大和」を名乗り、副長・土方歳三を北へ逃がすため単身出頭を決意する。",
             choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["kondo_kotetsu"],
+                    opinionChange: -10,
+                    text: "【🕊️ 生存ルート】板橋刑場へ偽りの救出部隊を突入させ、刑執行直前に近藤勇局長を電撃救出する",
+                    effectDesc: "【生存ルート】志士『近藤勇』を救出！HP 38 ダメージを受けるが、近藤局長は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("kondo_kotetsu");
+                        if (!app.deck.includes("kondo_kotetsu")) app.addCardToDeck("kondo_kotetsu");
+                        app.damagePlayer(38);
+                    }
+                },
                 {
                     opinionChange: -12,
                     text: "【佐幕派】近藤の覚悟を背負い、土方歳三と共に包囲網を脱出して会津へ急行する",
@@ -8636,6 +9004,21 @@ const GAME_DATA = {
             desc: "明治九年十月、熊本。廃刀令と断髪令に憤る旧肥後藩士ら「敬神党」約二百名が決起した。近代火器を一切用いず、日本刀と槍のみを手に熊本鎮台を深夜奇襲する。",
             choices: [
                 {
+                    isSurvivalRoute: true,
+                    targetShishi: ["maebara_charge"],
+                    opinionChange: 10,
+                    costGold: 35,
+                    canChoose: (app) => app.gold >= 35,
+                    text: "【🕊️ 生存ルート】萩の乱の敗戦直前に前原一誠を説得して海外亡命を手配し、処刑の死線を回避させる",
+                    effectDesc: "【生存ルート】志士『前原一誠』を救出！軍資金 35両 とHP 20 を消費するが、前原は生存確定となる！",
+                    action: (app) => {
+                        app.markShishiSurvived("maebara_charge");
+                        if (!app.deck.includes("maebara_charge")) app.addCardToDeck("maebara_charge");
+                        app.gold -= 35;
+                        app.damagePlayer(20);
+                    }
+                },
+                {
                     opinionChange: -8,
                     text: "【佐幕派】武士の矜持を掲げる白刃の夜襲に呼応し、鎮台司令部を電撃強襲する",
                     effectDesc: "志士『佐川官兵衛』を獲得。死闘の返り血で HP 26 ダメージを受けるが、次戦攻撃力 +5。",
@@ -8708,6 +9091,307 @@ const GAME_DATA = {
                         app.addCardToDeck("katsu_kaishu");
                         app.gold += 40;
                         app.obtainRandomRelic();
+                    }
+                }
+            ]
+        }
+    ,
+        {
+            id: "event_sakuma_assassination",
+            act: 1,
+            importance: 2,
+            title: "佐久間象山暗殺、開国の知略散る",
+            desc: "元治元年七月、京都三条木屋町。開国論を唱え馬にまたがる佐久間象山に、尊攘過激派の刺客・河上彦斎らが白昼襲いかかる！",
+            choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["sakuma_gunnery"],
+                    opinionChange: 0,
+                    text: "【🕊️ 生存ルート】象山の馬前に身を挺して割り込み、刺客の斬撃を刀で受け止めて救出する",
+                    effectDesc: "【生存ルート】志士『佐久間象山』の命を救い歴史を改変！HP 35 ダメージを受けるが、象山は生存確定となり以降もデッキで使い続けられる。",
+                    action: (app) => {
+                        app.markShishiSurvived("sakuma_gunnery");
+                        if (!app.deck.includes("sakuma_gunnery")) app.addCardToDeck("sakuma_gunnery");
+                        app.damagePlayer(35);
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】京都見廻組を急行させ、木屋町一帯の刺客を追捕する",
+                    effectDesc: "志士『佐々木只三郎』を獲得。次の戦闘の攻撃力+3。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("sasaki_patrol");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】現場の混乱を避け、象山が遺した西洋砲術の秘図を回収する",
+                    effectDesc: "25両を獲得し、次の戦闘のシールド+8。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.gold += 25;
+                        app.healPlayer(8);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_sannan_seppuku",
+            act: 2,
+            importance: 2,
+            title: "新選組総長・山南敬助の脱走と切腹",
+            desc: "元治二年二月、新選組の過激な方針に絶望した総長・山南敬助が前川邸を脱走。大津にて追っ手の沖田総司に追いつかれ、屯所へ連れ戻された。",
+            choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["sannan_tactics"],
+                    opinionChange: -5,
+                    costGold: 30,
+                    canChoose: (app) => app.gold >= 30,
+                    text: "【🕊️ 生存ルート】局長・近藤勇に命がけで直訴し、山南の脱走を「隠密探索の密命」として助命工作を行う",
+                    effectDesc: "【生存ルート】志士『山南敬助』の切腹を回避し生存！軍資金 30両 を消費し世論佐幕-5%、山南は生存確定となる。",
+                    action: (app) => {
+                        app.markShishiSurvived("sannan_tactics");
+                        if (!app.deck.includes("sannan_tactics")) app.addCardToDeck("sannan_tactics");
+                        app.gold -= 30;
+                    }
+                },
+                {
+                    opinionChange: -10,
+                    text: "【佐幕派】隊規の厳格さを守り、沖田総司に介錯を命じる",
+                    effectDesc: "志士『沖田総司』を獲得。次の戦闘の攻撃力+4、HP 15 ダメージ。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("okita_sandan");
+                        app.damagePlayer(15);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】新選組の内紛に乗じ、京の町衆に潜伏志士の情報を流す",
+                    effectDesc: "軍資金 25両 を獲得し、HP 8 回復。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.gold += 25;
+                        app.healPlayer(8);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_izo_execution",
+            act: 2,
+            importance: 3,
+            title: "土佐勤王党の獄、人斬り以蔵と武市半平太の最期",
+            desc: "慶応元年五月、高知城下の牢獄。山内容堂による厳しい弾圧の中、過酷な拷問に耐えた岡田以蔵と、獄中から同志を励まし続けた武市半平太が最期の裁きを待つ。",
+            choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["okada_izo", "takechi_ideology"],
+                    opinionChange: 12,
+                    text: "【🕊️ 生存ルート】決死の牢破りを決行し、警備の土佐藩士をなぎ倒して武市と以蔵を救出する",
+                    effectDesc: "【生存ルート】志士『武市半平太』『岡田以蔵』の両名を救出！HP 38 ダメージを受けるが、両名は生存確定となり以降もデッキで使用可能！",
+                    action: (app) => {
+                        app.markShishiSurvived("okada_izo");
+                        app.markShishiSurvived("takechi_ideology");
+                        if (!app.deck.includes("okada_izo")) app.addCardToDeck("okada_izo");
+                        if (!app.deck.includes("takechi_ideology")) app.addCardToDeck("takechi_ideology");
+                        app.damagePlayer(38);
+                    }
+                },
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】武市の遺志と以蔵の辞世を胸に刻み、土佐の同志を糾合する",
+                    effectDesc: "志士『中岡慎太郎』を獲得。次の戦闘の攻撃力+3。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("nakaoka_mediator");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
+                    }
+                },
+                {
+                    opinionChange: -10,
+                    text: "【佐幕派】山内容堂の厳正なる裁断を支持し、土佐の公議政体を固める",
+                    effectDesc: "志士『山内容堂』を獲得。25両 を獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("yodo_political_balance");
+                        app.gold += 25;
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_takasugi_illness",
+            act: 2,
+            importance: 3,
+            title: "高杉晋作の病臥、風雲児の別れ",
+            desc: "慶応三年四月、下関桜山。第二次長州征伐で大勝利を収めた奇兵隊の創設者・高杉晋作だが、肺結核の病魔がその身体を急速に蝕んでいた。",
+            choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["takasugi_kiheitai"],
+                    opinionChange: 10,
+                    costGold: 40,
+                    canChoose: (app) => app.gold >= 40,
+                    text: "【🕊️ 生存ルート】長崎から蘭方医の名医を緊急招聘し、高価な西洋新薬を投与して決死の養生に専念させる",
+                    effectDesc: "【生存ルート】志士『高杉晋作』の結核を克服させ生存確定！軍資金 40両 とHP 20 を消費するが、晋作は生存しデッキに残留！",
+                    action: (app) => {
+                        app.markShishiSurvived("takasugi_kiheitai");
+                        if (!app.deck.includes("takasugi_kiheitai")) app.addCardToDeck("takasugi_kiheitai");
+                        app.gold -= 40;
+                        app.damagePlayer(20);
+                    }
+                },
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】奇兵隊の指揮権を山県有朋に引き継ぎ、遺志を継ぐ",
+                    effectDesc: "志士『山県有朋』を獲得。次の戦闘の攻撃力+4。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("yamagata_march");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】晋作の残した三味線と軍資金を受け取り、後事を託される",
+                    effectDesc: "軍資金 35両 を獲得し、最大HP+3。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.gold += 35;
+                        app.maxHp += 3;
+                        app.healPlayer(3);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_takeda_assassination",
+            act: 2,
+            importance: 2,
+            title: "銭取橋の粛清、武田観柳斎の暗殺",
+            desc: "慶応三年六月、夜の鴨川銭取橋。新選組五番組組長・武田観柳斎が薩摩藩邸へ赴く途上、密偵の報告を受けた副長・土方歳三の命により斎藤一らが影から迫る。",
+            choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["takeda_strategy"],
+                    opinionChange: 0,
+                    text: "【🕊️ 生存ルート】斎藤一の鋭い牙突に割り込み、武田観柳斎を暗闇の路地へ引き摺り込んで逃走させる",
+                    effectDesc: "【生存ルート】志士『武田観柳斎』を救出し生存確定！HP 28 ダメージを受けるが、武田は生存確定となる。",
+                    action: (app) => {
+                        app.markShishiSurvived("takeda_strategy");
+                        if (!app.deck.includes("takeda_strategy")) app.addCardToDeck("takeda_strategy");
+                        app.damagePlayer(28);
+                    }
+                },
+                {
+                    opinionChange: -10,
+                    text: "【佐幕派】斎藤一の粛清を援護し、裏切り者を闇に葬る",
+                    effectDesc: "志士『斎藤一』を獲得。次の戦闘の攻撃力+4。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("saito_gato");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】現場から観柳斎が所持していた甲州軍学の秘伝書を回収する",
+                    effectDesc: "軍資金 25両 を獲得し、次戦シールド+6。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.gold += 25;
+                        app.healPlayer(6);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_oguri_execution",
+            act: 2,
+            importance: 2,
+            title: "小栗上野介、権田村の悲劇",
+            desc: "慶応四年四月、上野国権田村。幕府勘定奉行として横須賀造船所を創設した小栗忠順だが、官軍東山道総督府の命により無実の罪で烏川水落に引き出された。",
+            choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["oguri_reform"],
+                    opinionChange: -10,
+                    text: "【🕊️ 生存ルート】官軍の処刑隊を電撃急襲し、小栗忠順を奪還して山中深く逃亡させる",
+                    effectDesc: "【生存ルート】志士『小栗忠順』を救出！HP 35 ダメージと世論討幕-10%を受けるが、小栗は生存確定！",
+                    action: (app) => {
+                        app.markShishiSurvived("oguri_reform");
+                        if (!app.deck.includes("oguri_reform")) app.addCardToDeck("oguri_reform");
+                        app.damagePlayer(35);
+                    }
+                },
+                {
+                    opinionChange: 10,
+                    text: "【討幕派】官軍の命令を遵守し、小栗の遺品・近代造船設計図を接収する",
+                    effectDesc: "志士『大隈重信』を獲得。軍資金 30両 を獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("okuma_modernization");
+                        app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】小栗の遺志を胸に刻み、横須賀造船の技術者たちを保護する",
+                    effectDesc: "軍資金 35両 を獲得し、最大HP+3。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.gold += 35;
+                        app.maxHp += 3;
+                        app.healPlayer(3);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_okita_farewell",
+            act: 2,
+            importance: 3,
+            title: "沖田総司、千駄ヶ谷の病臥",
+            desc: "慶応四年五月、江戸千駄ヶ谷の植木屋平五郎宅。近藤勇の処刑を知らされぬまま、新選組一番隊組長・沖田総司の病状は極限に達していた。",
+            choices: [
+                {
+                    isSurvivalRoute: true,
+                    targetShishi: ["okita_sandan"],
+                    opinionChange: -5,
+                    costGold: 40,
+                    canChoose: (app) => app.gold >= 40,
+                    text: "【🕊️ 生存ルート】松本良順直伝の最新西洋滋養薬と名湯での長期湯治を手配し、総司の命を繋ぎ止める",
+                    effectDesc: "【生存ルート】志士『沖田総司』の病魔を抑え生存確定！軍資金 40両 とHP 20 を消費するが、総司は生存しデッキに残留！",
+                    action: (app) => {
+                        app.markShishiSurvived("okita_sandan");
+                        if (!app.deck.includes("okita_sandan")) app.addCardToDeck("okita_sandan");
+                        app.gold -= 40;
+                        app.damagePlayer(20);
+                    }
+                },
+                {
+                    opinionChange: -10,
+                    text: "【佐幕派】総司の愛刀・加州清光を受け継ぎ、北へ向かう土方歳三の後を追う",
+                    effectDesc: "志士『土方歳三』を獲得。次の戦闘の攻撃力+5。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("hijikata_fukucho");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】千駄ヶ谷の潜伏新選組隊士の武装を武装解除させ、保護する",
+                    effectDesc: "軍資金 25両 を獲得し、HP 8 回復。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.gold += 25;
+                        app.healPlayer(8);
                     }
                 }
             ]
@@ -11075,6 +11759,13 @@ const GAME_DATA = {
 // （発生年、月、表示期間、マップ用短縮タイトル）
 // ==========================================
 GAME_DATA.eventMeta = {
+    "event_sakuma_assassination": { year: 1864, month: 7, period: "1864年7月", shortTitle: "佐久間象山暗殺" },
+    "event_sannan_seppuku": { year: 1865, month: 2, period: "1865年2月", shortTitle: "山南敬助の切腹" },
+    "event_izo_execution": { year: 1865, month: 5, period: "1865年5月", shortTitle: "土佐勤王党の獄" },
+    "event_takasugi_illness": { year: 1867, month: 4, period: "1867年4月", shortTitle: "高杉晋作の病臥" },
+    "event_takeda_assassination": { year: 1867, month: 6, period: "1867年6月", shortTitle: "銭取橋の粛清" },
+    "event_oguri_execution": { year: 1868, month: 4, period: "1868年4月", shortTitle: "小栗上野介処刑" },
+    "event_okita_farewell": { year: 1868, month: 5, period: "1868年5月", shortTitle: "沖田総司の病臥" },
     // === 第一幕（京洛動乱期：〜1864年）全41件 ===
     "event_tenpo_reform": { year: 1841, month: 5, period: "1841年", shortTitle: "天保の改革" },
     "event_foreign_ship_edict": { year: 1842, month: 7, period: "1842年", shortTitle: "薪水給与令" },
@@ -11226,6 +11917,598 @@ if (Array.isArray(GAME_DATA.events)) {
 // ==========================================
 // 全99名 志士カード人物伝（史実伝記）定義
 // ==========================================
+
+// ==========================================
+// 全45件 志士カード史実死亡・死線定義
+// ==========================================
+GAME_DATA.shishiDeaths = {
+    "yoshida_teaching": {
+        "cardId": "yoshida_teaching",
+        "character": "yoshida",
+        "name": "吉田松陰",
+        "faction": "tobaku",
+        "deathYear": 1859,
+        "deathMonth": 10,
+        "deathSortKey": 185910,
+        "eventId": "event_andei_purge",
+        "eventTitle": "安政の大獄の嵐",
+        "reason": "安政6年10月、幕府への直言により伝馬町牢屋敷にて斬首処刑。",
+        "lastWords": "「身はたとひ 武蔵の野辺に 朽ちぬとも 留め置かまし 大和魂」"
+    },
+    "ii_naosuke": {
+        "cardId": "ii_naosuke",
+        "character": "ii_naosuke",
+        "name": "井伊直弼",
+        "faction": "sabaku",
+        "deathYear": 1860,
+        "deathMonth": 3,
+        "deathSortKey": 186003,
+        "eventId": "event_sakuradamon",
+        "eventTitle": "桜田門外の変・雪中の襲撃",
+        "reason": "安政7年3月3日、雪の桜田門外にて水戸浪士らの奇襲を受け駕籠の中で落命。",
+        "lastWords": "「茶道一会、天下の政治もまた一期一会」大老の豪腕、雪に赤く染まる。"
+    },
+    "arima_revolt": {
+        "cardId": "arima_revolt",
+        "character": "arima",
+        "name": "有馬新七",
+        "faction": "tobaku",
+        "deathYear": 1862,
+        "deathMonth": 4,
+        "deathSortKey": 186204,
+        "eventId": "event_satsuma_after_teradaya",
+        "eventTitle": "寺田屋騒動、薩摩の粛清",
+        "reason": "文久2年4月、伏見寺田屋にて同藩の鎮撫使と斬り合い激闘の末に絶命。",
+        "lastWords": "「おいごと刺せ！おいごと刺せ！」"
+    },
+    "kiyokawa_leader": {
+        "cardId": "kiyokawa_leader",
+        "character": "kiyokawa",
+        "name": "清河八郎",
+        "faction": "sabaku",
+        "deathYear": 1863,
+        "deathMonth": 4,
+        "deathSortKey": 186304,
+        "eventId": "event_shinchogumi",
+        "eventTitle": "新徴組、江戸の治安維持",
+        "reason": "文久3年4月、麻布一の橋にて幕府刺客・佐々木只三郎らに討たれ落命。",
+        "lastWords": "「魁の志、道半ばにして倒るるか……」浪士組創設者の終焉。"
+    },
+    "tanaka_assassin": {
+        "cardId": "tanaka_assassin",
+        "character": "tanaka_shinbei",
+        "name": "田中新兵衛",
+        "faction": "tobaku",
+        "deathYear": 1863,
+        "deathMonth": 5,
+        "deathSortKey": 186305,
+        "eventId": "event_izo_assassination",
+        "eventTitle": "京都暗殺風雲、人斬り以蔵の太刀",
+        "reason": "文久3年5月、姉小路暗殺の嫌疑を受け町奉行所にて尋問中に自刃。",
+        "lastWords": "己が太刀を奪い返し、無言のまま喉を突いて果てた。"
+    },
+    "sasaki_escort": {
+        "cardId": "sasaki_escort",
+        "character": "sasaki_aijiro",
+        "name": "佐々木愛次郎",
+        "faction": "sabaku",
+        "deathYear": 1863,
+        "deathMonth": 8,
+        "deathSortKey": 186308,
+        "eventId": "event_serizawa_assassination",
+        "eventTitle": "八木邸の粛清、芹沢鴨の暗殺",
+        "reason": "文久3年8月、新選組内部抗争の渦中で暗殺され落命。",
+        "lastWords": "美男五人衆と呼ばれた若き隊士、隊規の闇に消える。"
+    },
+    "yoshimura_revolt": {
+        "cardId": "yoshimura_revolt",
+        "character": "yoshimura",
+        "name": "吉村寅太郎",
+        "faction": "tobaku",
+        "deathYear": 1863,
+        "deathMonth": 9,
+        "deathSortKey": 186309,
+        "eventId": "event_tenchu_revolt",
+        "eventTitle": "天誅組の変、山中の旗",
+        "reason": "文久3年9月、天誅組の総裁として幕府追討軍と交戦し鷲家口にて戦死。",
+        "lastWords": "「吉野山 風に乱るる もみじ葉は 我が立つ杣の 血潮なりけり」"
+    },
+    "yoshida_minomaru": {
+        "cardId": "yoshida_minomaru",
+        "character": "yoshida_minomaru",
+        "name": "吉田稔麿",
+        "faction": "tobaku",
+        "deathYear": 1864,
+        "deathMonth": 6,
+        "deathSortKey": 186406,
+        "eventId": "event_ikedaya",
+        "eventTitle": "池田屋事件の急襲",
+        "reason": "元治元年6月、池田屋にて新選組の強襲を受け長州藩邸前で自刃。",
+        "lastWords": "松門四天王の英才、長州の未来を案じながら24歳で散る。"
+    },
+    "mochizuki_sacrifice": {
+        "cardId": "mochizuki_sacrifice",
+        "character": "mochizuki",
+        "name": "望月亀弥太",
+        "faction": "tobaku",
+        "deathYear": 1864,
+        "deathMonth": 6,
+        "deathSortKey": 186406,
+        "eventId": "event_ikedaya",
+        "eventTitle": "池田屋事件の急襲",
+        "reason": "元治元年6月、池田屋から脱出を図るも新選組の追撃を受け自刃。",
+        "lastWords": "土佐勤王党の駿足、深手を負い二条川原にて絶命。"
+    },
+    "kusaka_revolt": {
+        "cardId": "kusaka_revolt",
+        "character": "kusaka",
+        "name": "久坂玄瑞",
+        "faction": "tobaku",
+        "deathYear": 1864,
+        "deathMonth": 7,
+        "deathSortKey": 186407,
+        "eventId": "event_hamaguri_gate",
+        "eventTitle": "禁門の変、御所前の激戦",
+        "reason": "元治元年7月、御所突入に失敗し鷹司邸内で寺島忠三郎と共に自刃。",
+        "lastWords": "「時ありて 散るをめでたき 桜花 人も見捨てぬ 嵐ならずや」"
+    },
+    "kirishima_charge": {
+        "cardId": "kirishima_charge",
+        "character": "kirishima",
+        "name": "来島又兵衛",
+        "faction": "tobaku",
+        "deathYear": 1864,
+        "deathMonth": 7,
+        "deathSortKey": 186407,
+        "eventId": "event_hamaguri_gate",
+        "eventTitle": "禁門の変、御所前の激戦",
+        "reason": "元治元年7月、蛤御門にて陣頭指揮を執り会津軍へ突撃中に胸を撃たれ自刃。",
+        "lastWords": "「これにて死すとも悔いなし！」"
+    },
+    "maki_revolt": {
+        "cardId": "maki_revolt",
+        "character": "maki",
+        "name": "真木和泉",
+        "faction": "tobaku",
+        "deathYear": 1864,
+        "deathMonth": 7,
+        "deathSortKey": 186407,
+        "eventId": "event_hamaguri_gate",
+        "eventTitle": "禁門の変、御所前の激戦",
+        "reason": "元治元年7月、天王山にて退路を断たれ同志十七名と共に自刃。",
+        "lastWords": "「大君の 臣たるものを 辞する身は 草の露とも 露の身とも」"
+    },
+    "irie_secret": {
+        "cardId": "irie_secret",
+        "character": "irie",
+        "name": "入江九一",
+        "faction": "tobaku",
+        "deathYear": 1864,
+        "deathMonth": 7,
+        "deathSortKey": 186407,
+        "eventId": "event_hamaguri_gate",
+        "eventTitle": "禁門の変、御所前の激戦",
+        "reason": "元治元年7月、久坂玄瑞の自刃を見届け御所を脱出する際、敵槍を受け戦死。",
+        "lastWords": "松門四天王の忠義、久坂の遺志を胸に落命。"
+    },
+    "sakuma_gunnery": {
+        "cardId": "sakuma_gunnery",
+        "character": "sakuma",
+        "name": "佐久間象山",
+        "faction": "tobaku",
+        "deathYear": 1864,
+        "deathMonth": 7,
+        "deathSortKey": 186407,
+        "eventId": "event_sakuma_assassination",
+        "eventTitle": "佐久間象山暗殺、開国の知略散る",
+        "reason": "元治元年7月、京都三条木屋町にて尊攘派刺客・河上彦斎らに白昼暗殺される。",
+        "lastWords": "「東洋道徳、西洋芸術」天下の兵学者、凶刃に斃れる。"
+    },
+    "sufu_reform": {
+        "cardId": "sufu_reform",
+        "character": "sufu",
+        "name": "周布政之助",
+        "faction": "tobaku",
+        "deathYear": 1864,
+        "deathMonth": 9,
+        "deathSortKey": 186409,
+        "eventId": "event_choshu_expedition",
+        "eventTitle": "第一次長州征討、進軍の命",
+        "reason": "元治元年9月、禁門の変の責めと藩内保守派の専横を苦に山口庄原にて自刃。",
+        "lastWords": "長州革新の支柱、若き志士たちに未来を託して逝く。"
+    },
+    "takeda_kounsai": {
+        "cardId": "takeda_kounsai",
+        "character": "takeda_kounsai",
+        "name": "武田耕雲斎",
+        "faction": "tobaku",
+        "deathYear": 1865,
+        "deathMonth": 2,
+        "deathSortKey": 186502,
+        "eventId": "event_tenguto_rising",
+        "eventTitle": "水戸天狗党の挙兵、筑波山の義旗",
+        "reason": "元治2年2月、京への雪中進軍の末に敦賀にて降伏、幕府軍により非情の斬首処刑。",
+        "lastWords": "「過ぐる日の 夢路を辿る 白雪に 散る紅の 花ぞ惜しまる」"
+    },
+    "sannan_tactics": {
+        "cardId": "sannan_tactics",
+        "character": "sannan",
+        "name": "山南敬助",
+        "faction": "sabaku",
+        "deathYear": 1865,
+        "deathMonth": 2,
+        "deathSortKey": 186502,
+        "eventId": "event_sannan_seppuku",
+        "eventTitle": "新選組総長・山南敬助の脱走と切腹",
+        "reason": "元治2年2月、新選組の方針に絶望し脱走、連れ戻され沖田総司の介錯で切腹。",
+        "lastWords": "「総司、頼む……」誠の旗の下、静謐なる総長が逝く。"
+    },
+    "okada_izo": {
+        "cardId": "okada_izo",
+        "character": "izo",
+        "name": "岡田以蔵",
+        "faction": "tobaku",
+        "deathYear": 1865,
+        "deathMonth": 5,
+        "deathSortKey": 186505,
+        "eventId": "event_izo_execution",
+        "eventTitle": "土佐勤王党の獄、人斬り以蔵の最期",
+        "reason": "慶応元年5月、過酷な拷問の果てに土佐藩にて打首獄門。",
+        "lastWords": "「君が為 尽くす心は 水の泡 消えにし後は 澄み渡る空」"
+    },
+    "takechi_ideology": {
+        "cardId": "takechi_ideology",
+        "character": "takechi",
+        "name": "武市半平太",
+        "faction": "tobaku",
+        "deathYear": 1865,
+        "deathMonth": 5,
+        "deathSortKey": 186505,
+        "eventId": "event_izo_execution",
+        "eventTitle": "土佐勤王党の獄、人斬り以蔵の最期",
+        "reason": "慶応元年5月、藩主・山内容堂の命により三文字割腹の切腹を遂げる。",
+        "lastWords": "「ふたたびと 返らぬ歳を 儚くも 命に代えて 咲くや白菊」"
+    },
+    "akane_negotiation": {
+        "cardId": "akane_negotiation",
+        "character": "akane",
+        "name": "赤禰武人",
+        "faction": "tobaku",
+        "deathYear": 1866,
+        "deathMonth": 2,
+        "deathSortKey": 186602,
+        "eventId": "event_kozanshi_rising",
+        "eventTitle": "功山寺挙兵、回天の烽火",
+        "reason": "慶応2年2月、長州内訌の調停を図るも裏切りと誤解され処刑。",
+        "lastWords": "「忠誠の心は天日に通ず」平和を望んだ奇兵隊総管の悲運。"
+    },
+    "takasugi_kiheitai": {
+        "cardId": "takasugi_kiheitai",
+        "character": "takasugi",
+        "name": "高杉晋作",
+        "faction": "tobaku",
+        "deathYear": 1867,
+        "deathMonth": 4,
+        "deathSortKey": 186704,
+        "eventId": "event_takasugi_illness",
+        "eventTitle": "高杉晋作の病臥、風雲児の別れ",
+        "reason": "慶応3年4月、四境戦争の激闘後に肺結核が悪化し下関にて27歳で病没。",
+        "lastWords": "「おもしろき こともなき世を おもしろく すみなすものは 心なりけり」"
+    },
+    "takeda_strategy": {
+        "cardId": "takeda_strategy",
+        "character": "takeda",
+        "name": "武田観柳斎",
+        "faction": "sabaku",
+        "deathYear": 1867,
+        "deathMonth": 6,
+        "deathSortKey": 186706,
+        "eventId": "event_takeda_assassination",
+        "eventTitle": "銭取橋の粛清、武田観柳斎の暗殺",
+        "reason": "慶応3年6月、薩摩への内通を疑われ鴨川銭取橋にて斎藤一らにより討殺。",
+        "lastWords": "甲州軍学の知謀、新選組の刃に消ゆ。"
+    },
+    "ryoma_kaiwentai": {
+        "cardId": "ryoma_kaiwentai",
+        "character": "ryoma",
+        "name": "坂本龍馬",
+        "faction": "tobaku",
+        "deathYear": 1867,
+        "deathMonth": 11,
+        "deathSortKey": 186711,
+        "eventId": "event_omiya_assassination",
+        "eventTitle": "近江屋事件、盟友の喪失",
+        "reason": "慶応3年11月15日、京都近江屋にて刺客に襲われ脳天を斬られ絶命。",
+        "lastWords": "「脳をやられた、もういかん……」日本の夜明けを見ることなく斃れる。"
+    },
+    "nakaoka_mediator": {
+        "cardId": "nakaoka_mediator",
+        "character": "nakaoka",
+        "name": "中岡慎太郎",
+        "faction": "tobaku",
+        "deathYear": 1867,
+        "deathMonth": 11,
+        "deathSortKey": 186711,
+        "eventId": "event_omiya_assassination",
+        "eventTitle": "近江屋事件、盟友の喪失",
+        "reason": "慶応3年11月15日、近江屋にて龍馬と共に襲撃を受け全身に深手を負い二日後に絶命。",
+        "lastWords": "「龍馬は即死であった……」陸援隊長、友の後を追う。"
+    },
+    "ito_kasshitaro": {
+        "cardId": "ito_kasshitaro",
+        "character": "ito_kasshitaro",
+        "name": "伊東甲子太郎",
+        "faction": "sabaku",
+        "deathYear": 1867,
+        "deathMonth": 11,
+        "deathSortKey": 186711,
+        "eventId": "event_aburakoji",
+        "eventTitle": "油小路の変、訣別の刃",
+        "reason": "慶応3年11月、近藤勇の招宴帰途、油小路木津屋橋にて新選組に暗殺。",
+        "lastWords": "「奸賊ばら！」御陵衛士の魁、夜陰の辻に斃れる。"
+    },
+    "todo_heisuke": {
+        "cardId": "todo_heisuke",
+        "character": "todo",
+        "name": "藤堂平助",
+        "faction": "sabaku",
+        "deathYear": 1867,
+        "deathMonth": 11,
+        "deathSortKey": 186711,
+        "eventId": "event_aburakoji",
+        "eventTitle": "油小路の変、訣別の刃",
+        "reason": "慶応3年11月、伊東の遺体収容に駆けつけた油小路にて新選組と交戦し戦死。",
+        "lastWords": "魁先生と呼ばれた試衛館以来の同志、油小路の石畳に散る。"
+    },
+    "sasaki_patrol": {
+        "cardId": "sasaki_patrol",
+        "character": "sasaki",
+        "name": "佐々木只三郎",
+        "faction": "sabaku",
+        "deathYear": 1868,
+        "deathMonth": 1,
+        "deathSortKey": 186801,
+        "eventId": "event_toba_fushimi",
+        "eventTitle": "鳥羽・伏見の決戦、錦旗の翻転",
+        "reason": "慶応4年1月、樟葉の戦いにて官軍の猛銃撃を腰に受け致命傷、戦死。",
+        "lastWords": "京都見廻組組頭、小太刀の達人、徳川の落日に殉ず。"
+    },
+    "sagara_souzou": {
+        "cardId": "sagara_souzou",
+        "character": "sagara",
+        "name": "相楽総三",
+        "faction": "tobaku",
+        "deathYear": 1868,
+        "deathMonth": 3,
+        "deathSortKey": 186803,
+        "eventId": "event_sekihotai_march",
+        "eventTitle": "赤報隊の進軍、年貢半減の布告",
+        "reason": "慶応4年3月、偽官軍の罪を着せられ信濃下諏訪宿にて無念の処刑。",
+        "lastWords": "赤報隊の先駆、官軍の政治的都合に翻弄され散る。"
+    },
+    "kondo_kotetsu": {
+        "cardId": "kondo_kotetsu",
+        "character": "kondo",
+        "name": "近藤勇",
+        "faction": "sabaku",
+        "deathYear": 1868,
+        "deathMonth": 4,
+        "deathSortKey": 186804,
+        "eventId": "event_nagareyama_farewell",
+        "eventTitle": "流山の訣別、近藤勇の出頭",
+        "reason": "慶応4年4月、流山で捕縛され板橋宿の刑場にて斬首刑に処される。",
+        "lastWords": "「孤軍たすけ落ちて 俘虜となる 顧みて君恩を思えば 涙さらに流る」"
+    },
+    "oguri_reform": {
+        "cardId": "oguri_reform",
+        "character": "oguri",
+        "name": "小栗忠順",
+        "faction": "sabaku",
+        "deathYear": 1868,
+        "deathMonth": 4,
+        "deathSortKey": 186804,
+        "eventId": "event_oguri_execution",
+        "eventTitle": "小栗上野介、権田村の悲劇",
+        "reason": "慶応4年4月、上野国権田村にて新政府軍により無実の罪で斬首処刑。",
+        "lastWords": "横須賀造船所を創った幕府最高の知性、無言のまま露と消ゆ。"
+    },
+    "okita_sandan": {
+        "cardId": "okita_sandan",
+        "character": "okita",
+        "name": "沖田総司",
+        "faction": "sabaku",
+        "deathYear": 1868,
+        "deathMonth": 5,
+        "deathSortKey": 186805,
+        "eventId": "event_okita_farewell",
+        "eventTitle": "沖田総司、千駄ヶ谷の病臥",
+        "reason": "慶応4年5月、近藤勇の死を知らされぬまま千駄ヶ谷植木屋にて結核病没。",
+        "lastWords": "「動かねば 闇にへだつや 花と水」天才剣士、25歳で静かに眠る。"
+    },
+    "harada_spear": {
+        "cardId": "harada_spear",
+        "character": "harada",
+        "name": "原田左之助",
+        "faction": "sabaku",
+        "deathYear": 1868,
+        "deathMonth": 5,
+        "deathSortKey": 186805,
+        "eventId": "event_ueno_war",
+        "eventTitle": "上野戦争、彰義隊の死守",
+        "reason": "慶応4年5月、彰義隊に加わり上野寛永寺にて奮戦、受けた銃傷により絶命。",
+        "lastWords": "十番組組長、槍を振るい江戸の炎の中に散る。"
+    },
+    "kawai_artillery": {
+        "cardId": "kawai_artillery",
+        "character": "kawai",
+        "name": "河井継之助",
+        "faction": "sabaku",
+        "deathYear": 1868,
+        "deathMonth": 8,
+        "deathSortKey": 186808,
+        "eventId": "event_nagaoka_defense",
+        "eventTitle": "長岡城攻防、ガトリングの轟音",
+        "reason": "慶応4年8月、長岡城奪還戦で左足に被弾、会津への退却途上で戦傷死。",
+        "lastWords": "「八十里 腰抜け武士の 越す峠」長岡の家老、独立の夢散る。"
+    },
+    "yokoi_philosophy": {
+        "cardId": "yokoi_philosophy",
+        "character": "yokoi",
+        "name": "横井小楠",
+        "faction": "tobaku",
+        "deathYear": 1869,
+        "deathMonth": 1,
+        "deathSortKey": 186901,
+        "eventId": "event_yokoi_reform",
+        "eventTitle": "横井小楠、国是の建白",
+        "reason": "明治2年1月、開明的思想を逆恨みされ京都寺町にて十津川郷士らに暗殺。",
+        "lastWords": "「堯舜孔子の道、西洋の器械」公議政体の先駆者、凶刃に散る。"
+    },
+    "koga_naval": {
+        "cardId": "koga_naval",
+        "character": "koga",
+        "name": "甲賀源吾",
+        "faction": "sabaku",
+        "deathYear": 1869,
+        "deathMonth": 3,
+        "deathSortKey": 186903,
+        "eventId": "event_miyako_bay",
+        "eventTitle": "宮古湾海戦、アポルダージュの奇襲",
+        "reason": "明治2年3月、回天艦長として敵甲鉄艦への奇襲中、集中砲火を浴び戦死。",
+        "lastWords": "「舵を離すな！」艦橋で指揮を執り続けた海の勇士。"
+    },
+    "kayano_sacrifice": {
+        "cardId": "kayano_sacrifice",
+        "character": "kayano",
+        "name": "萱野権兵衛",
+        "faction": "sabaku",
+        "deathYear": 1869,
+        "deathMonth": 5,
+        "deathSortKey": 186905,
+        "eventId": "event_aizu_surrender",
+        "eventTitle": "会津藩降伏、城下の朝",
+        "reason": "明治2年5月、主家松平容保の助命のため戦争責任を一手に背負い切腹。",
+        "lastWords": "「主家殉難、義の家老」会津武士道の魂を遺して果つ。"
+    },
+    "hijikata_fukucho": {
+        "cardId": "hijikata_fukucho",
+        "character": "hijikata",
+        "name": "土方歳三",
+        "faction": "sabaku",
+        "deathYear": 1869,
+        "deathMonth": 5,
+        "deathSortKey": 186905,
+        "eventId": "event_ippongi_kanmon",
+        "eventTitle": "一本木関門の激闘、土方歳三の突進",
+        "reason": "明治2年5月11日、箱館一本木関門にて馬上で進撃中、腹部に銃弾を受け戦死。",
+        "lastWords": "「よしや身は 蝦夷の島根に 朽ちぬとも 魂は東の 君をまもらむ」"
+    },
+    "iba_duel": {
+        "cardId": "iba_duel",
+        "character": "iba",
+        "name": "伊庭八郎",
+        "faction": "sabaku",
+        "deathYear": 1869,
+        "deathMonth": 5,
+        "deathSortKey": 186905,
+        "eventId": "event_hakodate_assault",
+        "eventTitle": "箱館総攻撃、最後の朝",
+        "reason": "明治2年5月、木古内で胸に重傷を負い五稜郭内にて榎本武揚に看取られ服毒自刃。",
+        "lastWords": "「待てしばし 冥土の道も 連れ添ひて」隻腕の美剣士、北辺に散る。"
+    },
+    "omura_reform": {
+        "cardId": "omura_reform",
+        "character": "omura",
+        "name": "大村益次郎",
+        "faction": "tobaku",
+        "deathYear": 1869,
+        "deathMonth": 11,
+        "deathSortKey": 186911,
+        "eventId": "event_army_ministry",
+        "eventTitle": "陸軍省設置、軍政の整備",
+        "reason": "明治2年9月に京都木屋町で元長州藩士らに襲撃され重傷、11月に大阪で落命。",
+        "lastWords": "「軍制の改革、志半ばにして斃るるか……」近代陸軍の祖の最期。"
+    },
+    "hirosawa_alliance": {
+        "cardId": "hirosawa_alliance",
+        "character": "hirosawa",
+        "name": "広沢真臣",
+        "faction": "tobaku",
+        "deathYear": 1871,
+        "deathMonth": 1,
+        "deathSortKey": 187101,
+        "eventId": "event_dajo_system",
+        "eventTitle": "太政官制度、行政の再編",
+        "reason": "明治4年1月、東京市ヶ谷の私邸にて謎の刺客に襲われ暗殺。",
+        "lastWords": "薩長同盟の陰の立役者、真相闇のまま散る。"
+    },
+    "eto_reform": {
+        "cardId": "eto_reform",
+        "character": "eto",
+        "name": "江藤新平",
+        "faction": "tobaku",
+        "deathYear": 1874,
+        "deathMonth": 4,
+        "deathSortKey": 187404,
+        "eventId": "event_seikanron_debate",
+        "eventTitle": "征韓論政変、割れる新政府",
+        "reason": "明治7年4月、佐賀の乱を起こし敗北、捕縛されて晒し首の刑死。",
+        "lastWords": "「ただ皇天後土の我が心を知るあるのみ」司法の祖、悲運の刑死。"
+    },
+    "maebara_charge": {
+        "cardId": "maebara_charge",
+        "character": "maebara",
+        "name": "前原一誠",
+        "faction": "tobaku",
+        "deathYear": 1876,
+        "deathMonth": 12,
+        "deathSortKey": 187612,
+        "eventId": "event_shinpuren_revolt",
+        "eventTitle": "神風連の乱、白刃の逆襲",
+        "reason": "明治9年12月、士族の困窮を救うため萩の乱を起こすも敗れて刑死。",
+        "lastWords": "「吾今国の為に死す、死すとも恨みなし」松門の熱血児の終焉。"
+    },
+    "sagawa_cavalry": {
+        "cardId": "sagawa_cavalry",
+        "character": "sagawa",
+        "name": "佐川官兵衛",
+        "faction": "sabaku",
+        "deathYear": 1877,
+        "deathMonth": 2,
+        "deathSortKey": 187702,
+        "eventId": "event_satsuma_rebellion",
+        "eventTitle": "西南戦争、士族の決起",
+        "reason": "明治10年2月、警視抜刀隊として南阿蘇にて突撃指揮中に銃弾を受け戦死。",
+        "lastWords": "会津の鬼官兵衛、新時代を見届け戦陣に散る。"
+    },
+    "saigo_jigen": {
+        "cardId": "saigo_jigen",
+        "character": "saigo",
+        "name": "西郷隆盛",
+        "faction": "tobaku",
+        "deathYear": 1877,
+        "deathMonth": 9,
+        "deathSortKey": 187709,
+        "eventId": "event_satsuma_rebellion",
+        "eventTitle": "西南戦争、士族の決起",
+        "reason": "明治10年9月、西南戦争の最終決戦・城山にて銃弾を浴び別府晋介の介錯で自刃。",
+        "lastWords": "「晋どん、もうここらでよか」維新の巨星、故郷の山に眠る。"
+    },
+    "nakamura_charge": {
+        "cardId": "nakamura_charge",
+        "character": "nakamura",
+        "name": "中村半次郎",
+        "faction": "tobaku",
+        "deathYear": 1877,
+        "deathMonth": 9,
+        "deathSortKey": 187709,
+        "eventId": "event_satsuma_rebellion",
+        "eventTitle": "西南戦争、士族の決起",
+        "reason": "明治10年9月、城山岩崎谷にて西郷の自刃を見届け、抜刀して敵陣へ突撃し戦死。",
+        "lastWords": "人斬り半次郎、西郷南洲に殉じ白刃の中に散る。"
+    }
+};
+
 GAME_DATA.shishiBios = {
     "ryoma_kaiwentai": "土佐藩出身。脱藩後に勝海舟に師事し神戸海軍操練所で航海術を修める。長崎に亀山社中（のちの海援隊）を結成し、長州への武器斡旋などを通じて敵対していた薩摩・長州を結ぶ「薩長同盟」を仲介。さらに後藤象二郎を介して「船中八策」を提示し大政奉還の実現に決定打を与えた。近江屋にて暗殺される。",
     "katsura_shindo": "長州藩の指導者（のちの木戸孝允）。吉田松陰の教えを受け、江戸三大道場・練兵館で神道無念流の免許皆伝を得て塾頭を務めた剣豪。池田屋事件や禁門の変など幾多の危機を巧みな変装と機転で潜り抜け「逃げの小五郎」の異名をとる。薩長同盟の当事者として討幕の主導権を握り、維新の三傑に数えられる。",
