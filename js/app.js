@@ -1075,12 +1075,29 @@ class BakumatsuApp {
             }
         }
 
-        // 選択肢の陣営と敗北/勝利陣営関係の判定
+        // 選択肢の陣営と敗北/勝利陣営関係の判定（明示的な faction 指定を最優先し、テキスト誤爆を防止）
         const choiceFaction = baseChoice.faction || 'common';
-        const isChoiceDefeatedSide = (historicalAdvantage === 'sabaku' && (choiceFaction === 'tobaku' || /尊攘|討幕|長州|七卿|天誅組|赤報隊|御陵衛士|以蔵|武市|平野国臣/.test(baseChoice.text))) ||
-                                     (historicalAdvantage === 'tobaku' && (choiceFaction === 'sabaku' || /幕府|新選組|会津|旧幕|庄内|桑名|彰義隊|甲陽鎮撫隊|近藤勇|土方歳三|白虎隊|榎本/.test(baseChoice.text)));
-        const isChoiceVictoriousSide = (historicalAdvantage === 'sabaku' && choiceFaction === 'sabaku') ||
-                                       (historicalAdvantage === 'tobaku' && choiceFaction === 'tobaku');
+        let isChoiceDefeatedSide = false;
+        let isChoiceVictoriousSide = false;
+
+        if (choiceFaction === 'tobaku') {
+            isChoiceDefeatedSide = (historicalAdvantage === 'sabaku');
+            isChoiceVictoriousSide = (historicalAdvantage === 'tobaku');
+        } else if (choiceFaction === 'sabaku') {
+            isChoiceDefeatedSide = (historicalAdvantage === 'tobaku');
+            isChoiceVictoriousSide = (historicalAdvantage === 'sabaku');
+        } else {
+            // common（陣営未指定）の場合のみ、選択肢テキストの先頭タグ等から陣営を推定
+            const isTobakuAction = /【討幕派】|^尊攘|^長州|七卿落ち|天誅組に加勢/.test(baseChoice.text);
+            const isSabakuAction = /【佐幕派】|^幕府|^会津|新選組として|彰義隊に加勢/.test(baseChoice.text);
+            if (isTobakuAction) {
+                isChoiceDefeatedSide = (historicalAdvantage === 'sabaku');
+                isChoiceVictoriousSide = (historicalAdvantage === 'tobaku');
+            } else if (isSabakuAction) {
+                isChoiceDefeatedSide = (historicalAdvantage === 'tobaku');
+                isChoiceVictoriousSide = (historicalAdvantage === 'sabaku');
+            }
+        }
 
         // 敵側が有利な歴史事件で、プレイヤーがその反対陣営の場合
         const isOpposingHistoricalEvent = Boolean(historicalAdvantage && historicalAdvantage !== this.faction && historicalAdvantage !== 'neutral');
@@ -1090,8 +1107,15 @@ class BakumatsuApp {
             success = baseChoice.chances.success;
             fail = baseChoice.chances.fail;
             riskCategory = baseChoice.riskCategory || 'custom';
+        } else if (baseChoice.isSurvivalRoute) {
+            // 🕊️ 生存ルート（歴史IF救出）は奇跡的な難関チャレンジのため reckless または defiance を強制
+            riskCategory = baseChoice.riskCategory === 'defiance' ? 'defiance' : 'reckless';
         } else if (baseChoice.riskCategory) {
             riskCategory = baseChoice.riskCategory;
+            // 敗北陣営の行動であるのに orthodox が指定されていた場合は defiance へ補正
+            if (isChoiceDefeatedSide && riskCategory === 'orthodox') {
+                riskCategory = 'defiance';
+            }
         } else if (targetsOpposingShishi) {
             // 敵陣営の志士を獲得する選択は極めて困難な歴史の抗い
             riskCategory = 'defiance';
@@ -1100,12 +1124,12 @@ class BakumatsuApp {
         } else if (baseChoice.isHistorical === true) {
             riskCategory = isChoiceDefeatedSide ? 'defiance' : 'orthodox';
         } else {
-            // キーワード自動判定（defianceをsafeより優先して判定）
+            // キーワード自動判定（defiance / reckless を safe より優先して判定）
             const text = `${baseChoice.text} ${baseChoice.effectDesc || ''} ${eventData.title || ''}`;
             
-            if (/旧勢力の完全排除|旧来の兵制を維持|武士の意地を通す|同盟を見送り|同盟を阻止|同盟破談|同盟拒否|盟約を見送り|鎖国を貫く|拒絶|拒否|破談|強硬に対峙|打ち払いを徹底|強硬論|断固拒否|旧態|頑として|歴史に抗う|懐柔を謀る|切り崩し/.test(text)) {
-                // 🟠 歴史の抗い（反史実・if決断）
-                riskCategory = 'defiance';
+            if (/旧勢力の完全排除|旧来の兵制を維持|武士の意地を通す|同盟を見送り|同盟を阻止|同盟破談|同盟拒否|盟約を見送り|鎖国を貫く|拒絶|拒否|破談|強硬に対峙|打ち払いを徹底|強硬論|断固拒否|旧態|頑として|歴史に抗う|懐柔を謀る|切り崩し|幕府独裁|独裁宣言|独裁政権|焦土|無二念/.test(text)) {
+                // 🟠 歴史の抗い・反史実決断（正史の真逆となる行動）
+                riskCategory = /全軍で総決戦|徹底抗戦|決戦を挑|一戦を交|断固拒絶|鎖国を貫く|打ち払いを徹底|無二念/.test(text) ? 'reckless' : 'defiance';
             } else if (!isChoiceVictoriousSide && /正面から|攻め込|攻め入|斬り込|迎え撃|抜刀|突入|突撃|砲撃|襲撃|死守|激戦|強行|突破|突進|暗殺|決死|打って出|決戦を挑|一戦を交|抗戦|徹底抗戦|蜂起|挙兵|ピストル|強襲|討ち入|玉砕|散華|決起|先陣|斬首|討滅|全砲門|電撃奇襲|仇を討つ|武力討幕|失地回復/.test(text)) {
                 // 🔴 逆境・無謀決戦（勝利側ではない場合のみ）
                 riskCategory = 'reckless';
