@@ -36,10 +36,8 @@ class MapSystem {
         this.app.currentTrend = trend;
 
         // 長編ローグライト階層数定義:
-        // Act 1: 14階層 ＋ 幕ボス（Floor 14） = 全15階層 (Floor 0〜14)
-        // Act 2: 14階層 ＋ 幕ボス（Floor 14） = 全15階層 (Floor 0〜14)
-        // Act 3: 13階層 ＋ 最終ボス（Floor 13） = 全14階層 (Floor 0〜13)
-        const floorCount = actNumber === 3 ? 13 : 14;
+        // Act 1〜3: 各幕 18階層 ＋ 幕ボス（Floor 18） = 全19階層 (Floor 0〜18)
+        const floorCount = 18;
 
         // Floor 0:
         // 第一幕: 志士を入手できる歴史事件（開始地点 3分岐確定）
@@ -88,15 +86,15 @@ class MapSystem {
         for (let f = 1; f < floorCount; f++) {
             const fNodes = [];
             // 歴史の関門フロア（不可避の重大事件合流地点）
-            const chokeFloor = (actNumber === 3) ? 7 : 8;
+            const chokeFloor = 10;
 
-            // ボス直前フロアは2分岐（休息＆商人）、中盤山場（f=6）は3分岐、関門（chokeFloor）は1合流、他は2〜3分岐
+            // ボス直前フロアは2分岐（休息＆商人）、山場（f=6, f=13）は3分岐、関門（chokeFloor）は1合流、他は2〜3分岐
             let colCount = 2;
             if (f === chokeFloor) {
                 colCount = 1;
             } else if (f === floorCount - 1) {
                 colCount = 2;
-            } else if (f === 6) {
+            } else if (f === 6 || f === 13) {
                 colCount = 3;
             } else {
                 colCount = (Math.random() < 0.6) ? 3 : 2;
@@ -108,7 +106,7 @@ class MapSystem {
                 let title = '戦場';
                 let isChokepoint = false;
 
-                // --- 階層設計（Slay the Spire級の洗練されたペース配分） ---
+                // --- 階層設計（歴史事件の体験を拡充した18層戦略配分） ---
                 if (f === chokeFloor) {
                     // 歴史の関門: 全ルートが必ず通過する重大歴史特異点
                     type = 'event';
@@ -127,7 +125,7 @@ class MapSystem {
                         title = '洋行商人';
                     }
                 } else if (f === 6) {
-                    // 中盤の山場: 武器庫（宝箱）または 強敵（エリート）
+                    // 前半の山場: 武器庫（宝箱）または 強敵（エリート）または 歴史事件
                     if (c === 0) {
                         type = 'treasure';
                         icon = '🎁';
@@ -142,7 +140,7 @@ class MapSystem {
                         title = '歴史事件';
                     }
                 } else if (f === 7) {
-                    // 武器庫・エリート直後の休息または事件
+                    // 前半山場直後の休息または歴史事件
                     if (c === 0) {
                         type = 'rest';
                         icon = '🍵';
@@ -152,7 +150,33 @@ class MapSystem {
                         icon = '📜';
                         title = '歴史事件';
                     }
-                } else if (f === 11) {
+                } else if (f === 13) {
+                    // 後半の山場: 武器庫（宝箱）または 強敵（エリート）または 歴史事件
+                    if (c === 0) {
+                        type = 'treasure';
+                        icon = '🎁';
+                        title = '武器庫';
+                    } else if (c === 1) {
+                        type = 'elite';
+                        icon = '👹';
+                        title = '強敵（刺客）';
+                    } else {
+                        type = 'event';
+                        icon = '📜';
+                        title = '歴史事件';
+                    }
+                } else if (f === 14) {
+                    // 後半山場直後の休息または歴史事件
+                    if (c === 0) {
+                        type = 'rest';
+                        icon = '🍵';
+                        title = '茶屋休息';
+                    } else {
+                        type = 'event';
+                        icon = '📜';
+                        title = '歴史事件';
+                    }
+                } else if (f === 15) {
                     // 終盤の難所: 強敵（エリート）または歴史事件・商人
                     if (c === 0) {
                         type = 'elite';
@@ -167,8 +191,8 @@ class MapSystem {
                         icon = '💰';
                         title = '洋行商人';
                     }
-                } else if (f === 4 || f === 12) {
-                    // 商人・休息・事件の寄り道フロア
+                } else if (f === 4 || f === 9 || f === 16) {
+                    // 商人・休息・歴史事件の寄り道フロア
                     if (c === 0) {
                         type = 'shop';
                         icon = '💰';
@@ -183,37 +207,37 @@ class MapSystem {
                         title = '戦場';
                     }
                 } else if (f <= 3) {
-                    // 序盤フロア (f === 1, 2, 3): デッキの基盤を作る戦場主体
+                    // 序盤フロア (f === 1, 2, 3): 戦場と歴史事件が選べる構成
                     const rand = Math.random();
-                    if (rand < 0.65) {
-                        type = 'battle';
-                        icon = '⚔️';
-                        title = '戦場';
-                    } else if (rand < 0.90) {
+                    if (rand < 0.45) {
                         type = 'event';
                         icon = '📜';
                         title = '歴史事件';
+                    } else if (rand < 0.85) {
+                        type = 'battle';
+                        icon = '⚔️';
+                        title = '戦場';
                     } else {
                         type = 'rest';
                         icon = '🍵';
                         title = '茶屋休息';
                     }
                 } else {
-                    // 中盤一般フロア (f === 5, 8, 9, 10): 多彩な分岐網
+                    // 一般フロア: 歴史事件の遭遇率を高めた多彩な分岐網
                     const rand = Math.random();
-                    if (rand < 0.40) {
-                        type = 'battle';
-                        icon = '⚔️';
-                        title = '戦場';
-                    } else if (rand < 0.65) {
+                    if (rand < 0.45) {
                         type = 'event';
                         icon = '📜';
                         title = '歴史事件';
-                    } else if (rand < 0.82) {
+                    } else if (rand < 0.75) {
+                        type = 'battle';
+                        icon = '⚔️';
+                        title = '戦場';
+                    } else if (rand < 0.87) {
                         type = 'shop';
                         icon = '💰';
                         title = '洋行商人';
-                    } else if (rand < 0.92) {
+                    } else if (rand < 0.95) {
                         type = 'rest';
                         icon = '🍵';
                         title = '茶屋休息';
@@ -437,9 +461,11 @@ class MapSystem {
                 if (deathDef.deathSortKey && deathDef.deathSortKey < this.app.currentSortKey) {
                     if (!this.app.isShishiSaved(cId) && !this.app.isShishiDead(cId)) {
                         if (!deathsToTrigger.some(d => d.cardId === cId)) {
+                            const y = deathDef.deathYear || deathDef.year || Math.floor((deathDef.deathSortKey || 0) / 100);
+                            const m = deathDef.deathMonth || deathDef.month || ((deathDef.deathSortKey || 0) % 100);
                             deathsToTrigger.push({
                                 cardId: cId,
-                                reason: `史実の年月（${deathDef.year}年${deathDef.month}月）を経過したため落命`,
+                                reason: `史実の年月（${y}年${m}月）を経過したため落命`,
                                 eventTitle: deathDef.eventTitle
                             });
                         }
@@ -630,6 +656,9 @@ class MapSystem {
         // プレイヤー所持志士のうち、まだ生存確定・死亡していない志士の死亡イベントを抽出
         const ownedCardIds = new Set(this.app && this.app.deck ? this.app.deck : []);
         const urgentDeathEvents = [];
+        const allDeathEventIds = new Set(
+            GAME_DATA.shishiDeaths ? Object.values(GAME_DATA.shishiDeaths).map(d => d.eventId) : []
+        );
         if (GAME_DATA.shishiDeaths) {
             Object.values(GAME_DATA.shishiDeaths).forEach(d => {
                 if (ownedCardIds.has(d.cardId) && !this.app.isShishiSaved(d.cardId) && !this.app.isShishiDead(d.cardId)) {
@@ -682,34 +711,65 @@ class MapSystem {
                         if (earlyPool.length > 0) pool = earlyPool;
                     }
 
-                    // 万が一プールが枯渇した場合でも、年代の単調増加（過去逆戻り防止）を最優先で維持
+                    // 万が一プールが枯渇した場合でも、年代の単調増加および関門境界を厳格に維持
                     if (pool.length === 0) {
                         pool = actEvents.filter(e =>
                             !allChokeEventIds.has(e.id) &&
                             !assignedIds.has(e.id) &&
-                            (e.sortKey || 0) >= currentMinSortKey
+                            (e.sortKey || 0) >= currentMinSortKey &&
+                            (e.sortKey || 0) <= maxKey
                         );
                     }
                     if (pool.length === 0) {
-                        pool = actEvents.filter(e => (e.sortKey || 0) >= currentMinSortKey);
+                        pool = actEvents.filter(e =>
+                            !allChokeEventIds.has(e.id) &&
+                            !assignedIds.has(e.id) &&
+                            (e.sortKey || 0) <= maxKey
+                        );
+                    }
+                    if (pool.length === 0) {
+                        pool = actEvents.filter(e => !allChokeEventIds.has(e.id) && !assignedIds.has(e.id));
                     }
                     if (pool.length === 0) {
                         pool = actEvents;
                     }
 
                     // 優先度ソート:
-                    // 1. 所持志士の命運がかかった事件（urgentDeathEvents）で、年代条件を満たすものを最優先で配置！
-                    // 2. 年代昇順（sortKey）
-                    // 3. 自陣営向け選択肢を持つものを優先
+                    // 1. 所持志士の命運がかかった事件（urgentDeathEvents）を最優先
+                    // 2. 同じ時期（同一年、または直近の年代帯）に有名志士が死亡する歴史事件があれば一般事件より優先！
+                    // 3. 次の有名志士死亡事件が控えている場合、過去の一般イベントでの停滞を防ぎ死亡事件を優先
+                    // 4. 年代昇順（sortKey）
+                    // 5. 自陣営向け選択肢を持つものを優先
                     const urgentForThisWindow = urgentDeathEvents.filter(ue =>
                         !assignedIds.has(ue.id) && (ue.sortKey || 0) >= minKey && (ue.sortKey || 0) <= maxKey
                     );
+
+                    const unassignedDeaths = pool.filter(e => allDeathEventIds.has(e.id));
+                    const nextDeathEvent = unassignedDeaths[0];
 
                     pool.sort((a, b) => {
                         const aUrgent = urgentForThisWindow.some(u => u.id === a.id);
                         const bUrgent = urgentForThisWindow.some(u => u.id === b.id);
                         if (aUrgent && !bUrgent) return -1;
                         if (!aUrgent && bUrgent) return 1;
+
+                        const aDeath = allDeathEventIds.has(a.id);
+                        const bDeath = allDeathEventIds.has(b.id);
+                        const yearA = Math.floor((a.sortKey || 0) / 100);
+                        const yearB = Math.floor((b.sortKey || 0) / 100);
+
+                        // 同じ時期（同一年）に有名志士が死亡する歴史事件があれば優先配置！
+                        if (yearA === yearB) {
+                            if (aDeath && !bDeath) return -1;
+                            if (!aDeath && bDeath) return 1;
+                        }
+
+                        // 次の有名志士死亡事件が控えている場合、過去の一般イベントでの停滞を防ぎ死亡事件を優先
+                        if (nextDeathEvent && f >= 2) {
+                            const targetYear = Math.floor((nextDeathEvent.sortKey || 0) / 100);
+                            if (a.id === nextDeathEvent.id && yearB < targetYear) return -1;
+                            if (b.id === nextDeathEvent.id && yearA < targetYear) return 1;
+                        }
 
                         const diff = (a.sortKey || 0) - (b.sortKey || 0);
                         if (diff !== 0) return diff;
