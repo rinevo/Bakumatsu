@@ -1051,7 +1051,8 @@ class BakumatsuApp {
         const effectText = `${baseChoice.effectDesc || ''}`;
         if (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) {
             for (const [cardId, card] of Object.entries(GAME_DATA.cards)) {
-                if (card.type === 'shishi' && (actionStr.includes(`'${cardId}'`) || actionStr.includes(`"${cardId}"`) || effectText.includes(card.name) || (card.character && effectText.includes(card.character)))) {
+                const isCharacterCard = card.type === 'shishi' || Boolean(card.character);
+                if (isCharacterCard && (actionStr.includes(`'${cardId}'`) || actionStr.includes(`"${cardId}"`) || effectText.includes(card.name) || (card.character && effectText.includes(card.character)))) {
                     if (card.faction && card.faction !== 'neutral' && card.faction !== this.faction) {
                         targetsOpposingShishi = true;
                         break;
@@ -1110,15 +1111,19 @@ class BakumatsuApp {
         } else if (baseChoice.isSurvivalRoute) {
             // 🕊️ 生存ルート（歴史IF救出）は奇跡的な難関チャレンジのため reckless または defiance を強制
             riskCategory = baseChoice.riskCategory === 'defiance' ? 'defiance' : 'reckless';
+        } else if (targetsOpposingShishi) {
+            // ⚠️ 敵陣営志士の登用: 自陣営と敵対する志士の獲得は、設定値にかかわらず歴史の抗い(defiance)へ強制格下げ
+            // 呪い混入や大ダメージ(HP30以上損失)を伴う場合、または元がrecklessの場合は無謀決戦(reckless: 15%〜25%)
+            const hasCurseOrHeavyDamage = effectText.includes('呪い') || actionStr.includes('curse_') ||
+                                          /HPを?\s*(?:3[0-9]|[4-9][0-9])\s*失/.test(effectText) ||
+                                          /damagePlayer\((?:3[0-9]|[4-9][0-9])\)/.test(actionStr);
+            riskCategory = (hasCurseOrHeavyDamage || baseChoice.riskCategory === 'reckless') ? 'reckless' : 'defiance';
         } else if (baseChoice.riskCategory) {
             riskCategory = baseChoice.riskCategory;
             // 敗北陣営の行動であるのに orthodox が指定されていた場合は defiance へ補正
             if (isChoiceDefeatedSide && riskCategory === 'orthodox') {
                 riskCategory = 'defiance';
             }
-        } else if (targetsOpposingShishi) {
-            // 敵陣営の志士を獲得する選択は極めて困難な歴史の抗い
-            riskCategory = 'defiance';
         } else if (baseChoice.isHistorical === false) {
             riskCategory = 'defiance';
         } else if (baseChoice.isHistorical === true) {
