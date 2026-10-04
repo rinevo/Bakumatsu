@@ -607,9 +607,9 @@ class MapSystem {
     // 必ず通る関門（チョークポイント）に割り当てる重大歴史事件の定義
     static get CHOKEPOINT_EVENTS() {
         return {
-            1: 'event_hamaguri_gate',      // 第一幕関門: 禁門の変、御所前の激戦
-            2: 'event_second_choshu_war',  // 第二幕関門: 第二次長州征討、四境戦争の激闘
-            3: 'event_toba_fushimi'        // 第三幕関門: 鳥羽・伏見の戦い
+            1: 'event_august_coup',         // 第一幕関門: 八月十八日の政変、都の転換 (186308)
+            2: 'event_second_choshu_war',   // 第二幕関門: 第二次長州征討、四境戦争の激闘 (186606)
+            3: 'event_aizu_war'             // 終幕関門: 会津戦争、白虎の決意 (186808)
         };
     }
 
@@ -624,97 +624,134 @@ class MapSystem {
         const faction = this.app ? this.app.faction : null;
         const allChokeEventIds = MapSystem.ALL_CHOKEPOINT_EVENT_IDS;
         const chokeId = MapSystem.CHOKEPOINT_EVENTS[actNumber];
+        const chokeEvent = actEvents.find(e => e.id === chokeId);
+        const chokeSortKey = chokeEvent ? (chokeEvent.sortKey || 0) : 999999;
 
-        // プレイヤー所持志士のうち、まだ生存確定・死亡していない志士の死亡イベントIDを抽出
+        // プレイヤー所持志士のうち、まだ生存確定・死亡していない志士の死亡イベントを抽出
         const ownedCardIds = new Set(this.app && this.app.deck ? this.app.deck : []);
-        const urgentDeathEventIds = new Set();
+        const urgentDeathEvents = [];
         if (GAME_DATA.shishiDeaths) {
             Object.values(GAME_DATA.shishiDeaths).forEach(d => {
                 if (ownedCardIds.has(d.cardId) && !this.app.isShishiSaved(d.cardId) && !this.app.isShishiDead(d.cardId)) {
-                    urgentDeathEventIds.add(d.eventId);
+                    const ev = actEvents.find(e => e.id === d.eventId);
+                    if (ev) urgentDeathEvents.push(ev);
                 }
             });
         }
 
-        // 道中イベント用の候補プール（四境戦争などの関門専用イベントは絶対に除外）
-        const generalActEvents = actEvents.filter(e => !allChokeEventIds.has(e.id));
+        // イベントノードをフロアごとにグループ化（フロア順に厳格配置）
+        const eventNodesByFloor = {};
+        this.nodes.filter(n => n.type === 'event').forEach(node => {
+            if (!eventNodesByFloor[node.floor]) eventNodesByFloor[node.floor] = [];
+            eventNodesByFloor[node.floor].push(node);
+        });
 
-        // マップ上の全イベントノードを floor 昇順、col 昇順に抽出
-        const eventNodes = this.nodes
-            .filter(n => n.type === 'event')
-            .sort((a, b) => a.floor - b.floor || a.col - b.col);
-
+        const floors = Object.keys(eventNodesByFloor).map(Number).sort((a, b) => a - b);
         const assignedIds = new Set();
-        // 関門イベントIDをあらかじめ予約登録し、道中ノードが選択できないように完全ガード
         allChokeEventIds.forEach(id => assignedIds.add(id));
 
-        let lastSortKey = 0;
+        const chokepointFloor = floors.find(f => eventNodesByFloor[f].some(n => n.isChokepoint));
 
-        eventNodes.forEach(node => {
-            let candidates;
+        let currentMinSortKey = 0;
 
-            if (node.isChokepoint) {
-                // 歴史の関門（チョークポイント・必ず通るコマ）: 幕に応じた不可避の重大決戦事件を確定割り当て
-                const found = GAME_DATA.events.find(e => e.id === chokeId);
-                candidates = found ? [found] : actEvents;
-            } else if (node.floor === 0) {
-                // 第一幕 Floor 0: 幕の黎明期（最初の5件）から選択（関門イベントは除外）
-                candidates = generalActEvents.slice(0, 5).filter(e => !assignedIds.has(e.id));
-                if (candidates.length === 0) candidates = generalActEvents.slice(0, 5);
-            } else {
-                // 道中フロア: 直前の事件の年代以降から抽出（関門イベントは除外）
-                candidates = generalActEvents.filter(e => !assignedIds.has(e.id) && (e.sortKey || 0) >= lastSortKey);
-                if (candidates.length === 0) {
-                    candidates = generalActEvents.filter(e => !assignedIds.has(e.id));
+        floors.forEach(f => {
+            const nodesOnFloor = eventNodesByFloor[f];
+
+            nodesOnFloor.forEach(node => {
+                let selectedEvent = null;
+
+                if (node.isChokepoint) {
+                    selectedEvent = chokeEvent;
+                } else {
+                    const isBeforeChoke = chokepointFloor !== undefined && f < chokepointFloor;
+                    const isAfterChoke = chokepointFloor !== undefined && f > chokepointFloor;
+
+                    const minKey = isAfterChoke ? Math.max(currentMinSortKey, chokeSortKey) : currentMinSortKey;
+                    const maxKey = isBeforeChoke ? chokeSortKey : Infinity;
+
+                    let pool = actEvents.filter(e =>
+                        !allChokeEventIds.has(e.id) &&
+                        !assignedIds.has(e.id) &&
+                        (e.sortKey || 0) >= minKey &&
+                        (e.sortKey || 0) <= maxKey
+                    );
+
+                    // 開始地点（Floor 0）は幕の序盤イベント（最初の5件など）を優先
+                    if (f === 0) {
+                        const earlyPool = pool.filter(e => (e.sortKey || 0) <= (actEvents[4]?.sortKey || maxKey));
+                        if (earlyPool.length > 0) pool = earlyPool;
+                    }
+
+                    // 万が一プールが枯渇した場合でも、年代の単調増加（過去逆戻り防止）を最優先で維持
+                    if (pool.length === 0) {
+                        pool = actEvents.filter(e =>
+                            !allChokeEventIds.has(e.id) &&
+                            !assignedIds.has(e.id) &&
+                            (e.sortKey || 0) >= currentMinSortKey
+                        );
+                    }
+                    if (pool.length === 0) {
+                        pool = actEvents.filter(e => (e.sortKey || 0) >= currentMinSortKey);
+                    }
+                    if (pool.length === 0) {
+                        pool = actEvents;
+                    }
+
+                    // 優先度ソート:
+                    // 1. 所持志士の命運がかかった事件（urgentDeathEvents）で、年代条件を満たすものを最優先で配置！
+                    // 2. 年代昇順（sortKey）
+                    // 3. 自陣営向け選択肢を持つものを優先
+                    const urgentForThisWindow = urgentDeathEvents.filter(ue =>
+                        !assignedIds.has(ue.id) && (ue.sortKey || 0) >= minKey && (ue.sortKey || 0) <= maxKey
+                    );
+
+                    pool.sort((a, b) => {
+                        const aUrgent = urgentForThisWindow.some(u => u.id === a.id);
+                        const bUrgent = urgentForThisWindow.some(u => u.id === b.id);
+                        if (aUrgent && !bUrgent) return -1;
+                        if (!aUrgent && bUrgent) return 1;
+
+                        const diff = (a.sortKey || 0) - (b.sortKey || 0);
+                        if (diff !== 0) return diff;
+
+                        if (faction) {
+                            const aFav = (a.choices || []).some(c => c.faction === faction || !c.faction);
+                            const bFav = (b.choices || []).some(c => c.faction === faction || !c.faction);
+                            return (bFav ? 1 : 0) - (aFav ? 1 : 0);
+                        }
+                        return 0;
+                    });
+
+                    selectedEvent = pool[0];
                 }
-                if (candidates.length === 0) {
-                    candidates = generalActEvents.length > 0 ? generalActEvents : actEvents;
-                }
-            }
 
-            // 優先度ソート:
-            // 1. 所持志士の命運がかかった事件（urgentDeathEventIds）を最優先で出現させる！
-            // 2. 年代順（sortKey）
-            // 3. 自陣営向け選択肢を持つものを優先
-            candidates.sort((a, b) => {
-                const aUrgent = urgentDeathEventIds.has(a.id);
-                const bUrgent = urgentDeathEventIds.has(b.id);
-                if (aUrgent && !bUrgent) return -1;
-                if (!aUrgent && bUrgent) return 1;
+                if (selectedEvent) {
+                    assignedIds.add(selectedEvent.id);
+                    node.eventId = selectedEvent.id;
+                    node.period = selectedEvent.period || (selectedEvent.year ? `${selectedEvent.year}年` : '1860年');
+                    node.shortTitle = selectedEvent.shortTitle || selectedEvent.title;
+                    node.title = `${node.period}\n${node.shortTitle}`;
+                    node.sortKey = selectedEvent.sortKey || 0;
 
-                const diff = (a.sortKey || 0) - (b.sortKey || 0);
-                if (diff !== 0) return diff;
-                if (faction) {
-                    const aFav = (a.choices || []).some(c => c.faction === faction || !c.faction);
-                    const bFav = (b.choices || []).some(c => c.faction === faction || !c.faction);
-                    return (bFav ? 1 : 0) - (aFav ? 1 : 0);
-                }
-                return 0;
-            });
-
-            const selected = candidates[0] || (node.isChokepoint ? GAME_DATA.events.find(e => e.id === chokeId) : generalActEvents[0] || actEvents[0]);
-            if (selected) {
-                assignedIds.add(selected.id);
-                lastSortKey = selected.sortKey || lastSortKey;
-
-                node.eventId = selected.id;
-                node.period = selected.period || `${selected.year || 1860}年`;
-                node.shortTitle = selected.shortTitle || selected.title;
-                node.title = `${node.period}\n${node.shortTitle}`;
-                node.sortKey = selected.sortKey || 0;
-
-                // 志士命運メタデータをノードに付与
-                if (GAME_DATA.shishiDeaths) {
-                    const deathEntry = Object.values(GAME_DATA.shishiDeaths).find(d => d.eventId === selected.id);
-                    if (deathEntry) {
-                        node.isFateNode = true;
-                        node.deathShishiCardId = deathEntry.cardId;
-                        node.deathShishiWarning = deathEntry.name;
-                        if (ownedCardIds.has(deathEntry.cardId)) {
-                            node.isOwnedFateNode = true;
+                    // 志士命運メタデータをノードに付与
+                    if (GAME_DATA.shishiDeaths) {
+                        const deathEntry = Object.values(GAME_DATA.shishiDeaths).find(d => d.eventId === selectedEvent.id);
+                        if (deathEntry) {
+                            node.isFateNode = true;
+                            node.deathShishiCardId = deathEntry.cardId;
+                            node.deathShishiWarning = deathEntry.name;
+                            if (ownedCardIds.has(deathEntry.cardId)) {
+                                node.isOwnedFateNode = true;
+                            }
                         }
                     }
                 }
+            });
+
+            // フロア完了後、このフロアで割り当てられたイベントの年代に基づいて次フロアの最小年代を更新
+            const floorSortKeys = nodesOnFloor.map(n => n.sortKey).filter(Boolean);
+            if (floorSortKeys.length > 0) {
+                currentMinSortKey = Math.max(currentMinSortKey, Math.min(...floorSortKeys));
             }
         });
     }

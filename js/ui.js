@@ -818,6 +818,9 @@ class UIManager {
             choicesContainer.innerHTML = '';
             eventData.choices
                 .filter(choice => {
+                    // 生存ルート（志士救出選択肢）は歴史IFの特別救出ルートのため、陣営制限や志士死亡による除外判定をバイパスして必ず表示
+                    if (choice.isSurvivalRoute) return true;
+
                     if (choice.faction && choice.faction !== this.app.faction) return false;
                     if (choice.action && typeof GAME_DATA !== 'undefined' && GAME_DATA.canFactionAcquireCard) {
                         const fnStr = choice.action.toString();
@@ -1475,6 +1478,16 @@ class UIManager {
 
         listContainer.innerHTML = '';
 
+        const leadEl = modal.querySelector('.death-modal-lead');
+        if (leadEl) {
+            const hasOwned = deadInfoList.some(d => d.wasOwned);
+            if (hasOwned) {
+                leadEl.innerHTML = `歴史の激流と過酷なる運命により、志士が命を落としました。<br>対象の志士カードは<strong class="highlight-loss">山札から消滅</strong>し、以降入手不可となります。`;
+            } else {
+                leadEl.innerHTML = `救出作戦は敵の猛攻に阻まれ、志士の命を救うことは叶いませんでした。<br>対象の志士は死線にて落命し、以降<strong class="highlight-loss">二度と仲間に加えることはできません</strong>。`;
+            }
+        }
+
         deadInfoList.forEach(info => {
             const cardObj = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards && GAME_DATA.cards[info.cardId]) || {};
             const cardName = info.name || cardObj.name || info.cardId;
@@ -1482,23 +1495,32 @@ class UIManager {
             const reason = info.reason || '歴史の死線により落命';
             const eventTitle = info.eventTitle || '歴史事件';
             const lastWords = info.lastWords || '';
+            const statusBadgeText = info.wasOwned ? '落命・山札から消滅' : '救出失敗・以降入手不可';
+            const visualTagText = info.wasOwned ? '散華・消滅' : '散華・落命';
+
+            let displayLastWords = (lastWords || '').trim();
+            if (displayLastWords) {
+                if (!displayLastWords.startsWith('「')) {
+                    displayLastWords = `「${displayLastWords}」`;
+                }
+            }
 
             const item = document.createElement('div');
             item.className = 'shishi-death-card-item';
             item.innerHTML = `
                 <div class="death-card-visual">
                     <img src="${cardImg}" alt="${cardName}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'90\\' height=\\'128\\' viewBox=\\'0 0 90 128\\'><rect width=\\'90\\' height=\\'128\\' fill=\\'%231a1a1a\\'/><text x=\\'45\\' y=\\'64\\' fill=\\'%23888\\' font-size=\\'12\\' text-anchor=\\'middle\\' dominant-baseline=\\'central\\'>${encodeURIComponent(cardName)}</text></svg>'">
-                    <div class="death-fallen-tag">散華・消滅</div>
+                    <div class="death-fallen-tag">${visualTagText}</div>
                 </div>
                 <div class="death-card-info">
                     <div class="death-card-name-row">
                         <span class="death-card-name">${cardName}</span>
-                        <span class="death-status-badge">落命・入手不可</span>
+                        <span class="death-status-badge">${statusBadgeText}</span>
                     </div>
                     <div class="death-reason-box">
                         <strong>【落命原因】</strong> ${reason}（契機: ${eventTitle}）
                     </div>
-                    ${lastWords ? `<div class="death-lastwords">「${lastWords}」</div>` : ''}
+                    ${displayLastWords ? `<div class="death-lastwords">${displayLastWords}</div>` : ''}
                 </div>
             `;
             listContainer.appendChild(item);

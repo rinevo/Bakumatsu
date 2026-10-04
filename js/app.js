@@ -599,12 +599,13 @@ class BakumatsuApp {
         }
     }
 
-    addCardToDeck(cardId) {
-        if (this.isShishiDead(cardId)) {
+    addCardToDeck(cardId, force = false) {
+        const isSaved = this.isShishiSaved(cardId);
+        if (!force && !isSaved && this.isShishiDead(cardId)) {
             console.warn(`[志士死亡] 『${cardId}』は歴史上落命したため、デッキに加えることはできません。`);
             return false;
         }
-        if (typeof GAME_DATA !== 'undefined' && GAME_DATA.canFactionAcquireCard) {
+        if (!force && !isSaved && typeof GAME_DATA !== 'undefined' && GAME_DATA.canFactionAcquireCard) {
             if (!GAME_DATA.canFactionAcquireCard(cardId, this.faction)) {
                 const card = GAME_DATA.cards[cardId];
                 const cardName = card ? card.name : cardId;
@@ -1291,6 +1292,11 @@ class BakumatsuApp {
                 this.modifyPublicOpinion(opinionBonus);
 
                 if (baseChoice.isSurvivalRoute) {
+                    if (Array.isArray(baseChoice.targetShishi)) {
+                        baseChoice.targetShishi.forEach(cId => {
+                            this.markShishiSurvived(cId);
+                        });
+                    }
                     rewards.unshift({ icon: '🕊️', text: `<strong>【史実改変・生存達成】</strong>志士の死線を乗り越え、歴史の運命を覆しました！` });
                 }
 
@@ -1317,6 +1323,11 @@ class BakumatsuApp {
 
                 // 生存ルート達成表示
                 if (baseChoice.isSurvivalRoute) {
+                    if (Array.isArray(baseChoice.targetShishi)) {
+                        baseChoice.targetShishi.forEach(cId => {
+                            this.markShishiSurvived(cId);
+                        });
+                    }
                     rewards.unshift({ icon: '🕊️', text: `<strong>【史実改変・生存達成】</strong>志士の死線を乗り越え、歴史の運命を覆しました！` });
                 }
 
@@ -1376,11 +1387,19 @@ class BakumatsuApp {
                     const deadNow = [];
                     baseChoice.targetShishi.forEach(cId => {
                         const res = this.killShishi(cId, '救出作戦失敗により死線にて落命', event?.title);
-                        if (res && res.wasOwned) deadNow.push(res);
+                        if (res) deadNow.push(res);
                     });
-                    rewards.unshift({ icon: '🥀', text: `<span class="penalty">【救出失敗】志士の命を救うことができず、無念の落命となりました（山札から消滅）。</span>` });
+                    rewards.unshift({ icon: '🥀', text: `<span class="penalty">【救出失敗】志士の命を救うことができず、無念の落命となりました（山札から消滅・以降入手不可）。</span>` });
                     if (deadNow.length > 0) {
                         this.pendingSurvivalFailureDeaths = deadNow;
+                        // 結末画面表示の直後に落命報告ウィンドウを自動表示
+                        setTimeout(() => {
+                            if (this.ui && this.ui.showShishiDeathModal && this.pendingSurvivalFailureDeaths) {
+                                const list = this.pendingSurvivalFailureDeaths;
+                                this.pendingSurvivalFailureDeaths = null;
+                                this.ui.showShishiDeathModal(list);
+                            }
+                        }, 600);
                     }
                 }
 
@@ -1452,6 +1471,7 @@ class BakumatsuApp {
 
         const origAddCard = this.addCardToDeck.bind(this);
         const origDamage = this.damagePlayer.bind(this);
+        const origMarkSurvived = this.markShishiSurvived.bind(this);
         const origObtainRelic = this.obtainRandomRelic ? this.obtainRandomRelic.bind(this) : null;
         const origRemovalModal = this.openCardRemovalModal ? this.openCardRemovalModal.bind(this) : null;
         let origPlayFanfare = null;
@@ -1463,9 +1483,12 @@ class BakumatsuApp {
                 // ダメージ無効化
             };
         } else if (outcome === 'failure') {
-            // 失敗: 志士カードの獲得、レリック入手、カード削除モーダルを完全ブロック！
+            // 失敗: 志士カードの獲得、生存確定、レリック入手、カード削除モーダルを完全ブロック！
             this.addCardToDeck = (cardId) => {
                 // 志士獲得を阻止
+            };
+            this.markShishiSurvived = (cardId) => {
+                // 失敗時は生存確定を完全阻止！
             };
             if (origObtainRelic) {
                 this.obtainRandomRelic = () => { /* ブロック */ };
@@ -1487,6 +1510,7 @@ class BakumatsuApp {
         } finally {
             this.addCardToDeck = origAddCard;
             this.damagePlayer = origDamage;
+            this.markShishiSurvived = origMarkSurvived;
             if (origObtainRelic) this.obtainRandomRelic = origObtainRelic;
             if (origRemovalModal) this.openCardRemovalModal = origRemovalModal;
             if (window.soundSystem) {

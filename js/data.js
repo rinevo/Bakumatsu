@@ -4406,13 +4406,15 @@ const GAME_DATA = {
                     targetShishi: ["sufu_reform"],
                     opinionChange: 8,
                     costGold: 30,
-                    canChoose: (app) => app.gold >= 30,
                     text: "【🕊️ 生存ルート】自刃を決意した周布政之助を必死に説得し、松下村塾の門弟らの未来のため生き延びさせる",
-                    effectDesc: "【生存ルート】志士『周布政之助』を説得し生存確定！軍資金 30両 を消費し世論討幕+8%、周布は生存確定となる。",
+                    effectDesc: "【生存ルート】志士『周布政之助』を説得し生存確定！軍資金 30両 を消費（不足時はHP代替）し世論討幕+8%、周布は生存確定となる。",
                     action: (app) => {
                         app.markShishiSurvived("sufu_reform");
                         if (!app.deck.includes("sufu_reform")) app.addCardToDeck("sufu_reform");
-                        app.gold -= 30;
+                        const spendGold = Math.min(app.gold, 30);
+                        const shortage = 30 - spendGold;
+                        app.gold -= spendGold;
+                        if (shortage > 0) app.damagePlayer(shortage);
                     }
                 },
                 {
@@ -5231,14 +5233,15 @@ const GAME_DATA = {
                     targetShishi: ["eto_reform"],
                     opinionChange: 10,
                     costGold: 35,
-                    canChoose: (app) => app.gold >= 35,
                     text: "【🕊️ 生存ルート】佐賀の乱で敗走した江藤新平を捕縛網から救い出し、新政府司法省の顧問として復権させる",
-                    effectDesc: "【生存ルート】志士『江藤新平』を救出！軍資金 35両 とHP 20 を消費するが、江藤は生存確定となる！",
+                    effectDesc: "【生存ルート】志士『江藤新平』を救出！軍資金 35両 とHP 20 を消費（資金不足時は不足分HPを追加消費）し、江藤は生存確定となる！",
                     action: (app) => {
                         app.markShishiSurvived("eto_reform");
                         if (!app.deck.includes("eto_reform")) app.addCardToDeck("eto_reform");
-                        app.gold -= 35;
-                        app.damagePlayer(20);
+                        const spendGold = Math.min(app.gold, 35);
+                        const shortage = 35 - spendGold;
+                        app.gold -= spendGold;
+                        app.damagePlayer(20 + shortage);
                     }
                 },
                 {
@@ -5796,14 +5799,15 @@ const GAME_DATA = {
                     targetShishi: ["kawai_artillery"],
                     opinionChange: -8,
                     costGold: 35,
-                    canChoose: (app) => app.gold >= 35,
                     text: "【🕊️ 生存ルート】八十里越えの退却途上で河井継之助の被弾傷に最新西洋外科手術を施し一命を救う",
-                    effectDesc: "【生存ルート】志士『河井継之助』を救出！軍資金 35両 とHP 20 を消費するが、河井は生存確定となりデッキに残留！",
+                    effectDesc: "【生存ルート】志士『河井継之助』を救出！軍資金 35両 とHP 20 を消費（資金不足時は不足分HPを追加消費）し、河井は生存確定となりデッキに残留！",
                     action: (app) => {
                         app.markShishiSurvived("kawai_artillery");
                         if (!app.deck.includes("kawai_artillery")) app.addCardToDeck("kawai_artillery");
-                        app.gold -= 35;
-                        app.damagePlayer(20);
+                        const spendGold = Math.min(app.gold, 35);
+                        const shortage = 35 - spendGold;
+                        app.gold -= spendGold;
+                        app.damagePlayer(20 + shortage);
                     }
                 },
                 {
@@ -6004,13 +6008,15 @@ const GAME_DATA = {
                     targetShishi: ["kayano_sacrifice"],
                     opinionChange: -5,
                     costGold: 40,
-                    canChoose: (app) => app.gold >= 40,
                     text: "【🕊️ 生存ルート】新政府軍参謀へ直談判し、家老・萱野権兵衛の殉難切腹を助命して会津復興の任へ就かせる",
-                    effectDesc: "【生存ルート】志士『萱野権兵衛』を救出し生存確定！軍資金 40両 を消費するが、萱野は生存確定となる。",
+                    effectDesc: "【生存ルート】志士『萱野権兵衛』を救出し生存確定！軍資金 40両 を消費（不足時はHP代替）し、萱野は生存確定となる。",
                     action: (app) => {
                         app.markShishiSurvived("kayano_sacrifice");
                         if (!app.deck.includes("kayano_sacrifice")) app.addCardToDeck("kayano_sacrifice");
-                        app.gold -= 40;
+                        const spendGold = Math.min(app.gold, 40);
+                        const shortage = 40 - spendGold;
+                        app.gold -= spendGold;
+                        if (shortage > 0) app.damagePlayer(shortage);
                     }
                 },
                 {
@@ -8255,13 +8261,15 @@ const GAME_DATA = {
                     targetShishi: ["sagara_souzou"],
                     opinionChange: 10,
                     costGold: 30,
-                    canChoose: (app) => app.gold >= 30,
                     text: "【🕊️ 生存ルート】下諏訪宿の処刑場へ急行し、官軍使者を説得して相楽総三の処刑を中止させ身柄を引き取る",
-                    effectDesc: "【生存ルート】志士『相楽総三』を救出！軍資金 30両 を支払い世論討幕+10%、相楽は生存確定となる。",
+                    effectDesc: "【生存ルート】志士『相楽総三』を救出！軍資金 30両 を支払い（不足時はHP代替）世論討幕+10%、相楽は生存確定となる。",
                     action: (app) => {
                         app.markShishiSurvived("sagara_souzou");
                         if (!app.deck.includes("sagara_souzou")) app.addCardToDeck("sagara_souzou");
-                        app.gold -= 30;
+                        const spendGold = Math.min(app.gold, 30);
+                        const shortage = 30 - spendGold;
+                        app.gold -= spendGold;
+                        if (shortage > 0) app.damagePlayer(shortage);
                     }
                 },
                 {
@@ -9008,14 +9016,15 @@ const GAME_DATA = {
                     targetShishi: ["maebara_charge"],
                     opinionChange: 10,
                     costGold: 35,
-                    canChoose: (app) => app.gold >= 35,
                     text: "【🕊️ 生存ルート】萩の乱の敗戦直前に前原一誠を説得して海外亡命を手配し、処刑の死線を回避させる",
-                    effectDesc: "【生存ルート】志士『前原一誠』を救出！軍資金 35両 とHP 20 を消費するが、前原は生存確定となる！",
+                    effectDesc: "【生存ルート】志士『前原一誠』を救出！軍資金 35両 とHP 20 を消費（資金不足時は不足分HPを追加消費）し、前原は生存確定となる！",
                     action: (app) => {
                         app.markShishiSurvived("maebara_charge");
                         if (!app.deck.includes("maebara_charge")) app.addCardToDeck("maebara_charge");
-                        app.gold -= 35;
-                        app.damagePlayer(20);
+                        const spendGold = Math.min(app.gold, 35);
+                        const shortage = 35 - spendGold;
+                        app.gold -= spendGold;
+                        app.damagePlayer(20 + shortage);
                     }
                 },
                 {
@@ -9149,13 +9158,15 @@ const GAME_DATA = {
                     targetShishi: ["sannan_tactics"],
                     opinionChange: -5,
                     costGold: 30,
-                    canChoose: (app) => app.gold >= 30,
                     text: "【🕊️ 生存ルート】局長・近藤勇に命がけで直訴し、山南の脱走を「隠密探索の密命」として助命工作を行う",
-                    effectDesc: "【生存ルート】志士『山南敬助』の切腹を回避し生存！軍資金 30両 を消費し世論佐幕-5%、山南は生存確定となる。",
+                    effectDesc: "【生存ルート】志士『山南敬助』の切腹を回避し生存！軍資金 30両 を消費（不足時はHP代替）し世論佐幕-5%、山南は生存確定となる。",
                     action: (app) => {
                         app.markShishiSurvived("sannan_tactics");
                         if (!app.deck.includes("sannan_tactics")) app.addCardToDeck("sannan_tactics");
-                        app.gold -= 30;
+                        const spendGold = Math.min(app.gold, 30);
+                        const shortage = 30 - spendGold;
+                        app.gold -= spendGold;
+                        if (shortage > 0) app.damagePlayer(shortage);
                     }
                 },
                 {
@@ -9236,14 +9247,15 @@ const GAME_DATA = {
                     targetShishi: ["takasugi_kiheitai"],
                     opinionChange: 10,
                     costGold: 40,
-                    canChoose: (app) => app.gold >= 40,
                     text: "【🕊️ 生存ルート】長崎から蘭方医の名医を緊急招聘し、高価な西洋新薬を投与して決死の養生に専念させる",
-                    effectDesc: "【生存ルート】志士『高杉晋作』の結核を克服させ生存確定！軍資金 40両 とHP 20 を消費するが、晋作は生存しデッキに残留！",
+                    effectDesc: "【生存ルート】志士『高杉晋作』の結核を克服させ生存確定！軍資金 40両 とHP 20 を消費（資金不足時は不足分HPを追加消費）し、晋作は生存しデッキに残留！",
                     action: (app) => {
                         app.markShishiSurvived("takasugi_kiheitai");
                         if (!app.deck.includes("takasugi_kiheitai")) app.addCardToDeck("takasugi_kiheitai");
-                        app.gold -= 40;
-                        app.damagePlayer(20);
+                        const spendGold = Math.min(app.gold, 40);
+                        const shortage = 40 - spendGold;
+                        app.gold -= spendGold;
+                        app.damagePlayer(20 + shortage);
                     }
                 },
                 {
@@ -9265,6 +9277,23 @@ const GAME_DATA = {
                         app.gold += 35;
                         app.maxHp += 3;
                         app.healPlayer(3);
+                    }
+                },
+                {
+                    opinionChange: -5,
+                    text: "【佐幕派】長州の麒麟児・晋作の最期を見届け、奇兵隊の動向を監視する",
+                    effectDesc: "長州藩の混乱を察知し警戒態勢を整える。軍資金 25両 を獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.gold += 25;
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "静かに手を合わせ、早すぎる英雄の死を悼む",
+                    effectDesc: "精神を整え、HPを 15 回復する。",
+                    action: (app) => {
+                        app.healPlayer(15);
                     }
                 }
             ]
@@ -9364,14 +9393,15 @@ const GAME_DATA = {
                     targetShishi: ["okita_sandan"],
                     opinionChange: -5,
                     costGold: 40,
-                    canChoose: (app) => app.gold >= 40,
                     text: "【🕊️ 生存ルート】松本良順直伝の最新西洋滋養薬と名湯での長期湯治を手配し、総司の命を繋ぎ止める",
-                    effectDesc: "【生存ルート】志士『沖田総司』の病魔を抑え生存確定！軍資金 40両 とHP 20 を消費するが、総司は生存しデッキに残留！",
+                    effectDesc: "【生存ルート】志士『沖田総司』の病魔を抑え生存確定！軍資金 40両 とHP 20 を消費（資金不足時は不足分HPを追加消費）し、総司は生存しデッキに残留！",
                     action: (app) => {
                         app.markShishiSurvived("okita_sandan");
                         if (!app.deck.includes("okita_sandan")) app.addCardToDeck("okita_sandan");
-                        app.gold -= 40;
-                        app.damagePlayer(20);
+                        const spendGold = Math.min(app.gold, 40);
+                        const shortage = 40 - spendGold;
+                        app.gold -= spendGold;
+                        app.damagePlayer(20 + shortage);
                     }
                 },
                 {
