@@ -3083,9 +3083,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 12,
+                    opinionChange: -12,
                     text: "【討幕派】池田屋の階下で抜刀し、新選組の刃を迎え撃ち味方を逃がす",
-                    effectDesc: "HP 26 ダメージを受けるが、次の戦闘の攻撃力+4、軍資金30両を獲得。",
+                    effectDesc: "新選組の刃を身に受けHP 26 ダメージを負うが、自らを盾として味方を逃がす。尊攘派壊滅の逆風の中、次戦攻撃力+4、軍資金30両を獲得。",
                     faction: "tobaku",
                     action: (app) => {
                         app.damagePlayer(26);
@@ -3095,9 +3095,9 @@ const GAME_DATA = {
                 },
                 {
                     requiredShishi: "katsura",
-                    opinionChange: 18,
+                    opinionChange: -8,
                     text: "【討幕派・桂小五郎】機転を利かせ裏路地から退避し、長州藩邸へ急報を届ける",
-                    effectDesc: "無傷で脱出成功！HP損害なし。藩邸の防備を固め、軍資金45両と次戦攻撃力+5を獲得！",
+                    effectDesc: "桂小五郎の機転で無傷脱出！長州藩邸の防備を固め軍資金45両と次戦攻撃力+5を獲得するが、京都尊攘派の壊滅により世論は佐幕へ傾く。",
                     faction: "tobaku",
                     action: (app) => {
                         app.gold += 45;
@@ -5029,9 +5029,9 @@ const GAME_DATA = {
             desc: "元治元年八月、英・仏・米・蘭の軍艦17隻が下関海峡へ来航。下関の長州砲台へ猛烈な艦砲射撃を浴びせ、陸戦隊を上陸させて占領した。高杉晋作が講和使節として乗り込み、賠償交渉を乗り切る中、長州は攘夷の不可能を悟り開国・倒幕へと急転換する。",
             choices: [
                 {
-                    opinionChange: 12,
+                    opinionChange: -12,
                     text: "【討幕派】神速の居合で前線突撃を敢行し、河上彦斎らと共に上陸部隊へ奇襲を仕掛ける",
-                    effectDesc: "志士『河上彦斎：神速の居合』を獲得。敵に大ダメージを与える準備を整える。HP 24 消費、次戦攻撃力 +6。",
+                    effectDesc: "志士『河上彦斎：神速の居合』を獲得。上陸部隊へ奇襲を試みるも砲撃で大打撃、砲台壊滅の敗北で世論逆風。HP 24 消費、次戦攻撃力 +6。",
                     faction: "tobaku",
                     shishiBonus: {
                         character: "gensai",
@@ -5047,9 +5047,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 10,
+                    opinionChange: -8,
                     text: "【討幕派】高杉晋作・伊藤博文・井上馨の講和交渉を支え、領土割譲要求を完全阻止する",
-                    effectDesc: "志士『高杉晋作』を獲得。軍資金 30両 獲得、列強介入 -5%。",
+                    effectDesc: "志士『高杉晋作』を獲得。軍資金 30両 獲得、列強介入 -5%。領土割譲は阻止するも攘夷完敗の現実に世論は後退。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("takasugi_kiheitai");
@@ -5508,18 +5508,18 @@ const GAME_DATA = {
                 },
 
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "兵站を整え、長期戦に備える",
-                    effectDesc: "志士『中岡慎太郎』を獲得。25両を得る。",
+                    effectDesc: "志士『中岡慎太郎』を獲得。兵站を整え長期戦に備えるも幕府軍の重囲に遭い世論逆風、25両を得る。",
                     action: (app) => {
                         app.addCardToDeck("nakaoka_mediator");
                         app.gold += 25;
                     }
                 },
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "【討幕派】無用な流血を避け、尊攘の志を温存する",
-                    effectDesc: "志士『久坂玄瑞』を獲得。HPを 6 回復し、列強介入-4%。",
+                    effectDesc: "志士『久坂玄瑞』を獲得。挙兵失敗の逆風の中、尊攘の志を温存して撤退。HPを 6 回復し、列強介入-4%。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("kusaka_revolt");
@@ -5911,9 +5911,9 @@ const GAME_DATA = {
             desc: "政変によって都を追われた公卿たちが、長州を目指して夜道を進む。追手を振り切り、次の策を立てなければならない。",
             choices: [
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "護衛を引き受け、道を切り開く",
-                    effectDesc: "志士『三条実美』を獲得。HPを 26 失うが、次の戦闘の攻撃力+3。",
+                    effectDesc: "志士『三条実美』を獲得。都を追われる逆風の中、追手を防ぎHPを 26 失うが次の戦闘の攻撃力+3。",
                     action: (app) => {
                         app.addCardToDeck("sanjo_court");
                         app.damagePlayer(26);
@@ -5921,9 +5921,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "資金を渡し、別の逃走路を用意する",
-                    effectDesc: "志士『品川弥二郎』を獲得。40両を支払い、列強介入-4%。資金が足りない場合は選択不可。",
+                    effectDesc: "志士『品川弥二郎』を獲得。都落ちの逆風の中、40両を支払い脱走路を確保、列強介入-4%。資金不足時は選択不可。",
                     costGold: 40,
                     canChoose: (app) => app.gold >= 40,
                     action: (app) => {
@@ -5933,9 +5933,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "追手へ偽情報を流す",
-                    effectDesc: "志士『田中光顕』を獲得。30両とHP 6を得る。",
+                    effectDesc: "志士『田中光顕』を獲得。偽情報で追手を欺き30両とHP 6を得るが、都は公武合体派が掌握。",
                     action: (app) => {
                         app.addCardToDeck("tanaka_intelligence");
                         app.gold += 20;
@@ -6311,9 +6311,9 @@ const GAME_DATA = {
             desc: "寺田屋に集まった志士たちの意見が割れ、刀を抜く者まで現れた。仲間をまとめるか、決起を急ぐか。",
             choices: [
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "説得を続け、同士討ちを止める",
-                    effectDesc: "志士『有馬新七』を獲得。HPを 6 回復し、列強介入-4%。",
+                    effectDesc: "志士『有馬新七』を獲得。同士討ちを止め説得に努めるも過激派は鎮圧され世論逆風。HPを 6 回復し、列強介入-4%。",
                     action: (app) => {
                         app.addCardToDeck("arima_revolt");
                         app.healPlayer(6);
@@ -6321,9 +6321,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "決起を急ぎ、敵の不意を突く",
-                    effectDesc: "志士『吉井友実』を獲得。次の戦闘の攻撃力+3、HPを 26 失う。",
+                    effectDesc: "志士『吉井友実』を獲得。決起を急ぐも鎮撫使に阻まれHPを 26 失うが次の戦闘の攻撃力+3。",
                     action: (app) => {
                         app.addCardToDeck("yoshii_support");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
@@ -6331,9 +6331,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "資金を分けて仲間を逃がす",
-                    effectDesc: "志士『田中新兵衛』を獲得。35両を支払い、最大HP+3。資金が足りない場合は選択不可。",
+                    effectDesc: "志士『田中新兵衛』を獲得。逆風の中35両を支払い仲間を逃がす、最大HP+3。資金不足時は選択不可。",
                     costGold: 35,
                     canChoose: (app) => app.gold >= 35,
                     action: (app) => {
@@ -6703,9 +6703,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 12,
+                    opinionChange: -12,
                     text: "藩の命に従い、統制を強める",
-                    effectDesc: "志士『大久保利通』を獲得。列強介入-5%、最大HP+3。",
+                    effectDesc: "志士『大久保利通』を獲得。公武合体派の統制強化に従い世論逆風、列強介入-5%、最大HP+3。",
                     action: (app) => {
                         app.addCardToDeck("okubo_strategy");
                         app.modifyImperialGauge(-5);
@@ -6714,9 +6714,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 12,
+                    opinionChange: -12,
                     text: "志士を逃がし、再起の道を残す",
-                    effectDesc: "志士『西郷隆盛』を獲得。軍資金70両を拠出し、HPを 32 失い、最大HP-10（生涯残る古傷）。呪い『幕府指名手配』が混入。資金不足時は最大HP-14。次の戦闘攻撃力+4。",
+                    effectDesc: "志士『西郷隆盛』を獲得。西郷配流の苦難、軍資金70両拠出・HP 32喪失・最大HP-10、呪い『幕府指名手配』混入。資金不足時は最大HP-14。次戦攻撃力+4。",
                     action: (app) => {
                         app.addCardToDeck("saigo_jigen");
                         app.addCardToDeck("curse_bounty");
@@ -6731,9 +6731,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 12,
+                    opinionChange: -12,
                     text: "両者を説得し、処分を延期する",
-                    effectDesc: "志士『吉井友実』を獲得。35両を支払い、HPを 8 回復する。資金が足りない場合は選択不可。",
+                    effectDesc: "志士『吉井友実』を獲得。処分の延期に奔走し35両支払いHP 8回復するが尊攘派後退。資金不足時は選択不可。",
                     costGold: 35,
                     canChoose: (app) => app.gold >= 35,
                     action: (app) => {
@@ -7186,9 +7186,9 @@ const GAME_DATA = {
             desc: "朝廷内の主導権が一夜にして入れ替わり、長州勢は京を追われた。政変に抗うか、次の機会を待つか。",
             choices: [
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "【討幕派】都に残り、尊攘派の失地回復を図る",
-                    effectDesc: "志士『久坂玄瑞』を獲得。HPを 26 失うが、次の戦闘の攻撃力+3。",
+                    effectDesc: "志士『久坂玄瑞』を獲得。政変で都を追われる逆風の中、失地回復を図りHPを 26 失うが次の戦闘の攻撃力+3。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("kusaka_revolt");
@@ -7197,9 +7197,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "七卿落ちに従い、長州へ再起の道を求める",
-                    effectDesc: "志士『三条実美』を獲得。40両を得て、HPを 6 回復する。",
+                    effectDesc: "志士『三条実美』を獲得。都落ちの逆風の中、長州へ再起を期して40両を得て、HPを 6 回復する。",
                     action: (app) => {
                         app.addCardToDeck("sanjo_court");
                         app.gold += 25;
@@ -7207,9 +7207,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "【討幕派】諸侯へ密書を送り、公武合体派の結束を揺さぶる",
-                    effectDesc: "志士『真木和泉』を獲得。列強介入-4%、25両を得る。",
+                    effectDesc: "志士『真木和泉』を獲得。公武合体派の結束を揺さぶる密書を送り列強介入-4%、25両を得るが都は佐幕派が掌握。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("maki_revolt");
@@ -7722,9 +7722,9 @@ const GAME_DATA = {
                 },
 
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "脱出を図る鈴木三樹三郎らを援護し、薩摩藩邸へ逃れる",
-                    effectDesc: "志士『鈴木三樹三郎』を獲得。HPを 6 回復し、25両を得る。",
+                    effectDesc: "志士『鈴木三樹三郎』を獲得。御陵衛士壊滅の逆風の中、薩摩藩邸へ脱出を援護しHPを 6 回復、25両を得る。",
                     action: (app) => {
                         app.addCardToDeck("suzuki_patrol");
                         app.healPlayer(6);
@@ -8314,9 +8314,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "東山道軍の板垣退助と合流し、民衆の動揺を鎮めつつ兵站路の確保を急ぐ",
-                    effectDesc: "志士『板垣退助』を獲得。最大HP+3、HPを 6 回復する。",
+                    effectDesc: "志士『板垣退助』を獲得。偽官軍処刑の衝撃と民衆の不信・世論動揺の中、動揺を鎮めて兵站を確保。最大HP+3、HPを 6 回復する。",
                     action: (app) => {
                         app.addCardToDeck("itagaki_charge");
                         app.maxHp += 3;
@@ -8424,9 +8424,9 @@ const GAME_DATA = {
             desc: "和宮降嫁に憤る水戸脱藩浪士らが、江戸城坂下門外にて老中・安藤信正の駕籠を襲撃した。白昼の雪解け道に血煙が上がり、公武合体の行方に暗雲が垂れ込める。",
             choices: [
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "【討幕派】浪士の義挙に呼応し、江戸城下の尊攘派ネットワークを拡大する",
-                    effectDesc: "志士『武市半平太』を獲得。HP 26 ダメージを受けるが、次戦攻撃力 +3。",
+                    effectDesc: "志士『武市半平太』を獲得。襲撃失敗と浪士壊滅により幕府取締りが厳重化し世論逆風。HP 26 ダメージを受けるが、次戦攻撃力 +3。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("takechi_ideology");
@@ -9113,9 +9113,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 10,
+                    opinionChange: -10,
                     text: "【討幕派】武市の遺志と以蔵の辞世を胸に刻み、土佐の同志を糾合する",
-                    effectDesc: "志士『中岡慎太郎』を獲得。次の戦闘の攻撃力+3。",
+                    effectDesc: "志士『中岡慎太郎』を獲得。土佐尊攘派壊滅の逆風の中、武市の遺志を胸に同志を糾合。次の戦闘の攻撃力+3。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("nakaoka_mediator");
@@ -9453,9 +9453,9 @@ const GAME_DATA = {
             desc: "文久三年十月、但馬生野銀山。大和天誅組の変に呼応し、福岡藩士・平野国臣や公卿・沢宣嘉らが代官所を急襲して破約攘夷の義旗を掲げた。わずか数日の電撃蜂起の行方は。",
             choices: [
                 {
-                    opinionChange: 8,
+                    opinionChange: -8,
                     text: "【討幕派】平野国臣の決起に参陣し、生野代官所の銀山資金を押収して進軍する",
-                    effectDesc: "志士『平野国臣：志士の狂瀾』を獲得。HP 26 ダメージを受けるが、次戦攻撃力 +4、軍資金 30両 を獲得。",
+                    effectDesc: "志士『平野国臣：志士の狂瀾』を獲得。進軍を試みるも包囲鎮圧され世論逆風。HP 26 ダメージを受けるが、次戦攻撃力 +4、軍資金 30両 を獲得。",
                     faction: "tobaku",
                     shishiBonus: {
                         character: "hirano",
@@ -9524,9 +9524,9 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 12,
+                    opinionChange: -12,
                     text: "【討幕派】死線を脱出した御陵衛士の生き残りを薩摩藩邸へ極秘裏に匿い、再起を期す",
-                    effectDesc: "志士『吉井友実』を獲得。軍資金 35両 を獲得し、HP を 6 回復。",
+                    effectDesc: "志士『吉井友実』を獲得。御陵衛士壊滅の逆風の中、生き残りを薩摩藩邸へ極秘裏に匿い軍資金 35両 を獲得、HP を 6 回復。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("yoshii_support");
