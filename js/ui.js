@@ -816,7 +816,7 @@ class UIManager {
 
         if (choicesContainer) {
             choicesContainer.innerHTML = '';
-            eventData.choices
+            let validChoices = eventData.choices
                 .filter(choice => {
                     // 生存ルート（志士救出選択肢）は歴史IFの特別救出ルートのため、陣営制限や志士死亡による除外判定をバイパスして必ず表示
                     if (choice.isSurvivalRoute) return true;
@@ -833,8 +833,22 @@ class UIManager {
                         }
                     }
                     return true;
-                })
-                .forEach(choice => {
+                });
+
+            // セーフティネット: 陣営やカード獲得制限により表示可能な選択肢が0件になってしまった場合、ゲーム進行不能を防ぐフォールバック選択肢を自動生成
+            if (validChoices.length === 0) {
+                validChoices = [{
+                    text: '【情勢静観】時代の推移を見守り、次なる好機を待つ',
+                    desc: '情勢を静観し、体力を回復して次なる機運を待つ。',
+                    historicalPrediction: 'safe',
+                    action: (app) => {
+                        app.player.hp = Math.min(app.player.maxHp, app.player.hp + 15);
+                        app.log('情勢を静観し、傷を癒して機を待った。（HP+15）', 'gain');
+                    }
+                }];
+            }
+
+            validChoices.forEach(choice => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-event-choice';
 

@@ -1679,7 +1679,7 @@ const GAME_DATA = {
         "kiyokawa_leader": {
             id: "kiyokawa_leader",
             name: "清河八郎：浪士組の魁",
-            faction: "sabaku",
+            faction: "tobaku",
             character: "kiyokawa",
             type: "shishi",
             cost: 2,
@@ -2257,7 +2257,6 @@ const GAME_DATA = {
             shield: 4,
             desc: "敵に 16 ダメージ、防 4。自軍HPを 4 消費するが、敵シールドを 6 破壊する。",
             rarity: "rare",
-            killedBySabaku: true, // 新選組内部粛清により八木邸で暗殺
             onPlay: (b, self) => {
                 if (b.enemy && b.enemy.shield > 0) {
                     b.enemy.shield = Math.max(0, b.enemy.shield - 6);
@@ -4644,12 +4643,14 @@ const GAME_DATA = {
         },
         {
             id: "event_roshigumi_departure",
+            historicalAdvantage: "sabaku",
             act: 1,
             importance: 2,
             title: "浪士組の出立、清河八郎と壬生浪士の分岐",
             desc: "文久三年二月、将軍家茂警護を名目に江戸小石川・伝通院で結成された『浪士組』二百余名が中山道を進軍して上洛。しかし首謀者・清河八郎は京都新徳寺で真の目的は討幕攘夷であると宣言。これに反対した近藤勇・芹沢鴨らは京都に残留し、のちの新選組の母体となった。",
             choices: [
                 {
+                    riskCategory: "orthodox",
                     opinionChange: -10,
                     text: "【佐幕派】清河の策謀に猛反発し、芹沢鴨・近藤勇と共に京都に残留して会津藩に尽忠を誓う",
                     effectDesc: "志士『芹沢鴨：豪剣の狂瀾』を獲得。剛剣の威圧で次戦攻撃力 +6、HP 8 消費。",
@@ -4668,6 +4669,7 @@ const GAME_DATA = {
                     }
                 },
                 {
+                    riskCategory: "orthodox",
                     opinionChange: -8,
                     text: "【佐幕派】近藤・土方ら試衛館派の統制を固め、壬生屯所で守護職の命を待つ",
                     effectDesc: "志士『土方歳三』を獲得。防 12、軍資金 25両 獲得。",
@@ -4678,6 +4680,7 @@ const GAME_DATA = {
                     }
                 },
                 {
+                    riskCategory: "defiance",
                     opinionChange: 10,
                     text: "【討幕派】清河八郎の大胆不敵な策を支持し、江戸へ引き返して幕府瓦解の工作を画策する",
                     effectDesc: "志士『清河八郎』を獲得。世論討幕 10%、軍資金 30両 獲得。",
@@ -4685,6 +4688,28 @@ const GAME_DATA = {
                     action: (app) => {
                         app.addCardToDeck("kiyokawa_leader");
                         app.gold += 30;
+                    }
+                },
+                {
+                    riskCategory: "defiance",
+                    opinionChange: 8,
+                    text: "【討幕派】清河の真意に呼応し、京都の尊攘派同志へ急報して朝廷親征への足がかりを築く",
+                    effectDesc: "志士『久坂玄瑞』を獲得。軍資金 25両 を獲得し、次の戦闘の攻撃力+3。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("kusaka_revolt");
+                        app.gold += 25;
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
+                    }
+                },
+                {
+                    riskCategory: "safe",
+                    opinionChange: 0,
+                    text: "浪士組の内部分裂と京洛の動揺を静観し、宿場町で物資と兵力を整える",
+                    effectDesc: "事態を冷静に見極め、HP を 15 回復し、軍資金 25両 獲得。",
+                    action: (app) => {
+                        app.healPlayer(15);
+                        app.gold += 25;
                     }
                 }
             ]
