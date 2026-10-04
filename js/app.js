@@ -1435,6 +1435,59 @@ class BakumatsuApp {
                 }
                 rewards.push({ icon: '⚠️', text: `作戦失敗の動揺により世論が不利に傾斜しました。` });
             }
+
+            // --- 史実死線志士の落命判定 ---
+            // 救出ルート以外の選択肢を選んだ場合：この歴史事件で史実上落命する志士は、救出されていないため史実通り落命する
+            if (!baseChoice.isSurvivalRoute && event && event.id && typeof GAME_DATA !== 'undefined' && GAME_DATA.shishiDeaths) {
+                const unrescuedDeaths = [];
+                Object.values(GAME_DATA.shishiDeaths).forEach(deathDef => {
+                    if (deathDef.eventId === event.id) {
+                        const cId = deathDef.cardId;
+                        if (!this.isShishiSaved(cId) && !this.isShishiDead(cId)) {
+                            const res = this.killShishi(
+                                cId,
+                                deathDef.reason || '歴史の死線により落命',
+                                event.title || deathDef.eventTitle
+                            );
+                            if (res) unrescuedDeaths.push(res);
+                        }
+                    }
+                });
+
+                if (unrescuedDeaths.length > 0) {
+                    const owned = unrescuedDeaths.filter(d => d.wasOwned);
+                    if (owned.length > 0) {
+                        owned.forEach(d => {
+                            rewards.push({
+                                icon: '🥀',
+                                text: `<span class="penalty"><strong>【史実の死線】</strong>志士『${d.name}』は救出されず、史実の運命により落命しました（所持デッキから除外）。</span>`
+                            });
+                        });
+                        if (!this.pendingEventDeaths) this.pendingEventDeaths = [];
+                        this.pendingEventDeaths.push(...owned);
+                    } else {
+                        unrescuedDeaths.forEach(d => {
+                            rewards.push({
+                                icon: '🥀',
+                                text: `<span class="penalty"><strong>【時代の推移】</strong>志士『${d.name}』は史実の運命により落命しました（以降入手不可）。</span>`
+                            });
+                        });
+                    }
+                }
+            }
+
+            // 死亡通知モーダルの自動表示予約
+            const pendingList = this.pendingEventDeaths || this.pendingSurvivalFailureDeaths;
+            if (pendingList && pendingList.length > 0) {
+                setTimeout(() => {
+                    const list = this.pendingEventDeaths || this.pendingSurvivalFailureDeaths;
+                    if (this.ui && this.ui.showShishiDeathModal && list && list.length > 0) {
+                        this.pendingEventDeaths = null;
+                        this.pendingSurvivalFailureDeaths = null;
+                        this.ui.showShishiDeathModal(list);
+                    }
+                }, 700);
+            }
         } catch (err) {
             console.error("[Fate roll resolution error]", err);
         }
@@ -1532,11 +1585,12 @@ class BakumatsuApp {
     finishEventAndReturnToMap() {
         this.currentAdventureEvent = null;
         this.returnToMap();
-        if (this.pendingSurvivalFailureDeaths && this.pendingSurvivalFailureDeaths.length > 0) {
-            const deadList = this.pendingSurvivalFailureDeaths;
+        const pendingList = this.pendingEventDeaths || this.pendingSurvivalFailureDeaths;
+        if (pendingList && pendingList.length > 0) {
+            this.pendingEventDeaths = null;
             this.pendingSurvivalFailureDeaths = null;
             if (this.ui && this.ui.showShishiDeathModal) {
-                this.ui.showShishiDeathModal(deadList);
+                this.ui.showShishiDeathModal(pendingList);
             }
         }
     }
