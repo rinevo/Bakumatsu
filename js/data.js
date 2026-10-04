@@ -3084,6 +3084,7 @@ const GAME_DATA = {
             id: "event_satcho_alliance",
             act: 2,
             importance: 3,
+            historicalAdvantage: "tobaku",
             title: "薩長同盟の密約",
             desc: "犬猿の仲だった薩摩と長州が、坂本龍馬の仲介で一つの卓を囲んだ。互いの誇りを捨て、来るべき時代に備える必要がある。",
             mapShishiRequirement: {
@@ -3093,9 +3094,11 @@ const GAME_DATA = {
             choices: [
                 {
                     opinionChange: 12,
-                    text: "密約に署名し、共同戦線を組む",
+                    text: "【討幕派】密約に署名し、共同戦線を組む",
                     effectDesc: "志士『中岡慎太郎』を獲得。『薩長同盟の密約』をデッキに加え、次の戦闘の攻撃力+4。",
                     faction: "tobaku",
+                    isHistorical: true,
+                    riskCategory: "orthodox",
                     shishiBonus: [
                         {
                             character: "ryoma",
@@ -3125,6 +3128,7 @@ const GAME_DATA = {
                     opinionChange: 12,
                     text: "片方に肩入れし、資金を引き出す",
                     effectDesc: "志士『小松帯刀』を獲得。30両を得るが、列強介入+20%。",
+                    riskCategory: "intrigue",
                     shishiBonus: [
                         {
                             character: "komatsu",
@@ -3143,8 +3147,11 @@ const GAME_DATA = {
                 },
                 {
                     opinionChange: 12,
-                    text: "同盟を急がず、互いの力を見極める",
+                    text: "【討幕派】同盟を急がず、互いの力を見極める",
                     effectDesc: "志士『桂小五郎』を獲得。HPを 8 回復し、列強介入-5%。",
+                    faction: "tobaku",
+                    isHistorical: true,
+                    riskCategory: "safe",
                     shishiBonus: [
                         {
                             character: "katsura",
@@ -3162,11 +3169,27 @@ const GAME_DATA = {
                     }
                 },
                 {
+                    opinionChange: 20,
+                    text: "【佐幕派・歴史の抗い】長州の孤立を狙い、桂小五郎へ密使を送り切り崩しを図る",
+                    effectDesc: "志士『桂小五郎』を獲得。しかし密議発覚の激震によりHP 32喪失、最大HP-6。世論討幕+20%（大逆風）、呪い『過激派の暴発』が混入！",
+                    faction: "sabaku",
+                    isHistorical: false,
+                    riskCategory: "defiance",
+                    action: (app) => {
+                        app.addCardToDeck("katsura_shindo");
+                        app.addCardToDeck("curse_riot");
+                        app.damagePlayer(32);
+                        app.maxHp = Math.max(20, app.maxHp - 6);
+                    }
+                },
+                {
                     opinionChange: 40,
                     requiredShishi: ["ryoma", "saigo", "katsura"],
                     text: "🌟【龍馬・西郷・小五郎 揃踏限定】薩長同盟の完全締結と倒幕軍事同盟の結成",
                     effectDesc: "討幕の二大巨頭と盟主が完全合意！世論討幕+40%、軍資金100両、次戦攻撃力+10、神器レリック『薩長盟約の錦旗』を獲得！",
                     faction: "tobaku",
+                    isHistorical: true,
+                    riskCategory: "orthodox",
                     action: (app) => {
                         app.gold += 100;
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 10;
@@ -3433,7 +3456,6 @@ const GAME_DATA = {
                         app.addCardToDeck("katsu_kaishu");
                         app.hp = app.maxHp;
                         app.modifyImperialGauge(-5);
-                        window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -4758,14 +4780,17 @@ const GAME_DATA = {
             id: "event_satcho_protocol",
             act: 2,
             importance: 3,
+            historicalAdvantage: "tobaku",
             title: "薩長盟約、倒幕の密議",
             desc: "薩摩と長州の代表が、互いの疑念を越えて密かに手を結ぼうとしている。連携を急ぐか、兵力を蓄えるか。",
             choices: [
                 {
                     opinionChange: 12,
-                    text: "盟約を結び、共同作戦を整える",
+                    text: "【討幕派】盟約を結び、共同作戦を整える",
                     effectDesc: "志士『桂小五郎』を獲得。『薩長同盟の密約』をデッキに加え、次の戦闘の攻撃力+4。",
                     faction: "tobaku",
+                    isHistorical: true,
+                    riskCategory: "orthodox",
                     action: (app) => {
                         app.addCardToDeck("katsura_shindo");
                         app.addCardToDeck("satcho_secret");
@@ -4773,23 +4798,41 @@ const GAME_DATA = {
                     }
                 },
                 {
-                    opinionChange: 12,
-                    text: "同盟を見送り、兵糧を蓄える",
-                    effectDesc: "志士『西郷隆盛』を獲得。50両を得て、HPを 8 回復する。",
+                    opinionChange: 25,
+                    text: "【佐幕派・歴史の抗い】密偵を放ち同盟を妨害、西郷の懐柔を謀る",
+                    effectDesc: "志士『西郷隆盛』を獲得。しかし敵陣営巨魁懐柔の強烈な代償により、HPを 35 失い、最大HP-8。味方の猜疑により世論討幕+25%（大逆風）、呪い『家臣の寝返り』が混入！",
+                    faction: "sabaku",
+                    isHistorical: false,
+                    riskCategory: "defiance",
                     action: (app) => {
                         app.addCardToDeck("saigo_jigen");
+                        app.addCardToDeck("curse_betrayal");
+                        app.damagePlayer(35);
+                        app.maxHp = Math.max(20, app.maxHp - 8);
                         app.gold += 30;
-                        app.healPlayer(8);
                     }
                 },
                 {
                     opinionChange: 12,
-                    text: "列強に援助を求める",
+                    text: "【共通】列強に援助を求め、最新銃器を調達する",
                     effectDesc: "志士『広沢真臣』を獲得。『新式ミニエ銃』をデッキに加えるが、列強介入+20%。",
+                    riskCategory: "intrigue",
                     action: (app) => {
                         app.addCardToDeck("hirosawa_alliance");
                         app.addCardToDeck("weapon_minie");
                         app.modifyImperialGauge(20);
+                    }
+                },
+                {
+                    opinionChange: -5,
+                    text: "【佐幕派】同盟の動向を警戒しつつ、幕府直轄軍の兵糧を蓄える",
+                    effectDesc: "志士は獲得できないが、軍資金50両を得て、HPを 12 回復する。",
+                    faction: "sabaku",
+                    isHistorical: true,
+                    riskCategory: "safe",
+                    action: (app) => {
+                        app.gold += 50;
+                        app.healPlayer(12);
                     }
                 }
             ]
@@ -7114,7 +7157,6 @@ const GAME_DATA = {
                         app.addCardToDeck("hayashi_last_stand");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
                         app.modifyImperialGauge(-4);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7126,7 +7168,6 @@ const GAME_DATA = {
                         app.addCardToDeck("itagaki_charge");
                         app.maxHp += 3;
                         app.hp += 8;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7137,7 +7178,6 @@ const GAME_DATA = {
                         app.addCardToDeck("hitomi_katsutaro");
                         app.gold += 25;
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]
@@ -7210,7 +7250,6 @@ const GAME_DATA = {
                         app.healPlayer(4);
                         app.maxHp += 2;
                         app.hp += 6;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7221,7 +7260,6 @@ const GAME_DATA = {
                         app.addCardToDeck("otori_strategy");
                         app.modifyImperialGauge(-3);
                         app.gold += 20;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7232,7 +7270,6 @@ const GAME_DATA = {
                         app.addCardToDeck("enomoto_naval");
                         app.gold += 20;
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 2;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]
@@ -7460,7 +7497,6 @@ const GAME_DATA = {
                         app.addCardToDeck("harada_spear");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
                         app.damagePlayer(38);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7471,7 +7507,6 @@ const GAME_DATA = {
                         app.addCardToDeck("abe_juro_tactics");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
                         app.gold += 25;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7482,7 +7517,6 @@ const GAME_DATA = {
                         app.addCardToDeck("takahashi_guard");
                         app.healPlayer(8);
                         app.modifyImperialGauge(-5);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]
@@ -7504,7 +7538,6 @@ const GAME_DATA = {
                         app.maxHp = Math.max(20, app.maxHp - 10);
                         app.damagePlayer(38);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7517,7 +7550,6 @@ const GAME_DATA = {
                         app.maxHp = Math.max(20, app.maxHp - 10);
                         app.damagePlayer(38);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7528,7 +7560,6 @@ const GAME_DATA = {
                         app.addCardToDeck("sasaki_escort");
                         app.maxHp += 3;
                         app.hp += 10;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]
@@ -7601,7 +7632,6 @@ const GAME_DATA = {
                         app.addCardToDeck("sadaakira_guard");
                         app.maxHp += 3;
                         app.hp += 12;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7612,7 +7642,6 @@ const GAME_DATA = {
                         app.addCardToDeck("tatsumi_naobumi");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
                         app.gold += 25;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7623,7 +7652,6 @@ const GAME_DATA = {
                         app.addCardToDeck("akizuki_strategy");
                         app.modifyImperialGauge(-4);
                         app.healPlayer(6);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]
@@ -7644,7 +7672,6 @@ const GAME_DATA = {
                         app.addCardToDeck("yamakawa_cavalry");
                         app.maxHp += 3;
                         app.hp += 15;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7655,7 +7682,6 @@ const GAME_DATA = {
                         app.addCardToDeck("sagawa_cavalry");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
                         app.damagePlayer(26);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7666,7 +7692,6 @@ const GAME_DATA = {
                         app.addCardToDeck("kayano_sacrifice");
                         app.gold += 25;
                         app.modifyImperialGauge(-4);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]
@@ -7739,7 +7764,6 @@ const GAME_DATA = {
                         app.addCardToDeck("okada_izo");
                         app.damagePlayer(38);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7752,7 +7776,6 @@ const GAME_DATA = {
                         app.maxHp = Math.max(20, app.maxHp - 10);
                         app.damagePlayer(38);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7768,7 +7791,6 @@ const GAME_DATA = {
                         } else {
                             app.maxHp = Math.max(20, app.maxHp - 10);
                         }
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]
@@ -7790,7 +7812,6 @@ const GAME_DATA = {
                         app.modifyImperialGauge(-4);
                         app.maxHp += 3;
                         app.hp += 8;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7802,7 +7823,6 @@ const GAME_DATA = {
                         app.addCardToDeck("iwakura_imperial");
                         app.gold += 25;
                         app.modifyImperialGauge(-4);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7813,7 +7833,6 @@ const GAME_DATA = {
                         app.addCardToDeck("shungaku_council");
                         app.gold += 25;
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]
@@ -7834,7 +7853,6 @@ const GAME_DATA = {
                         app.addCardToDeck("takeda_kounsai");
                         app.damagePlayer(26);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7846,7 +7864,6 @@ const GAME_DATA = {
                         app.addCardToDeck("hara_counsel");
                         app.healPlayer(6);
                         app.gold += 25;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7857,7 +7874,6 @@ const GAME_DATA = {
                         app.addCardToDeck("sanjo_court");
                         app.maxHp += 3;
                         app.healPlayer(6);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]
@@ -7879,7 +7895,6 @@ const GAME_DATA = {
                         app.addRelic("omura_tactics_scroll");
                         app.gold = Math.max(0, app.gold - 70);
                         app.modifyImperialGauge(20);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7893,7 +7908,6 @@ const GAME_DATA = {
                         app.gold += 35;
                         app.maxHp = Math.max(20, app.maxHp - 10);
                         app.damagePlayer(38);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7926,7 +7940,6 @@ const GAME_DATA = {
                         app.damagePlayer(26);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
                         app.gold += 20;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7938,7 +7951,6 @@ const GAME_DATA = {
                         app.addCardToDeck("hitomi_katsutaro");
                         app.healPlayer(6);
                         app.gold += 25;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7949,7 +7961,6 @@ const GAME_DATA = {
                         app.addCardToDeck("itagaki_charge");
                         app.maxHp += 3;
                         app.healPlayer(6);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]
@@ -7970,7 +7981,6 @@ const GAME_DATA = {
                         app.addCardToDeck("shibusawa_eiichi");
                         app.gold += 20;
                         app.modifyImperialGauge(-3);
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7981,7 +7991,6 @@ const GAME_DATA = {
                     action: (app) => {
                         app.addCardToDeck("godai_commerce");
                         app.gold += 20;
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 },
                 {
@@ -7994,7 +8003,6 @@ const GAME_DATA = {
                         if (window.app && window.app.battle) {
                             window.app.battle.gainPlayerShield(10);
                         }
-                        if (window.soundSystem) window.soundSystem.playFanfare();
                     }
                 }
             ]

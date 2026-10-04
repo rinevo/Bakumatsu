@@ -170,7 +170,9 @@ class UIManager {
         if (card.isKept) div.classList.add('card-kept');
         div.dataset.cardId = card.id;
 
-        const actualCost = this.app.battle ? this.app.battle.calculateCardCost(card) : (card.cost || 0);
+        const masterCard = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[card.id] : null;
+        const fallbackCost = (masterCard && masterCard.cost !== undefined) ? masterCard.cost : (card.cost || 0);
+        const actualCost = this.app.battle ? this.app.battle.calculateCardCost(card) : fallbackCost;
 
         let costHtml = `<div class="card-cost">${card.unplayable ? '✕' : actualCost + ' 文'}</div>`;
         let attackBadge = card.attack ? `<span class="stat-badge atk">攻 ${card.attack}</span>` : '';

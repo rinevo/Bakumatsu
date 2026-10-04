@@ -429,6 +429,52 @@ class SoundSystem {
         this.playVictory();
     }
 
+    // --- 作戦失敗・歴史の蹉跌（和風・重厚な失意と打撃の音） ---
+    playFailure() {
+        if (this.isSeMuted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        // 1. 下降する不吉な短音階（失意の響き）
+        const failNotes = [392.00, 311.13, 261.63, 196.00]; // G4 -> Eb4 -> C4 -> G3
+        failNotes.forEach((freq, idx) => {
+            setTimeout(() => {
+                this.playKotoNote(freq, 0.4);
+            }, idx * 120);
+        });
+
+        // 2. 挫折・被弾の重い衝撃音（ドスン…）
+        setTimeout(() => {
+            if (!this.ctx) return;
+            const t = this.ctx.currentTime;
+            
+            // 重低音インパクト
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(120, t);
+            osc.frequency.exponentialRampToValueAtTime(32, t + 0.6);
+
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(260, t);
+            filter.frequency.linearRampToValueAtTime(70, t + 0.6);
+
+            gain.gain.setValueAtTime(0.45, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(t);
+            osc.stop(t + 0.7);
+
+            // 濁った金属音・無念の余韻
+            this.playNoiseSnap(0.25, 0.2, 350);
+        }, failNotes.length * 120);
+    }
+
     playKotoNote(freq, duration = 0.5, isBgm = false) {
         if ((!isBgm && this.isSeMuted) || !this.ctx) return;
         const now = this.ctx.currentTime;

@@ -964,6 +964,39 @@ class BakumatsuApp {
         let fail = 15;
         let riskCategory = 'orthodox';
 
+        // 獲得する志士カードの陣営を判定（敵陣営の志士カード獲得か？）
+        let targetsOpposingShishi = false;
+        const actionStr = (baseChoice.action || '').toString();
+        const effectText = `${baseChoice.effectDesc || ''}`;
+        if (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) {
+            for (const [cardId, card] of Object.entries(GAME_DATA.cards)) {
+                if (card.type === 'shishi' && (actionStr.includes(`'${cardId}'`) || actionStr.includes(`"${cardId}"`) || effectText.includes(card.name) || (card.character && effectText.includes(card.character)))) {
+                    if (card.faction && card.faction !== 'neutral' && card.faction !== this.faction) {
+                        targetsOpposingShishi = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 歴史事件の優勢陣営（historicalAdvantage）を判定
+        let historicalAdvantage = eventData.historicalAdvantage;
+        if (!historicalAdvantage) {
+            const evId = eventData.id || '';
+            const evTitle = eventData.title || '';
+            // 討幕派優勢な主要歴史事件
+            if (/satcho|satsuma_decision|taisei_hokan|restoration_council|toba_fushimi|edo_opening|katsu_saigo|second_choshu|ueno_war|aizu_war|aizu_surrender|goryokaku|paris_expo|hyogo_armada/.test(evId) ||
+                /薩長|大政奉還|王政復古|鳥羽・伏見|江戸開城|勝・西郷|四境戦争|第二次長州|上野戦争|会津戦争|会津降伏|五稜郭|版籍奉還|廃藩置県/.test(evTitle)) {
+                historicalAdvantage = 'tobaku';
+            } else if (/ikedaya|kinmon|first_choshu|august18|shinsengumi|mibu_drill|aburakoji|tenguto|teradaya_1862/.test(evId) ||
+                /池田屋|禁門の変|第一次長州|八月十八日|新選組|壬生屯所|油小路|天狗党/.test(evTitle)) {
+                historicalAdvantage = 'sabaku';
+            }
+        }
+
+        // 敵側が有利な歴史事件で、プレイヤーがその反対陣営の場合
+        const isOpposingHistoricalEvent = Boolean(historicalAdvantage && historicalAdvantage !== this.faction && historicalAdvantage !== 'neutral');
+
         if (baseChoice.chances && typeof baseChoice.chances.great === 'number') {
             great = baseChoice.chances.great;
             success = baseChoice.chances.success;
@@ -971,23 +1004,26 @@ class BakumatsuApp {
             riskCategory = baseChoice.riskCategory || 'custom';
         } else if (baseChoice.riskCategory) {
             riskCategory = baseChoice.riskCategory;
+        } else if (targetsOpposingShishi) {
+            // 敵陣営の志士を獲得する選択は極めて困難な歴史の抗い
+            riskCategory = 'defiance';
         } else if (baseChoice.isHistorical === false) {
             riskCategory = 'defiance';
         } else if (baseChoice.isHistorical === true) {
             riskCategory = 'orthodox';
         } else {
-            // キーワード自動判定
+            // キーワード自動判定（defianceをsafeより優先して判定）
             const text = `${baseChoice.text} ${baseChoice.effectDesc || ''} ${eventData.title || ''}`;
             
-            if (/深入りを避け|脱出|静観|回避|退却|離脱|見送り|温存|隠忍|不戦|武器を手放す|降伏勧告|平和的|流血を止め|恭順を受け入れ|無用な流血/.test(text)) {
-                // 🛡️ 慎重・安全策
-                riskCategory = 'safe';
+            if (/旧勢力の完全排除|旧来の兵制を維持|武士の意地を通す|同盟を見送り|同盟を阻止|同盟破談|同盟拒否|盟約を見送り|鎖国を貫く|拒絶|拒否|破談|強硬に対峙|打ち払いを徹底|強硬論|断固拒否|旧態|頑として|歴史に抗う|懐柔を謀る|切り崩し/.test(text)) {
+                // 🟠 歴史の抗い（反史実・if決断）
+                riskCategory = 'defiance';
             } else if (/正面から|攻め込|攻め入|斬り込|迎え撃|抜刀|突入|突撃|砲撃|襲撃|死守|激戦|強行|突破|突進|暗殺|決死|打って出|決戦を挑|一戦を交|抗戦|徹底抗戦|蜂起|挙兵|ピストル|強襲|討ち入|玉砕|散華|決起|先陣|斬首|討滅|全砲門|電撃奇襲|仇を討つ|武力討幕/.test(text)) {
                 // 🔴 逆境・無謀決戦
                 riskCategory = 'reckless';
-            } else if (/旧勢力の完全排除|旧来の兵制を維持|武士の意地を通す|同盟を見送り|鎖国を貫く|拒絶|拒否|破談|強硬に対峙|打ち払いを徹底|強硬論|断固拒否|旧態|頑として/.test(text)) {
-                // 🟠 歴史の抗い（反史実・if決断）
-                riskCategory = 'defiance';
+            } else if (/深入りを避け|脱出|静観|回避|退却|離脱|兵力を温存|戦力を温存|資金を温存|隠忍|不戦|武器を手放す|降伏勧告|平和的|流血を止め|恭順を受け入れ|無用な流血|兵糧を蓄える/.test(text)) {
+                // 🛡️ 慎重・安全策
+                riskCategory = 'safe';
             } else if (/買収|借款|商人|密貿易|密談|密議|情報|金|兵器|新式|潜入|調略|工作|裏手|武器を流|武器の調達|密使|談判|周旋|密命|裏取引/.test(text)) {
                 // 🟡 謀略・周旋
                 riskCategory = 'intrigue';
@@ -995,6 +1031,11 @@ class BakumatsuApp {
                 // 🟢 堅実・史実正道
                 riskCategory = 'orthodox';
             }
+        }
+
+        // 敵対する歴史事件で史実に抗う選択の場合、カテゴリを強制的に defiance
+        if (isOpposingHistoricalEvent && (riskCategory === 'defiance' || targetsOpposingShishi || baseChoice.isHistorical === false)) {
+            riskCategory = 'defiance';
         }
 
         // カテゴリごとの基本確率（custom以外）
@@ -1033,9 +1074,21 @@ class BakumatsuApp {
             }
         }
 
+        // 敵対する歴史事件において史実に抗う場合の追加ペナルティ（歴史の奔流への抵抗）
+        if (isOpposingHistoricalEvent && (riskCategory === 'defiance' || targetsOpposingShishi || baseChoice.isHistorical === false)) {
+            fail += 10;
+            success = Math.max(15, success - 8);
+            great = Math.max(5, great - 3);
+        }
+
+        // 敵側志士カードを獲得しようとする難関ペナルティ
+        if (targetsOpposingShishi) {
+            fail += 8;
+            success = Math.max(15, success - 5);
+            great = Math.max(5, great - 2);
+        }
+
         // 呪いや大ダメージ（HP30以上損失）を伴う無謀・危険リスク補正
-        const effectText = `${baseChoice.effectDesc || ''}`;
-        const actionStr = (baseChoice.action || '').toString();
         const hasCurse = effectText.includes('呪い') || actionStr.includes('curse_');
         const hasHeavyDamage = /HPを?\s*(?:3[0-9]|[4-9][0-9])\s*失/.test(effectText) || /damagePlayer\((?:3[0-9]|[4-9][0-9])\)/.test(actionStr);
         if (hasCurse || hasHeavyDamage) {
@@ -1186,6 +1239,37 @@ class BakumatsuApp {
                     rewards.push({ icon: '⚖️', text: `世論が <strong class="reward-highlight">${facName}</strong> へ傾斜しました。` });
                 }
 
+                // 敵陣営の志士を獲得した場合の判定
+                const actionStr = (baseChoice.action || '').toString();
+                const effectText = `${baseChoice.effectDesc || ''}`;
+                let acquiredOpposingShishi = null;
+                if (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) {
+                    for (const [cardId, card] of Object.entries(GAME_DATA.cards)) {
+                        if (card.type === 'shishi' && (actionStr.includes(`'${cardId}'`) || actionStr.includes(`"${cardId}"`) || effectText.includes(card.name) || (card.character && effectText.includes(card.character)))) {
+                            if (card.faction && card.faction !== 'neutral' && card.faction !== this.faction) {
+                                acquiredOpposingShishi = card;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (acquiredOpposingShishi) {
+                    // 選択肢自体にダメージや呪い等の強烈なデバフが定義されていない場合のセーフティネット
+                    const hadDamage = actionStr.includes('damagePlayer');
+                    const hadCurse = actionStr.includes('curse_') || effectText.includes('呪い');
+                    if (!hadDamage) {
+                        this.damagePlayer(25);
+                        this.maxHp = Math.max(20, this.maxHp - 5);
+                        rewards.push({ icon: '⚡', text: `<span class="penalty">敵陣志士登用の代償: 陣営内の猛烈な反発と内紛により HP 25喪失 ＆ 最大HP -5！</span>` });
+                    }
+                    if (!hadCurse) {
+                        this.addCardToDeck('curse_betrayal');
+                        rewards.push({ icon: '☠️', text: `<span class="penalty">猜疑の影: 味方の不信により呪いカード『家臣の寝返り』がデッキに混入！</span>` });
+                    }
+                    rewards.push({ icon: '⚠️', text: `<span class="penalty">【敵対志士登用】天下を揺るがす異例の登用により、自軍内部に強烈な波紋が広がりました。</span>` });
+                }
+
                 rewards.push({ icon: '⭕', text: `史実通りの成果を達成！志士カードを獲得しました。` });
 
             } else {
@@ -1233,8 +1317,12 @@ class BakumatsuApp {
                 window.soundSystem.playVictory();
             } else if (outcome === 'success' && window.soundSystem.playTaiko) {
                 window.soundSystem.playTaiko(true);
-            } else if (outcome === 'failure' && window.soundSystem.playSlash) {
-                window.soundSystem.playSlash();
+            } else if (outcome === 'failure') {
+                if (window.soundSystem.playFailure) {
+                    window.soundSystem.playFailure();
+                } else if (window.soundSystem.playWarning) {
+                    window.soundSystem.playWarning();
+                }
             }
         }
 
@@ -1264,6 +1352,8 @@ class BakumatsuApp {
         const origDamage = this.damagePlayer.bind(this);
         const origObtainRelic = this.obtainRandomRelic ? this.obtainRandomRelic.bind(this) : null;
         const origRemovalModal = this.openCardRemovalModal ? this.openCardRemovalModal.bind(this) : null;
+        let origPlayFanfare = null;
+        let origPlayVictory = null;
 
         if (outcome === 'great') {
             // 大成功: HPダメージを完全無効化
@@ -1281,6 +1371,13 @@ class BakumatsuApp {
             if (origRemovalModal) {
                 this.openCardRemovalModal = () => { /* ブロック */ };
             }
+            // 失敗時はアクション内のファンファーレ・勝利音も完全にブロック！
+            if (window.soundSystem) {
+                origPlayFanfare = window.soundSystem.playFanfare;
+                origPlayVictory = window.soundSystem.playVictory;
+                window.soundSystem.playFanfare = () => {};
+                window.soundSystem.playVictory = () => {};
+            }
         }
 
         try {
@@ -1290,6 +1387,10 @@ class BakumatsuApp {
             this.damagePlayer = origDamage;
             if (origObtainRelic) this.obtainRandomRelic = origObtainRelic;
             if (origRemovalModal) this.openCardRemovalModal = origRemovalModal;
+            if (window.soundSystem) {
+                if (origPlayFanfare) window.soundSystem.playFanfare = origPlayFanfare;
+                if (origPlayVictory) window.soundSystem.playVictory = origPlayVictory;
+            }
         }
     }
 

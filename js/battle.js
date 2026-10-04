@@ -483,7 +483,9 @@ class BattleSystem {
     }
 
     calculateCardCost(card) {
-        let cost = card.cost || 0;
+        // マスターデータから本来の基本コストを厳格に取得（意図しないコスト変動や温存割引を完全排除）
+        const masterCard = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[card.id] : null;
+        let cost = (masterCard && masterCard.cost !== undefined) ? masterCard.cost : (card.cost || 0);
 
         // 関税自主権喪失の呪いが手札にある場合、全コスト+1
         const hasTariff = this.hand.some(c => c.id === 'curse_tariff');
@@ -790,10 +792,14 @@ class BattleSystem {
             const c = this.hand.shift();
             if (c.isKept) {
                 c.isKept = false;
-                c.wasKeptLastTurn = true;
+                delete c.wasKeptLastTurn;
+                // マスターデータから基本コストを厳格にリセット（いかなる温存割引も排除）
+                if (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards && GAME_DATA.cards[c.id]) {
+                    c.cost = GAME_DATA.cards[c.id].cost;
+                }
                 keptCards.push(c);
             } else {
-                c.wasKeptLastTurn = false;
+                delete c.wasKeptLastTurn;
                 this.discardPile.push(c.id);
             }
         }
