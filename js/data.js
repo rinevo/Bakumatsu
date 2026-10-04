@@ -1985,6 +1985,180 @@ const GAME_DATA = {
                 b.damagePlayerDirect(4);
                 window.soundSystem.playWarning();
             }
+        },
+        // --- 🔴 討幕派 新規志士カード（4枚） ---
+        "shimazu_nariakira": {
+            id: "shimazu_nariakira",
+            name: "島津斉彬：集成の英断",
+            faction: "tobaku",
+            character: "nariakira",
+            type: "shishi",
+            subType: "leader",
+            cost: 2,
+            attack: 10,
+            shield: 10,
+            desc: "敵に 10 ダメージ、防 10。手札の「兵器」または「戦術」のコストをこの戦闘中1下げる。列強介入 -3%。",
+            rarity: "legendary",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(10);
+                b.gainPlayerShield(10);
+                if (b.hand) {
+                    b.hand.forEach(c => {
+                        if (c.type === 'tactic' || c.type === 'equip') {
+                            c.cost = Math.max(0, (c.cost || 0) - 1);
+                        }
+                    });
+                }
+                b.modifyImperialGauge(-3);
+            }
+        },
+        "john_manjiro": {
+            id: "john_manjiro",
+            name: "ジョン万次郎：数奇なる羅針盤",
+            faction: "tobaku",
+            character: "manjiro",
+            type: "shishi",
+            subType: "samurai",
+            cost: 1,
+            attack: 6,
+            shield: 6,
+            desc: "敵に 6 ダメージ、防 6。山札からカードを2枚引く。次ターンの手札上限+1。",
+            rarity: "rare",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(6);
+                b.gainPlayerShield(6);
+                b.drawCards(2);
+                b.nextTurnHandBonus = (b.nextTurnHandBonus || 0) + 1;
+            }
+        },
+        "yuri_kimimasa": {
+            id: "yuri_kimimasa",
+            name: "由利公正：新政の殖産",
+            faction: "tobaku",
+            character: "yuri",
+            type: "shishi",
+            subType: "tactician",
+            cost: 1,
+            attack: 0,
+            shield: 8,
+            desc: "防 8。文を 2 獲得。次戦勝利時の獲得軍資金 +15両。",
+            rarity: "uncommon",
+            onPlay: (b, self) => {
+                b.gainPlayerShield(8);
+                b.gainPlayerEnergy(2);
+                if (window.app) {
+                    window.app.nextBattleGoldBonus = (window.app.nextBattleGoldBonus || 0) + 15;
+                }
+            }
+        },
+        "hirano_kuniomi": {
+            id: "hirano_kuniomi",
+            name: "平野国臣：志士の狂瀾",
+            faction: "tobaku",
+            character: "hirano",
+            type: "shishi",
+            subType: "samurai",
+            cost: 1,
+            attack: 12,
+            shield: 0,
+            desc: "敵に 12 ダメージ。自軍HPを 3 消費する。敵に「脆弱 2」（被ダメージ50%増）を付与。",
+            rarity: "rare",
+            killedBySabaku: true, // 六角獄舎で処刑
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(12);
+                b.damagePlayerDirect(3);
+                b.applyStatusToEnemy("vulnerable", 2);
+            }
+        },
+
+        // --- 🔵 佐幕派 新規志士カード（4枚） ---
+        "tokugawa_yoshinobu": {
+            id: "tokugawa_yoshinobu",
+            name: "徳川慶喜：英断の恭順",
+            faction: "sabaku",
+            character: "yoshinobu",
+            type: "shishi",
+            subType: "leader",
+            cost: 2,
+            attack: 8,
+            shield: 16,
+            desc: "敵に 8 ダメージ、防 16。敵の攻撃意図を 5 低下させ、次ターンの敵剛力を無効化する。",
+            rarity: "legendary",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(8);
+                b.gainPlayerShield(16);
+                if (b.enemy && b.enemy.intent && b.enemy.intent.damage) {
+                    b.enemy.intent.damage = Math.max(0, b.enemy.intent.damage - 5);
+                }
+                b.applyStatusToEnemy("weak", 2);
+            }
+        },
+        "nakano_takeko": {
+            id: "nakano_takeko",
+            name: "中野竹子：薙刀の一陣",
+            faction: "sabaku",
+            character: "takeko",
+            type: "shishi",
+            subType: "samurai",
+            cost: 1,
+            attack: 11,
+            shield: 4,
+            desc: "敵に 11 ダメージ、防 4。会心の一撃（50%の確率でダメージ1.5倍）。敵のシールドを 5 貫通。",
+            rarity: "rare",
+            killedByTobaku: true, // 柳橋で戦死
+            onPlay: (b, self) => {
+                let dmg = 11;
+                if (Math.random() < 0.5) {
+                    dmg = Math.floor(dmg * 1.5);
+                    if (window.particleSystem) window.particleSystem.showComboText("【会心一刀！】", 1);
+                }
+                if (b.enemy && b.enemy.shield > 0) {
+                    b.enemy.shield = Math.max(0, b.enemy.shield - 5);
+                }
+                b.dealDamageToEnemy(dmg);
+                b.gainPlayerShield(4);
+            }
+        },
+        "iwase_tadanari": {
+            id: "iwase_tadanari",
+            name: "岩瀬忠震：条約の理財",
+            faction: "sabaku",
+            character: "iwase",
+            type: "shishi",
+            subType: "tactician",
+            cost: 1,
+            attack: 4,
+            shield: 8,
+            desc: "敵に 4 ダメージ、防 8。列強介入メーターを 4% 下げ、手札を1枚引く。",
+            rarity: "uncommon",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(4);
+                b.gainPlayerShield(8);
+                b.modifyImperialGauge(-4);
+                b.drawCards(1);
+            }
+        },
+        "hattori_takeo": {
+            id: "hattori_takeo",
+            name: "服部武雄：不抜の二刀",
+            faction: "sabaku",
+            character: "hattori",
+            type: "shishi",
+            subType: "samurai",
+            cost: 2,
+            attack: 14,
+            shield: 8,
+            desc: "敵に 7 ダメージを 2回（計14）、防 8。敵のシールドを 6 破壊する。",
+            rarity: "rare",
+            killedBySabaku: true, // 油小路で新選組に討たれる
+            onPlay: (b, self) => {
+                if (b.enemy && b.enemy.shield > 0) {
+                    b.enemy.shield = Math.max(0, b.enemy.shield - 6);
+                }
+                b.dealDamageToEnemy(7);
+                b.dealDamageToEnemy(7);
+                b.gainPlayerShield(8);
+            }
         }
     },
 
@@ -8920,10 +9094,10 @@ const GAME_DATA = {
                 {
                     opinionChange: -8,
                     text: "【佐幕派】中野竹子の娘子隊と共に抜刀突撃を敢行し、新政府軍の銃列を突き崩す",
-                    effectDesc: "志士『松平容保：会津の義気』を獲得。壮烈な激闘により HP 28 ダメージを受けるが、次戦攻撃力 +5。",
+                    effectDesc: "志士『中野竹子：薙刀の一陣』を獲得。壮烈な激闘により HP 28 ダメージを受けるが、次戦攻撃力 +5。",
                     faction: "sabaku",
                     action: (app) => {
-                        app.addCardToDeck("aizu_shield");
+                        app.addCardToDeck("nakano_takeko");
                         app.damagePlayer(28);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
                     }
@@ -9422,6 +9596,368 @@ const GAME_DATA = {
                     action: (app) => {
                         app.gold += 25;
                         app.healPlayer(8);
+                    }
+                }
+            ]
+        },
+        // ==========================================
+        // 新規追加歴史事件（全8件拡充：131件→139件）
+        // ==========================================
+        // --- 第一幕（京洛動乱期）追加4件 ---
+        {
+            id: "event_shuseikan_project",
+            act: 1,
+            importance: 2,
+            title: "集成館事業、近代産業の黎明",
+            desc: "嘉永四年、薩摩藩主・島津斉彬が鹿児島・磯の地に一大近代洋式工場群「集成館」を興した。反射炉での鉄砲鋳造、造船、ガラス・火薬の国産化。西欧列強に対峙せんとする富国強兵の魁に、どう呼応するか。",
+            choices: [
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】島津斉彬の集成館事業に参画し、最新の洋式火器製造を推進する",
+                    effectDesc: "志士『島津斉彬：集成の英断』を獲得。軍資金 40両 を拠出するが、最大HP +3。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("shimazu_nariakira");
+                        app.gold = Math.max(0, app.gold - 40);
+                        app.maxHp += 3;
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】幕府勘定所へ洋式製鉄の技術を献じ、台場砲台の強化を具申する",
+                    effectDesc: "志士『阿部正弘』を獲得。軍資金 30両 を獲得し、次戦防御力 +6。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("abe_defense");
+                        app.gold += 30;
+                        if (window.app && window.app.battle) window.app.battle.gainPlayerShield(6);
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "集成館で試作された最新式小銃を買い付け、武装を刷新する",
+                    effectDesc: "『新式ミニエ銃』をデッキに加え、HP を 6 回復する。",
+                    action: (app) => {
+                        app.addCardToDeck("weapon_minie");
+                        app.healPlayer(6);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_manjiro_return",
+            act: 1,
+            importance: 1,
+            title: "中浜万次郎の帰航、未知なる航海術",
+            desc: "太平洋を漂流し米国で高等教育・航海術を修めたジョン万次郎が、十余年の歳月を経て日本へ帰還した。異国の進んだ地理、造船、民主制度を知る稀代の漂流民をどう迎えるか。",
+            choices: [
+                {
+                    opinionChange: 5,
+                    text: "【討幕派】万次郎の卓越した航海術と英語力を乞い、海外密貿易と海運の顧問に迎える",
+                    effectDesc: "志士『ジョン万次郎：数奇なる羅針盤』を獲得。列強介入 -4%、HP を 6 回復。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("john_manjiro");
+                        app.modifyImperialGauge(-4);
+                        app.healPlayer(6);
+                    }
+                },
+                {
+                    opinionChange: -5,
+                    text: "【佐幕派】幕府直参に登用し、軍艦操練所の教授方として洋式海軍の創設を託す",
+                    effectDesc: "志士『勝海舟』を獲得。軍資金 25両 を獲得し、最大HP +2。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("katsu_kaishu");
+                        app.gold += 25;
+                        app.maxHp += 2;
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "万次郎が持ち帰った世界地図と英米航海年鑑の写本を調達する",
+                    effectDesc: "軍資金 30両 を獲得し、列強介入 -3%。",
+                    action: (app) => {
+                        app.gold += 30;
+                        app.modifyImperialGauge(-3);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_shimoda_harris_talks",
+            act: 1,
+            importance: 2,
+            title: "下田会談、ハリスと岩瀬忠震の舌戦",
+            desc: "安政四年十月、下田・玉泉寺。初代米国総領事タウンゼント・ハリスと、幕府目付・岩瀬忠震が条約締結を巡り対峙した。理路整然と主権と通商利益を守らんと論戦を挑む岩瀬の胆力。",
+            choices: [
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】岩瀬忠震の卓越した外交論陣を支え、関税自主と国益の確保に全力を尽くす",
+                    effectDesc: "志士『岩瀬忠震：条約の理財』を獲得。列強介入 -5%、軍資金 25両 を獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("iwase_tadanari");
+                        app.modifyImperialGauge(-5);
+                        app.gold += 25;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】幕閣の無勅許調印路線を糾弾し、朝廷の勅許なき通商条約に反対を叫ぶ",
+                    effectDesc: "志士『武市半平太』を獲得。次戦攻撃力 +3、HP 26 ダメージを受ける。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("takechi_ideology");
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
+                        app.damagePlayer(26);
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "条約交渉の妥結を見越し、横浜開港場での物産取引の権利を先行確保する",
+                    effectDesc: "軍資金 40両 を獲得するが、列強介入 +6%。",
+                    action: (app) => {
+                        app.gold += 40;
+                        app.modifyImperialGauge(6);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_ikuno_uprising",
+            act: 1,
+            importance: 2,
+            title: "生野の変、但馬に翻る破約の旗",
+            desc: "文久三年十月、但馬生野銀山。大和天誅組の変に呼応し、福岡藩士・平野国臣や公卿・沢宣嘉らが代官所を急襲して破約攘夷の義旗を掲げた。わずか数日の電撃蜂起の行方は。",
+            choices: [
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】平野国臣の決起に参陣し、生野代官所の銀山資金を押収して進軍する",
+                    effectDesc: "志士『平野国臣：志士の狂瀾』を獲得。HP 26 ダメージを受けるが、次戦攻撃力 +4、軍資金 30両 を獲得。",
+                    faction: "tobaku",
+                    shishiBonus: {
+                        character: "hirano",
+                        desc: "狂瀾の突進！被ダメージを半減し、次戦攻撃力+2！",
+                        apply: (app) => {
+                            app.healPlayer(13);
+                            app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 2;
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("hirano_kuniomi");
+                        app.damagePlayer(26);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                        app.gold += 30;
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】出石藩・姫路藩の藩兵を急行させ、代官所を奪還して農民騒擾を鎮撫する",
+                    effectDesc: "志士『立見尚文』を獲得。HP を 6 回復し、軍資金 25両 を獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("tatsumi_naobumi");
+                        app.healPlayer(6);
+                        app.gold += 25;
+                    }
+                },
+                {
+                    opinionChange: 0,
+                    text: "混乱に乗じ、銀山の良質な銀塊を回収して軍資金に充てる",
+                    effectDesc: "軍資金 50両 を獲得するが、最大HP -3。",
+                    action: (app) => {
+                        app.gold += 50;
+                        app.maxHp = Math.max(1, app.maxHp - 3);
+                    }
+                }
+            ]
+        },
+
+        // --- 第二幕（東海道進撃期）追加2件 ---
+        {
+            id: "event_aburakoji_hattori",
+            act: 2,
+            importance: 3,
+            title: "油小路の死闘、服部武雄の二刀流",
+            desc: "慶応三年十一月、京都油小路木津屋橋。伊東甲子太郎を暗殺された御陵衛士の同志たちが遺体を引き取りに現れ、待ち伏せる新選組と壮絶な夜戦に突入。撃剣師範・服部武雄が背に塀を負い二刀を振るって孤軍奮戦する。",
+            choices: [
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】服部武雄の凄絶なる二刀流に加勢し、多勢の新選組包囲陣を相手に獅子奮迅の太刀を振るう",
+                    effectDesc: "志士『服部武雄：不抜の二刀』を獲得。死闘の重傷で HP 32 ダメージを受けるが、次戦攻撃力 +6。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("hattori_takeo");
+                        app.damagePlayer(32);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 6;
+                    }
+                },
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】新選組隊士として包囲陣を固め、離隊した御陵衛士を掃討して隊の規律を守る",
+                    effectDesc: "志士『永倉新八』を獲得。HP を 8 回復し、軍資金 25両 を獲得。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("nagakura_bushin");
+                        app.healPlayer(8);
+                        app.gold += 25;
+                    }
+                },
+                {
+                    opinionChange: 12,
+                    text: "【討幕派】死線を脱出した御陵衛士の生き残りを薩摩藩邸へ極秘裏に匿い、再起を期す",
+                    effectDesc: "志士『吉井友実』を獲得。軍資金 35両 を獲得し、HP を 6 回復。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("yoshii_support");
+                        app.gold += 35;
+                        app.healPlayer(6);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_yoshinobu_kyoujun",
+            act: 2,
+            importance: 3,
+            title: "上野寛永寺、徳川慶喜の恭順",
+            desc: "慶応四年二月、江戸・上野寛永寺大慈院。鳥羽・伏見の敗戦後、将軍・徳川慶喜は主戦派の徹底抗戦論を退け、自ら謹慎・恭順を決断した。徳川二百六十年の泰平の幕引きと江戸焦土戦の回避。",
+            choices: [
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】慶喜公の至誠の恭順方針を支持し、勝海舟と共に和平開城交渉の道を拓く",
+                    effectDesc: "志士『徳川慶喜：英断の恭順』を獲得。次戦防御力 +12、全カードの最大HP +3＆完全回復！",
+                    faction: "sabaku",
+                    shishiBonus: {
+                        character: "yoshinobu",
+                        desc: "大局の恭順！軍資金 50両 を獲得し、次戦防御力+6！",
+                        apply: (app) => {
+                            app.gold += 50;
+                            if (window.app && window.app.battle) window.app.battle.gainPlayerShield(6);
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("tokugawa_yoshinobu");
+                        if (window.app && window.app.battle) window.app.battle.gainPlayerShield(12);
+                        app.maxHp += 3;
+                        app.healPlayer(999);
+                    }
+                },
+                {
+                    opinionChange: -12,
+                    text: "【佐幕派】将軍謹慎の隙を狙う過激派を抑え、江戸城下の治安維持にあたる",
+                    effectDesc: "志士『勝海舟』を獲得。軍資金 40両 を獲得し、列強介入 -5%。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("katsu_kaishu");
+                        app.gold += 40;
+                        app.modifyImperialGauge(-5);
+                    }
+                },
+                {
+                    opinionChange: 12,
+                    text: "【討幕派】東征大総督府の進撃に加わり、朝敵追討の旗を掲げて東海道を疾走する",
+                    effectDesc: "志士『西郷隆盛：薩摩の巨魁』を獲得。HP 32 ダメージを受けるが、次戦攻撃力 +5。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("saigo_jigen");
+                        app.damagePlayer(32);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                    }
+                }
+            ]
+        },
+
+        // --- 終幕（天下分け目の決戦〜明治期）追加2件 ---
+        {
+            id: "event_dajokan_satsu",
+            act: 3,
+            importance: 2,
+            title: "太政官札の発行、由利公正の新通貨",
+            desc: "慶応四年五月、京都。新政府の軍資金不足を解消すべく、参与・由利公正（三岡八郎）の献策により日本初の全国通用紙幣「太政官札」が発行された。近代的国家財政の産声。",
+            choices: [
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】由利公正の通貨改革を後援し、太政官札の普及と新政府財政の安定を図る",
+                    effectDesc: "志士『由利公正：新政の殖産』を獲得。軍資金 50両 を獲得し、最大HP +3。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("yuri_kimimasa");
+                        app.gold += 50;
+                        app.maxHp += 3;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】大坂の豪商たちを説得し、正金準備の確保と新紙幣の信認向上に努める",
+                    effectDesc: "志士『五代友厚』を獲得。軍資金 40両 を獲得し、HP を 6 回復。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("godai_commerce");
+                        app.gold += 40;
+                        app.healPlayer(6);
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】旧幕府の金座・銀座の貨幣流通を死守し、奥羽諸藩の軍用資金を調達する",
+                    effectDesc: "志士『小栗忠順』を獲得。軍資金 35両 を獲得し、次戦防御力 +6。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("oguri_reform");
+                        app.gold += 35;
+                        if (window.app && window.app.battle) window.app.battle.gainPlayerShield(6);
+                    }
+                }
+            ]
+        },
+        {
+            id: "event_aizu_nadeshiko",
+            act: 3,
+            importance: 2,
+            title: "会津娘子隊の結成、鶴ヶ城の義烈",
+            desc: "慶応四年八月、会津若松城下。新政府軍の猛攻が城壁に迫る中、中野竹子や神保雪子ら武家の女性たちが薙刀を手に自発的に結集した。家と義を胸に出陣する烈女たちの決意。",
+            choices: [
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】中野竹子率いる娘子隊の結成を後押しし、鶴ヶ城柳橋の迎撃戦へ共に出陣する",
+                    effectDesc: "志士『中野竹子：薙刀の一陣』を獲得。HP 26 ダメージを受けるが、次戦攻撃力 +5、世論佐幕 8%。",
+                    faction: "sabaku",
+                    shishiBonus: {
+                        character: "takeko",
+                        desc: "烈女の気迫！被ダメージを半減し、次戦攻撃力+3！",
+                        apply: (app) => {
+                            app.healPlayer(13);
+                            app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
+                        }
+                    },
+                    action: (app) => {
+                        app.addCardToDeck("nakano_takeko");
+                        app.damagePlayer(26);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 5;
+                    }
+                },
+                {
+                    opinionChange: -8,
+                    text: "【佐幕派】山川大蔵と共に鶴ヶ城内の防備を固め、婦女子の城内収容を指揮する",
+                    effectDesc: "志士『山川大蔵：彼岸獅子の奮戦』を獲得。HP を 8 回復し、最大HP +3。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("yamakawa_cavalry");
+                        app.healPlayer(8);
+                        app.maxHp += 3;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    text: "【討幕派】会津城下の戦闘激化を憂い、城内へ降伏勧告の使者を立てて無用の流血を防ぐ",
+                    effectDesc: "志士『板垣退助』を獲得。HP を 8 回復し、軍資金 30両 を獲得。",
+                    faction: "tobaku",
+                    action: (app) => {
+                        app.addCardToDeck("itagaki_charge");
+                        app.healPlayer(8);
+                        app.gold += 30;
                     }
                 }
             ]
@@ -11780,15 +12316,114 @@ const GAME_DATA = {
             b.dealDamageToEnemy(18);
             if (b.enemy) b.enemy.shield = Math.max(0, (b.enemy.shield || 0) - 10);
         }
+    },
+    // === 新規追加 史実コネクトリンク（8組追加：233組→241組） ===
+    {
+        id: "combo_nariakira_saigo",
+        chars: ["nariakira", "saigo"],
+        title: "【薩摩の師弟・集成の号令！】",
+        desc: "敵に 20 ダメージ、次戦攻撃力 +6、文 +1。",
+        apply: (b) => {
+            b.dealDamageToEnemy(20);
+            b.gainPlayerEnergy(1);
+            if (window.app) window.app.nextBattleStrengthBuff = (window.app.nextBattleStrengthBuff || 0) + 6;
+        }
+    },
+    {
+        id: "combo_manjiro_katsu",
+        chars: ["manjiro", "katsu"],
+        title: "【太平洋の羅針盤！】",
+        desc: "防 16、カードを2枚引く。列強介入 -4%。",
+        apply: (b) => {
+            b.gainPlayerShield(16);
+            b.drawCards(2);
+            b.modifyImperialGauge(-4);
+        }
+    },
+    {
+        id: "combo_yuri_ryoma",
+        chars: ["yuri", "ryoma"],
+        title: "【新貨創出・船中の国論！】",
+        desc: "敵に 14 ダメージ、文 +1、軍資金 30両 を獲得。",
+        apply: (b) => {
+            b.dealDamageToEnemy(14);
+            b.gainPlayerEnergy(1);
+            if (window.app) window.app.gold += 30;
+        }
+    },
+    {
+        id: "combo_hirano_saigo",
+        chars: ["hirano", "saigo"],
+        title: "【錦江湾の絆・狂瀾の義！】",
+        desc: "敵に 18 ダメージ、敵に脱力 2、剛力 +3。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            b.applyStatusToEnemy("weak", 2);
+            b.applyPlayerBuff("strength", 3);
+        }
+    },
+    {
+        id: "combo_yoshinobu_katsu",
+        chars: ["yoshinobu", "katsu"],
+        title: "【徳川の泰平・大局の決断！】",
+        desc: "防 20、文 +1、敵の全攻撃意図を半減。",
+        apply: (b) => {
+            b.gainPlayerShield(20);
+            b.gainPlayerEnergy(1);
+            if (b.enemy && b.enemy.intent && b.enemy.intent.damage) {
+                b.enemy.intent.damage = Math.floor(b.enemy.intent.damage / 2);
+            }
+        }
+    },
+    {
+        id: "combo_takeko_yamakawa",
+        chars: ["takeko", "yamakawa"],
+        title: "【会津の華・義烈の薙刀！】",
+        desc: "敵に 18 ダメージ、防 10、敵シールドを 10 破壊。",
+        apply: (b) => {
+            b.dealDamageToEnemy(18);
+            b.gainPlayerShield(10);
+            if (b.enemy) b.enemy.shield = Math.max(0, (b.enemy.shield || 0) - 10);
+        }
+    },
+    {
+        id: "combo_iwase_abe",
+        chars: ["iwase", "abe"],
+        title: "【安政外交の双璧！】",
+        desc: "防 14、列強介入 -6%、文 +1。",
+        apply: (b) => {
+            b.gainPlayerShield(14);
+            b.modifyImperialGauge(-6);
+            b.gainPlayerEnergy(1);
+        }
+    },
+    {
+        id: "combo_hattori_ito",
+        chars: ["hattori", "ito_kasshitaro"],
+        title: "【御陵衛士・孤高の二刀！】",
+        desc: "敵に 22 ダメージ、敵に「脆弱 2」（被ダメージ50%増）。",
+        apply: (b) => {
+            b.dealDamageToEnemy(22);
+            b.applyStatusToEnemy("vulnerable", 2);
+        }
     }
 ]
 };
 
 // ==========================================
-// 全124件 歴史事件の史実メタデータ定義
+// 全139件 歴史事件の史実メタデータ定義
 // （発生年、月、表示期間、マップ用短縮タイトル）
 // ==========================================
 GAME_DATA.eventMeta = {
+    // 新規追加歴史事件メタデータ（8件）
+    "event_shuseikan_project": { year: 1851, month: 4, period: "1851年4月", shortTitle: "集成館事業" },
+    "event_manjiro_return": { year: 1851, month: 10, period: "1851年10月", shortTitle: "万次郎帰航" },
+    "event_shimoda_harris_talks": { year: 1857, month: 10, period: "1857年10月", shortTitle: "下田会談" },
+    "event_ikuno_uprising": { year: 1863, month: 10, period: "1863年10月", shortTitle: "生野の変" },
+    "event_aburakoji_hattori": { year: 1867, month: 11, period: "1867年11月", shortTitle: "油小路死闘" },
+    "event_yoshinobu_kyoujun": { year: 1868, month: 2, period: "1868年2月", shortTitle: "慶喜公恭順" },
+    "event_dajokan_satsu": { year: 1868, month: 5, period: "1868年5月", shortTitle: "太政官札" },
+    "event_aizu_nadeshiko": { year: 1868, month: 8, period: "1868年8月", shortTitle: "会津娘子隊" },
     "event_sakuma_assassination": { year: 1864, month: 7, period: "1864年7月", shortTitle: "佐久間象山暗殺" },
     "event_sannan_seppuku": { year: 1865, month: 2, period: "1865年2月", shortTitle: "山南敬助の切腹" },
     "event_izo_execution": { year: 1865, month: 5, period: "1865年5月", shortTitle: "土佐勤王党の獄" },
@@ -12638,7 +13273,16 @@ GAME_DATA.shishiBios = {
     "takeda_kounsai": "水戸藩家老。徳川斉昭の信任を得て藩政改革と尊王攘夷論を推進。水戸藩内外の尊攘激派が結集した「天狗党」の総首領に推され挙兵（天狗党の乱）。千余名を率いて上洛を目指し真冬の中山道を越えたが越前敦賀で幕府軍に降伏。凄惨な弾圧により武田をはじめ幹部数百名が斬首された。",
     "ogasawara_minister": "唐津藩世子・幕府老中格・外国事務総裁。第二次長州征伐では小倉口総督として指揮を執るが幕府軍の敗色濃厚となり撤退。戊辰戦争では榎本武揚艦隊に合流して箱館五稜郭へ渡り抗戦。維新後は引退して世に出ず、幕末の回顧録を残した。",
     "sagara_souzou": "下野国郷士出身の尊攘派志士。西郷隆盛らの密命を受け江戸で薩摩藩邸浪士隊を率いて幕府を挑発。戊辰戦争勃発に際し、新政府軍の先鋒として「赤報隊」を結成。「年貢半減令」を掲げて東山道を快進撃したが、新政府の方針転換により偽官軍の汚名を着せられ下諏訪にて処刑された悲劇の志士。",
-    "shibusawa_eiichi": "武蔵国血洗島の豪農出身。尊王攘夷思想に傾倒し高崎城乗っ取りを企てるも挫折、一橋慶喜に仕官して幕臣となる。徳川昭武に従いパリ万国博覧会へ渡欧し近代資本主義の仕組みを学ぶ。維新後は大蔵省で新制度を整えた後に実業界へ転じ、第一国立銀行など約500もの企業を育て「日本資本主義の父」と称された。"
+    "shibusawa_eiichi": "武蔵国血洗島の豪農出身。尊王攘夷思想に傾倒し高崎城乗っ取りを企てるも挫折、一橋慶喜に仕官して幕臣となる。徳川昭武に従いパリ万国博覧会へ渡欧し近代資本主義の仕組みを学ぶ。維新後は大蔵省で新制度を整えた後に実業界へ転じ、第一国立銀行など約500もの企業を育て「日本資本主義の父」と称された。",
+    // 新規追加志士人物伝（8名）
+    "shimazu_nariakira": "薩摩藩第11代藩主。洋式軍備や近代産業を興す「集成館事業」を創始し、反射炉・造船所・紡績・電信を日本で初めて実用化させた幕末屈指の名君。西郷隆盛や大久保利通の非凡な才を見出して抜擢し、明治維新の原動力となる薩摩の礎を築いた。大軍を率いての上洛直前に志半ばで急逝。",
+    "john_manjiro": "土佐国中浜の漁師出身（中浜万次郎）。14歳で漂流しアメリカ捕鯨船に救助され渡米。近代航海術・測量・英語を修めて首席卒業し、ゴールドラッシュで資金を得て奇跡の帰国を果たした。日米和親条約の交渉通訳や軍艦操練所教授を務め、咸臨丸の太平洋横断でも活躍した日米架け橋の偉人。",
+    "yuri_kimimasa": "越前福井藩士（三岡八郎）。橋本左内や横井小楠に師事し藩財政の再建に辣腕を振るう。坂本龍馬と深く親交を結び新国家の経済政策を策定。明治新政府では参与・会計事務掛となり「五箇条の御誓文」の原案を起草、日本最初の全国通用紙幣「太政官札」を発行して国家財政の基礎を確立した。",
+    "hirano_kuniomi": "筑前福岡藩士。尊皇攘夷激派の志士。西郷隆盛と僧月照の入水に立ち会い月照を救出、寺田屋事件にも関与した。大和天誅組の変に呼応して但馬生野で挙兵（生野の変）したが敗れ捕縛。京都六角獄舎に投獄され、禁門の変の混乱の中で斬首処刑された悲壮の義士。",
+    "tokugawa_yoshinobu": "江戸幕府第15代征夷大将軍（徳川慶喜）。水戸徳川家出身の一橋家当主。卓越した知謀で国難に立ち向かい、土佐藩の建白を容れて「大政奉還」を決断。鳥羽・伏見の戦い後は主戦論を退けて自ら上野寛永寺・水戸で謹慎・恭順を徹底し、江戸無血開城と日本の内乱終息を導いた最後の将軍。",
+    "nakano_takeko": "会津藩士の娘。江戸三大道場・玄武館で薙刀・撃剣・書道を修めた才色兼備の女剣士。戊辰戦争の会津城下戦において武家の女性たちを率いて自発的に「娘子隊」を結成。白装束に薙刀を手に新政府軍の銃列へ決死の突撃を敢行し、柳橋の激闘にて銃弾を受け21歳の若さで散華した。",
+    "iwase_tadanari": "江戸幕府旗本・外国奉行・目付。俊才をもって知られ、ペリー来航後の外交を一手に担う。初代米国総領事ハリスと粘り強い交渉を展開して日米修好通商条約の条文を起草、「条約の理財」と称された。安政の五カ国条約を主導したが、将軍継嗣問題で井伊直弼に疎まれ安政の大獄で失脚・蟄居となった。",
+    "hattori_takeo": "播磨赤穂出身の新選組撃剣師範・柔術師範。二刀流の達人として恐れられた。伊東甲子太郎らとともに新選組を離脱して御陵衛士（高台寺党）を結成。油小路の変において伊東の遺体を収容に訪れ新選組の伏兵と激突。背中に民家の塀を背負い、多勢の隊士を相手に孤軍奮戦して壮烈な最期を遂げた。"
 };
 
 // 全志士カードに人物伝（bio）を自動付与
