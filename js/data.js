@@ -3351,6 +3351,27 @@ const GAME_DATA = {
                         app.gold += 100;
                         app.hp = app.maxHp;
                     }
+                },
+                {
+                    opinionChange: -12,
+                    faction: "sabaku",
+                    text: "【佐幕派】徳川宗家を首班とする公議政体を模索し、幕府の実質的指導権を維持する",
+                    effectDesc: "志士『勝海舟：無血の大局観』を獲得。列強介入-8%、軍資金 50両 を獲得する。",
+                    shishiBonus: [
+                        {
+                            character: "katsu",
+                            desc: "大局の知恵！世論佐幕-15%、HPを全快！",
+                            apply: (app) => {
+                                app.modifyPublicOpinion(-15);
+                                app.hp = app.maxHp;
+                            }
+                        }
+                    ],
+                    action: (app) => {
+                        app.addCardToDeck("katsu_kaishu");
+                        app.modifyImperialGauge(-8);
+                        app.gold += 50;
+                    }
                 }
             ]
         },
@@ -3677,6 +3698,7 @@ const GAME_DATA = {
             choices: [
                 {
                     opinionChange: -12,
+                    faction: "sabaku",
                     text: "要塞に籠もり、最後まで抗戦する",
                     effectDesc: "志士『榎本武揚』を獲得。HPを 38 失うが、最大HP+3と次の戦闘の攻撃力+4。",
                     action: (app) => {
@@ -3704,6 +3726,17 @@ const GAME_DATA = {
                         app.addCardToDeck("shimada_kai");
                         app.gold += 35;
                         app.modifyImperialGauge(20);
+                    }
+                },
+                {
+                    opinionChange: 12,
+                    faction: "tobaku",
+                    text: "【討幕派】黒田清隆の全軍統括に従い、降伏勧告を行い戊辰戦争を完全終結させる",
+                    effectDesc: "志士『黒田了介：北辺の開拓』を獲得。HPを 12 回復し、軍資金 50両 を獲得する。",
+                    action: (app) => {
+                        app.addCardToDeck("kuroda_frontier");
+                        app.gold += 50;
+                        app.healPlayer(12);
                     }
                 }
             ]
@@ -5218,6 +5251,17 @@ const GAME_DATA = {
                         app.gold += 25;
                         app.modifyImperialGauge(12);
                     }
+                },
+                {
+                    opinionChange: -8,
+                    faction: "sabaku",
+                    text: "【佐幕派】幕府老中として英国公使と談判し、賠償金交渉により全面戦争を未然に防ぐ",
+                    effectDesc: "志士『小栗忠順：造船の先見』を獲得。列強介入-6%、軍資金 25両 を得る。",
+                    action: (app) => {
+                        app.addCardToDeck("oguri_reform");
+                        app.modifyImperialGauge(-6);
+                        app.gold += 25;
+                    }
                 }
             ]
         },
@@ -5282,6 +5326,7 @@ const GAME_DATA = {
                 },
                 {
                     opinionChange: -12,
+                    faction: "sabaku",
                     text: "佐川官兵衛ら抜刀隊と連携し、夜陰に紛れて兵を退かせる",
                     effectDesc: "志士『佐川官兵衛』を獲得。HPを 8 回復し、次の戦闘で攻撃力+4。",
                     action: (app) => {
@@ -5299,6 +5344,18 @@ const GAME_DATA = {
                         app.addCardToDeck("sakai_genba_charge");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
                         app.healPlayer(8);
+                    }
+                },
+                {
+                    opinionChange: 12,
+                    faction: "tobaku",
+                    text: "【討幕派】板垣退助・伊地知正治の指揮下で新政府軍の砲撃陣地を展開し、鶴ヶ城を包囲制圧する",
+                    effectDesc: "志士『板垣退助：自由の先駆』を獲得。HPを 20 失うが、軍資金 40両 を得て次の戦闘で攻撃力+4。",
+                    action: (app) => {
+                        app.addCardToDeck("itagaki_charge");
+                        app.damagePlayer(20);
+                        app.gold += 40;
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
                     }
                 }
             ]
@@ -5884,6 +5941,17 @@ const GAME_DATA = {
                         app.gold += 20;
                         app.healPlayer(6);
                     }
+                },
+                {
+                    opinionChange: -8,
+                    faction: "sabaku",
+                    text: "【佐幕派】京都守護職・会津藩兵と連携して都を厳重警戒し、尊攘派の勢力を完全に一掃する",
+                    effectDesc: "志士『松平容保：会津の義気』を獲得。軍資金 30両 を得て、次の戦闘の防御力+6。",
+                    action: (app) => {
+                        app.addCardToDeck("aizu_shield");
+                        app.gold += 30;
+                        app.nextBattleDefenseBuff = (app.nextBattleDefenseBuff || 0) + 6;
+                    }
                 }
             ]
         },
@@ -6274,6 +6342,17 @@ const GAME_DATA = {
                         app.maxHp += 3;
                         app.hp += 6;
                     }
+                },
+                {
+                    opinionChange: -8,
+                    faction: "sabaku",
+                    text: "【佐幕派】島津久光の命を受けた鎮撫使として過激派を制圧し、公武合体の秩序を守る",
+                    effectDesc: "志士『松平春嶽：公議の守り』を獲得。HPを 6 回復し、軍資金 30両 を得る。",
+                    action: (app) => {
+                        app.addCardToDeck("shungaku_council");
+                        app.healPlayer(6);
+                        app.gold += 30;
+                    }
                 }
             ]
         },
@@ -6450,6 +6529,18 @@ const GAME_DATA = {
                         app.addCardToDeck("sagawa_cavalry");
                         app.gold -= 40;
                         app.modifyImperialGauge(-5);
+                    }
+                },
+                {
+                    opinionChange: 12,
+                    faction: "tobaku",
+                    text: "【討幕派】新式銃隊で戸ノ口原の防衛線を電撃突破し、一気に鶴ヶ城下へ進撃する",
+                    effectDesc: "志士『伊地知正治：薩摩の軍議』を獲得。HPを 20 失うが、軍資金 35両 を得て次の戦闘の攻撃力+3。",
+                    action: (app) => {
+                        app.addCardToDeck("ijichi_command");
+                        app.damagePlayer(20);
+                        app.gold += 35;
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
                     }
                 }
             ]
@@ -6649,6 +6740,18 @@ const GAME_DATA = {
                         app.addCardToDeck("yoshii_support");
                         app.gold -= 35;
                         app.healPlayer(8);
+                    }
+                },
+                {
+                    opinionChange: -12,
+                    faction: "sabaku",
+                    text: "【佐幕派】島津久光の軍勢と共に江戸へ下り、幕閣に公武合体の幕政改革を認めさせる",
+                    effectDesc: "志士『松平春嶽：公議の守り』を獲得。軍資金 40両 を得て、最大HP+3。",
+                    action: (app) => {
+                        app.addCardToDeck("shungaku_council");
+                        app.gold += 40;
+                        app.maxHp += 3;
+                        app.hp += 6;
                     }
                 }
             ]
@@ -7060,6 +7163,17 @@ const GAME_DATA = {
                         app.gold -= 50;
                         app.maxHp += 3;
                         app.hp += 10;
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    faction: "tobaku",
+                    text: "【討幕派】会津城の開城を受け入れ、将兵を保護して奥羽越の戦乱を終結させる",
+                    effectDesc: "志士『大久保利通：冷徹な謀略』を獲得。HPを 8 回復し、軍資金 35両 を獲得する。",
+                    action: (app) => {
+                        app.addCardToDeck("okubo_strategy");
+                        app.healPlayer(8);
+                        app.gold += 35;
                     }
                 }
             ]
@@ -7720,6 +7834,18 @@ const GAME_DATA = {
                         app.healPlayer(8);
                         app.modifyImperialGauge(-5);
                     }
+                },
+                {
+                    opinionChange: 12,
+                    faction: "tobaku",
+                    text: "【討幕派】大村益次郎の精密砲撃作戦に従い、アームストロング砲で黒門口の防衛線を粉砕する",
+                    effectDesc: "志士『山田顕義：近代軍の礎』を獲得し、デッキに『アームストロング砲』を追加。HPを 26 失うが次の戦闘の攻撃力+4。",
+                    action: (app) => {
+                        app.addCardToDeck("yamada_modern_army");
+                        app.addCardToDeck("weapon_armstrong");
+                        app.damagePlayer(26);
+                        app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
+                    }
                 }
             ]
         },
@@ -7854,6 +7980,17 @@ const GAME_DATA = {
                         app.addCardToDeck("akizuki_strategy");
                         app.modifyImperialGauge(-4);
                         app.healPlayer(6);
+                    }
+                },
+                {
+                    opinionChange: 8,
+                    faction: "tobaku",
+                    text: "【討幕派】新政府北陸道軍として柏崎へ進軍し、越後街道の要衝を確保する",
+                    effectDesc: "志士『黒田了介：北辺の開拓』を獲得。HPを 20 失うが、軍資金 30両 を獲得する。",
+                    action: (app) => {
+                        app.addCardToDeck("kuroda_frontier");
+                        app.damagePlayer(20);
+                        app.gold += 30;
                     }
                 }
             ]
