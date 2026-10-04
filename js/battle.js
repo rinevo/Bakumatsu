@@ -60,6 +60,9 @@ class BattleSystem {
         // 手札温存（キープ）設定（最大5枚まで）
         this.maxKeepCount = 5;
 
+        // 同一ターン内での同一カード重複ドロー防止用セット
+        this.drawnCardIdsThisTurn = new Set();
+
         this.isPlayerTurn = false;
         this.isBattleOver = false;
     }
@@ -70,6 +73,7 @@ class BattleSystem {
         this.comboCount = 0;
         this.playedThisTurn = [];
         this.triggeredCombosThisTurn = new Set();
+        this.drawnCardIdsThisTurn = new Set();
 
         // プレイヤー初期化
         this.playerHp = this.app.hp;
@@ -398,6 +402,10 @@ class BattleSystem {
         this.triggeredCombosThisTurn.clear();
         this.turnEndDiscardCount = 0;
 
+        // 同一ターン内での同一カード重複ドロー防止用セット（前ターンから温存されたカードも含む）
+        this.drawnCardIdsThisTurn = new Set();
+        this.hand.forEach(c => this.drawnCardIdsThisTurn.add(c.id));
+
         // シールドリセット（一部レリックがあれば保持可能）
         this.playerShield = 0;
 
@@ -457,26 +465,54 @@ class BattleSystem {
         }
     }
 
-    drawCards(count) {
-        for (let i = 0; i < count; i++) {
-            if (this.drawPile.length === 0) {
-                if (this.discardPile.length === 0) break;
-                // 捨て札をシャッフルして山札へ
-                this.drawPile = this.shuffleArray([...this.discardPile]);
-                this.discardPile = [];
-                window.soundSystem.playTaiko(false);
+    findUnseenCardIndex(pile) {
+        if (!pile || pile.length === 0) return -1;
+        for (let j = pile.length - 1; j >= 0; j--) {
+            if (!this.drawnCardIdsThisTurn.has(pile[j])) {
+                return j;
             }
-            if (this.drawPile.length > 0) {
-                const cardId = this.drawPile.pop();
-                const cardData = GAME_DATA.cards[cardId];
-                if (cardData) {
-                    const cardInstance = { ...cardData, instanceId: Math.random().toString(36).substr(2, 9) };
-                    this.hand.push(cardInstance);
+        }
+        return -1;
+    }
 
-                    // 引いた時の効果（呪い等）
-                    if (cardInstance.onDrawn) {
-                        cardInstance.onDrawn(this);
-                    }
+    drawCards(count) {
+        if (!this.drawnCardIdsThisTurn) {
+            this.drawnCardIdsThisTurn = new Set();
+            this.hand.forEach(c => this.drawnCardIdsThisTurn.add(c.id));
+        }
+
+        for (let i = 0; i < count; i++) {
+            // 1. 山札の中で、このターン未ドローのカードを探す
+            let candidateIndex = this.findUnseenCardIndex(this.drawPile);
+
+            // 2. 山札になく、捨て札にある場合は、捨て札を山札にシャッフル合流して探す
+            if (candidateIndex === -1 && this.discardPile.length > 0) {
+                const hasUnseenInDiscard = this.discardPile.some(id => !this.drawnCardIdsThisTurn.has(id));
+                if (hasUnseenInDiscard) {
+                    this.drawPile = this.shuffleArray([...this.drawPile, ...this.discardPile]);
+                    this.discardPile = [];
+                    window.soundSystem.playTaiko(false);
+                    candidateIndex = this.findUnseenCardIndex(this.drawPile);
+                }
+            }
+
+            // 3. 山札にも捨て札にもこのターン未ドローのカードがなければ、同一ターン内の重複引きを避けてドロー終了
+            if (candidateIndex === -1) {
+                break;
+            }
+
+            // 未ドローのカードを山札から抜き出す
+            const [cardId] = this.drawPile.splice(candidateIndex, 1);
+            this.drawnCardIdsThisTurn.add(cardId);
+
+            const cardData = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[cardId] : null;
+            if (cardData) {
+                const cardInstance = { ...cardData, instanceId: Math.random().toString(36).substr(2, 9) };
+                this.hand.push(cardInstance);
+
+                // 引いた時の効果（呪い等）
+                if (cardInstance.onDrawn) {
+                    cardInstance.onDrawn(this);
                 }
             }
         }
@@ -569,7 +605,19 @@ class BattleSystem {
         });
 
         // 墓地または除外へ送る
-        if (card.type !== 'shishi' && card.exhaust) {
+        if (card.type === 'item' || card.consumable) {
+            // アイテムカード（消費道具）: 戦闘中は除外(exhaustPile)へ送り、永続デッキ(this.app.deck)からも完全に消滅
+            this.exhaustPile.push(card.id);
+            if (this.app && Array.isArray(this.app.deck)) {
+                const idx = this.app.deck.indexOf(card.id);
+                if (idx !== -1) {
+                    this.app.deck.splice(idx, 1);
+                }
+            }
+            if (window.particleSystem && window.particleSystem.createFloatingText) {
+                window.particleSystem.createFloatingText("道具消費（デッキから消滅）", window.innerWidth / 2, window.innerHeight * 0.7, "#ffa500");
+            }
+        } else if (card.type !== 'shishi' && card.exhaust) {
             this.exhaustPile.push(card.id);
         } else {
             this.discardPile.push(card.id);

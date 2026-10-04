@@ -1773,11 +1773,11 @@ const GAME_DATA = {
             cost: 1,
             attack: 0,
             shield: 4,
-            desc: "防 4 を獲得し、HP を 12 回復する。【使い切り】（使用後除外）。",
+            desc: "防 4 を獲得し、HP を 12 回復する。【消費道具】（使用後デッキから消滅）。",
             rarity: "common",
             exhaust: true,
+            consumable: true,
             onPlay: (b) => {
-                b.gainPlayerShield(4);
                 b.healPlayer(12);
                 if (window.soundSystem && window.soundSystem.playTaiko) {
                     window.soundSystem.playTaiko(false);
@@ -1792,9 +1792,10 @@ const GAME_DATA = {
             cost: 1,
             attack: 0,
             shield: 0,
-            desc: "HP を 20 回復し、自身の弱体・脱力状態を全治癒する。【使い切り】（使用後除外）。",
+            desc: "HP を 20 回復し、自身の弱体・脱力状態を全治癒する。【消費道具】（使用後デッキから消滅）。",
             rarity: "uncommon",
             exhaust: true,
+            consumable: true,
             onPlay: (b) => {
                 b.healPlayer(20);
                 if (b.playerDebuffs) b.playerDebuffs = {};
@@ -1811,9 +1812,10 @@ const GAME_DATA = {
             cost: 0,
             attack: 0,
             shield: 0,
-            desc: "HP を 28 回復し、カードを 1 枚引く。【使い切り】（使用後除外）。",
+            desc: "HP を 28 回復し、カードを 1 枚引く。【消費道具】（使用後デッキから消滅）。",
             rarity: "rare",
             exhaust: true,
+            consumable: true,
             onPlay: (b) => {
                 b.healPlayer(28);
                 b.drawCards(1);
