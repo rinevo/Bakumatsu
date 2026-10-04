@@ -57,6 +57,9 @@ class BattleSystem {
         this.shieldBonus = 0;
         this.handDrawBonus = 0;
 
+        // 手札温存（キープ）設定（最大5枚まで）
+        this.maxKeepCount = 5;
+
         this.isPlayerTurn = false;
         this.isBattleOver = false;
     }
@@ -409,12 +412,49 @@ class BattleSystem {
             }
         });
 
-        // カードドロー (基本5枚 + ボーナス / 強劣勢時は-1枚のペナルティ)
-        const drawCount = Math.max(2, 5 + this.handDrawBonus);
-        this.drawCards(drawCount);
+        // カードドロー (基本手札枚数は5枚 + ボーナス / 強劣勢時のペナルティ)
+        // 温存したカードがある場合、目標手札枚数になるよう補充（例: 5枚温存時は0枚ドローで温存した5枚がそのまま手札になる）
+        const targetHandSize = Math.max(2, 5 + this.handDrawBonus);
+        const currentHandCount = this.hand.length;
+        const drawCount = Math.max(0, targetHandSize - currentHandCount);
+        if (drawCount > 0) {
+            this.drawCards(drawCount);
+        }
 
         window.soundSystem.playHyoshigi();
         this.app.ui.updateBattleUI();
+    }
+
+    // --- 手札カードの温存（キープ）トグル ---
+    toggleCardKeep(instanceId) {
+        if (!this.isPlayerTurn || this.isBattleOver) return;
+
+        const card = this.hand.find(c => c.instanceId === instanceId);
+        if (!card) return;
+
+        if (card.isKept) {
+            card.isKept = false;
+        } else {
+            const currentKeptCount = this.hand.filter(c => c.isKept).length;
+            const maxAllowed = this.maxKeepCount || 5;
+            if (currentKeptCount >= maxAllowed) {
+                if (window.soundSystem && window.soundSystem.playWarning) {
+                    window.soundSystem.playWarning();
+                }
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    window.particleSystem.createFloatingText(`温存は最大${maxAllowed}枚までです`, window.innerWidth / 2, window.innerHeight * 0.6, "#ecc94b");
+                }
+                return;
+            }
+            card.isKept = true;
+            if (window.soundSystem && window.soundSystem.playDraw) {
+                window.soundSystem.playDraw();
+            }
+        }
+
+        if (this.app.ui && this.app.ui.updateBattleUI) {
+            this.app.ui.updateBattleUI();
+        }
     }
 
     drawCards(count) {
@@ -745,10 +785,19 @@ class BattleSystem {
     }
 
     discardEntireHand() {
+        const keptCards = [];
         while (this.hand.length > 0) {
-            const c = this.hand.pop();
-            this.discardPile.push(c.id);
+            const c = this.hand.shift();
+            if (c.isKept) {
+                c.isKept = false;
+                c.wasKeptLastTurn = true;
+                keptCards.push(c);
+            } else {
+                c.wasKeptLastTurn = false;
+                this.discardPile.push(c.id);
+            }
         }
+        this.hand = keptCards;
     }
 
     modifyImperialGauge(delta) {

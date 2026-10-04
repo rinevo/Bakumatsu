@@ -1808,7 +1808,8 @@ body {
     align-items: center;
     gap: 8px;
     font-size: 14px;
-    margin-bottom: 8px;
+    margin-top: 10px;
+    margin-bottom: 4px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
 }
 .intent-icon { font-size: 18px; }
@@ -2353,7 +2354,7 @@ body {
 .battle-hand-container {
     width: 100%;
     max-width: 100%;
-    min-height: 260px;
+    min-height: 320px;
     display: flex;
     align-items: flex-end;
     overflow-x: auto;
@@ -2361,8 +2362,10 @@ body {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
     touch-action: pan-x;
-    padding: 16px 0 8px 0;
+    padding: 56px 0 10px 0;
     box-sizing: border-box;
+    position: relative;
+    z-index: 15;
 
     /* 横スクロールバーのスタイリング（参考サイトガイド準拠） */
     scrollbar-width: thin;
@@ -2392,7 +2395,7 @@ body {
     width: max-content;
     min-width: 100%;
     margin: 0 auto;
-    padding: 8px 16px;
+    padding: 24px 16px 8px 16px;
     box-sizing: border-box;
 }
 
@@ -2429,7 +2432,7 @@ body {
 }
 
 .card-frame:hover {
-    transform: translateY(-20px) scale(1.08);
+    transform: translateY(-16px) scale(1.05);
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.7);
     z-index: 30;
 }
@@ -2518,6 +2521,70 @@ body {
 .stat-badge.atk { background: #b3261e; color: #fff; }
 .stat-badge.def { background: #1b4975; color: #fff; }
 .stat-badge.risk { background: #d9534f; color: #fff; font-size: 9px; }
+
+/* カード右上グループ */
+.card-top-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* 手札カードスロット（温存ボタンとカード本体の縦並びコンテナ） */
+.battle-card-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px; /* 温存ボタンとカード本体の間に少し離れた隙間を確保 */
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* カード上部・温存ボタン（完全に静止した独立ボタン） */
+.card-keep-tab {
+    background: rgba(22, 18, 14, 0.95);
+    border: 1px solid #c9a45c;
+    color: #e2d9c8;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 4px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    line-height: 1.2;
+    z-index: 10;
+}
+
+.card-keep-tab:hover {
+    background: #d4af37;
+    color: #1a1510;
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.85);
+}
+
+.card-keep-tab.active {
+    background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
+    color: #1a1510;
+    border-color: #fff;
+    font-weight: 800;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
+}
+
+.card-frame.card-kept {
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.75), inset 0 0 10px rgba(255, 215, 0, 0.35) !important;
+    transform: none !important;
+}
+
+.card-frame.card-kept:hover {
+    transform: none !important;
+    box-shadow: 0 0 22px rgba(255, 215, 0, 0.95), inset 0 0 12px rgba(255, 215, 0, 0.45) !important;
+}
+
 
 .card-desc {
     font-size: 11px;
@@ -4219,12 +4286,12 @@ body {
 
     /* 自軍手札エリアの横スクロール＆スマホ用カードサイズ最適化 */
     .battle-hand-container {
-        min-height: 220px;
-        padding: 8px 0 6px 0;
+        min-height: 270px;
+        padding: 44px 0 6px 0;
     }
     .battle-hand {
         gap: 10px;
-        padding: 4px 12px;
+        padding: 16px 12px 4px 12px;
     }
     .card-frame {
         width: 135px;
@@ -4371,11 +4438,12 @@ body {
 
     /* 最小幅端末でのカード手札調整 */
     .battle-hand-container {
-        min-height: 200px;
+        min-height: 250px;
+        padding: 40px 0 6px 0;
     }
     .battle-hand {
         gap: 8px;
-        padding: 4px 8px;
+        padding: 14px 8px 4px 8px;
     }
     .card-frame {
         width: 120px;

@@ -167,6 +167,7 @@ class UIManager {
     createCardElement(card, options = {}) {
         const div = document.createElement('div');
         div.className = `card-frame ${card.faction} ${card.type} ${card.rarity || ''}`;
+        if (card.isKept) div.classList.add('card-kept');
         div.dataset.cardId = card.id;
 
         const actualCost = this.app.battle ? this.app.battle.calculateCardCost(card) : (card.cost || 0);
@@ -181,7 +182,9 @@ class UIManager {
             <div class="card-inner">
                 <div class="card-top">
                     ${costHtml}
-                    ${typeBadge}
+                    <div class="card-top-right">
+                        ${typeBadge}
+                    </div>
                 </div>
                 <div class="card-name">${card.name}</div>
                 <div class="card-stats">
@@ -200,6 +203,27 @@ class UIManager {
         if (options.enableHoverGuide) {
             div.addEventListener('mouseenter', () => this.highlightSynergyCards(card));
             div.addEventListener('mouseleave', () => this.clearSynergyHighlights());
+        }
+
+        // 戦闘手札表示の場合: 温存ボタンをカード本体の外側に独立配置したスロットを生成
+        if (options.inBattleHand && !card.unplayable) {
+            const slot = document.createElement('div');
+            slot.className = 'battle-card-slot';
+
+            const isKept = card.isKept || false;
+            const keepTab = document.createElement('button');
+            keepTab.className = `card-keep-tab ${isKept ? 'active' : ''}`;
+            keepTab.type = 'button';
+            keepTab.title = isKept ? '温存解除' : '次ターンへ温存';
+            keepTab.innerHTML = `<span class="keep-icon">📌</span><span class="keep-text">${isKept ? '温存中' : '温存'}</span>`;
+            keepTab.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (this.app.battle) this.app.battle.toggleCardKeep(card.instanceId);
+            });
+
+            slot.appendChild(keepTab);
+            slot.appendChild(div);
+            return slot;
         }
 
         return div;
@@ -375,25 +399,24 @@ class UIManager {
                 enemyShieldBar.style.width = `${(shieldRatio * 100).toFixed(1)}%`;
             }
 
-            // 敵Intent表示
+            // 敵Intent表示（数値は完全非公開、行動種別の気配のみ）
             if (enemyIntent && e.intent) {
                 let intentIcon = '⚔️';
-                let intentText = '';
+                let intentLabel = '攻撃の気配';
                 if (e.intent.type === 'attack') {
                     intentIcon = '⚔️';
-                    const times = e.intent.times ? ` × ${e.intent.times}` : '';
-                    intentText = `攻撃 ${e.intent.damage}${times}`;
+                    intentLabel = (e.intent.times && e.intent.times > 1) ? `連撃の気配 (${e.intent.times}撃)` : '攻撃の気配';
                 } else if (e.intent.type === 'defend') {
                     intentIcon = '🛡️';
-                    intentText = `防御 ${e.intent.shield}`;
+                    intentLabel = '身構え（防御）';
                 } else if (e.intent.type === 'buff') {
                     intentIcon = '⚡';
-                    intentText = `強化 +${e.intent.strength}`;
+                    intentLabel = '気合（強化）';
                 } else if (e.intent.type === 'curse') {
                     intentIcon = '⚠️';
-                    intentText = `呪詛 ${e.intent.damage || 0}`;
+                    intentLabel = '計略（妨害）';
                 }
-                enemyIntent.innerHTML = `<span class="intent-icon">${intentIcon}</span> <span class="intent-desc">${intentText} (${e.intent.desc})</span>`;
+                enemyIntent.innerHTML = `<span class="intent-icon">${intentIcon}</span> <span class="intent-desc">${intentLabel}</span>`;
             }
 
             // 敵状態異常
@@ -416,21 +439,24 @@ class UIManager {
         if (handContainer) {
             handContainer.innerHTML = '';
             b.hand.forEach((card, index) => {
-                const cardEl = this.createCardElement(card, { enableHoverGuide: true });
+                const element = this.createCardElement(card, { enableHoverGuide: true, inBattleHand: true });
+                const cardEl = element.classList.contains('card-frame') ? element : element.querySelector('.card-frame');
                 const canPlay = b.canPlayCard(card);
 
-                if (!canPlay) {
-                    cardEl.classList.add('cannot-play');
-                } else {
-                    cardEl.classList.add('can-play');
+                if (cardEl) {
+                    if (!canPlay) {
+                        cardEl.classList.add('cannot-play');
+                    } else {
+                        cardEl.classList.add('can-play');
+                    }
+
+                    // クリックでプレイ（カード本体をクリックした時のみ）
+                    cardEl.addEventListener('click', () => {
+                        b.playCard(index);
+                    });
                 }
 
-                // クリックでプレイ
-                cardEl.addEventListener('click', () => {
-                    b.playCard(index);
-                });
-
-                handContainer.appendChild(cardEl);
+                handContainer.appendChild(element);
             });
         }
 
