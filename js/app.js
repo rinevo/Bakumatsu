@@ -1066,14 +1066,21 @@ class BakumatsuApp {
             const evId = eventData.id || '';
             const evTitle = eventData.title || '';
             // 討幕派優勢な主要歴史事件
-            if (/satcho|satsuma_decision|taisei_hokan|restoration_council|toba_fushimi|edo_opening|katsu_saigo|second_choshu|ueno_war|aizu_war|aizu_surrender|goryokaku|paris_expo|hyogo_armada/.test(evId) ||
-                /薩長|大政奉還|王政復古|鳥羽・伏見|江戸開城|勝・西郷|四境戦争|第二次長州|上野戦争|会津戦争|会津降伏|五稜郭|版籍奉還|廃藩置県/.test(evTitle)) {
+            if (/satcho|satsuma_decision|taisei_hokan|restoration_council|toba_fushimi|edo_opening|katsu_saigo|second_choshu|ueno_war|aizu_war|aizu_surrender|goryokaku|paris_expo|hyogo_armada|sakuradamon|kozandera|kozanshi|koshu_katsunuma|nagareyama|byakkotai|kuwana_kashiwazaki|miyako_bay|ippongi_kanmon|boshin_war/.test(evId) ||
+                /薩長|大政奉還|王政復古|鳥羽・伏見|江戸開城|勝・西郷|四境戦争|第二次長州|上野戦争|会津戦争|会津降伏|五稜郭|版籍奉還|廃藩置県|桜田門外|功山寺|甲州勝沼|流山|白虎隊|柏崎|宮古湾|一本木関門|戊辰戦争/.test(evTitle)) {
                 historicalAdvantage = 'tobaku';
-            } else if (/ikedaya|kinmon|first_choshu|august18|shinsengumi|mibu_drill|aburakoji|tenguto|teradaya_1862/.test(evId) ||
-                /池田屋|禁門の変|第一次長州|八月十八日|新選組|壬生屯所|油小路|天狗党/.test(evTitle)) {
+            } else if (/ikedaya|kinmon|hamaguri|first_choshu|choshu_expedition|august18|august_coup|shinsengumi|mibu_drill|aburakoji|tenguto|teradaya|seven_nobles|tenchu|ikuno|sakashitamon|andei|izo_execution|sekihotai|shinchogumi|serizawa|sannan/.test(evId) ||
+                /池田屋|禁門の変|第一次長州|八月十八日|新選組|壬生屯所|油小路|天狗党|寺田屋|七卿落ち|天誅組|生野の変|坂下門外|安政の大獄|土佐勤王党の獄|赤報隊|新徴組|芹沢鴨|山南敬助/.test(evTitle)) {
                 historicalAdvantage = 'sabaku';
             }
         }
+
+        // 選択肢の陣営と敗北/勝利陣営関係の判定
+        const choiceFaction = baseChoice.faction || 'common';
+        const isChoiceDefeatedSide = (historicalAdvantage === 'sabaku' && (choiceFaction === 'tobaku' || /尊攘|討幕|長州|七卿|天誅組|赤報隊|御陵衛士|以蔵|武市|平野国臣/.test(baseChoice.text))) ||
+                                     (historicalAdvantage === 'tobaku' && (choiceFaction === 'sabaku' || /幕府|新選組|会津|旧幕|庄内|桑名|彰義隊|甲陽鎮撫隊|近藤勇|土方歳三|白虎隊|榎本/.test(baseChoice.text)));
+        const isChoiceVictoriousSide = (historicalAdvantage === 'sabaku' && choiceFaction === 'sabaku') ||
+                                       (historicalAdvantage === 'tobaku' && choiceFaction === 'tobaku');
 
         // 敵側が有利な歴史事件で、プレイヤーがその反対陣営の場合
         const isOpposingHistoricalEvent = Boolean(historicalAdvantage && historicalAdvantage !== this.faction && historicalAdvantage !== 'neutral');
@@ -1091,7 +1098,7 @@ class BakumatsuApp {
         } else if (baseChoice.isHistorical === false) {
             riskCategory = 'defiance';
         } else if (baseChoice.isHistorical === true) {
-            riskCategory = 'orthodox';
+            riskCategory = isChoiceDefeatedSide ? 'defiance' : 'orthodox';
         } else {
             // キーワード自動判定（defianceをsafeより優先して判定）
             const text = `${baseChoice.text} ${baseChoice.effectDesc || ''} ${eventData.title || ''}`;
@@ -1099,24 +1106,26 @@ class BakumatsuApp {
             if (/旧勢力の完全排除|旧来の兵制を維持|武士の意地を通す|同盟を見送り|同盟を阻止|同盟破談|同盟拒否|盟約を見送り|鎖国を貫く|拒絶|拒否|破談|強硬に対峙|打ち払いを徹底|強硬論|断固拒否|旧態|頑として|歴史に抗う|懐柔を謀る|切り崩し/.test(text)) {
                 // 🟠 歴史の抗い（反史実・if決断）
                 riskCategory = 'defiance';
-            } else if (/正面から|攻め込|攻め入|斬り込|迎え撃|抜刀|突入|突撃|砲撃|襲撃|死守|激戦|強行|突破|突進|暗殺|決死|打って出|決戦を挑|一戦を交|抗戦|徹底抗戦|蜂起|挙兵|ピストル|強襲|討ち入|玉砕|散華|決起|先陣|斬首|討滅|全砲門|電撃奇襲|仇を討つ|武力討幕/.test(text)) {
-                // 🔴 逆境・無謀決戦
+            } else if (!isChoiceVictoriousSide && /正面から|攻め込|攻め入|斬り込|迎え撃|抜刀|突入|突撃|砲撃|襲撃|死守|激戦|強行|突破|突進|暗殺|決死|打って出|決戦を挑|一戦を交|抗戦|徹底抗戦|蜂起|挙兵|ピストル|強襲|討ち入|玉砕|散華|決起|先陣|斬首|討滅|全砲門|電撃奇襲|仇を討つ|武力討幕|失地回復/.test(text)) {
+                // 🔴 逆境・無謀決戦（勝利側ではない場合のみ）
                 riskCategory = 'reckless';
             } else if (/深入りを避け|脱出|静観|回避|退却|離脱|兵力を温存|戦力を温存|資金を温存|隠忍|不戦|武器を手放す|降伏勧告|平和的|流血を止め|恭順を受け入れ|無用な流血|兵糧を蓄える/.test(text)) {
-                // 🛡️ 慎重・安全策
-                riskCategory = 'safe';
+                // 🛡️ 慎重・安全策（敗北陣営の場合は defiance に引き下げ）
+                riskCategory = isChoiceDefeatedSide ? 'defiance' : 'safe';
             } else if (/買収|借款|商人|密貿易|密談|密議|情報|金|兵器|新式|潜入|調略|工作|裏手|武器を流|武器の調達|密使|談判|周旋|密命|裏取引/.test(text)) {
                 // 🟡 謀略・周旋
-                riskCategory = 'intrigue';
+                riskCategory = isChoiceDefeatedSide ? 'defiance' : 'intrigue';
             } else {
-                // 🟢 堅実・史実正道
-                riskCategory = 'orthodox';
+                // 敗北陣営の行動なら defiance、そうでなければ orthodox
+                riskCategory = isChoiceDefeatedSide ? 'defiance' : 'orthodox';
             }
         }
 
         // 敵対する歴史事件で史実に抗う選択の場合、カテゴリを強制的に defiance
-        if (isOpposingHistoricalEvent && (riskCategory === 'defiance' || targetsOpposingShishi || baseChoice.isHistorical === false)) {
-            riskCategory = 'defiance';
+        if (isOpposingHistoricalEvent && (riskCategory === 'defiance' || targetsOpposingShishi || baseChoice.isHistorical === false || isChoiceDefeatedSide)) {
+            if (riskCategory !== 'reckless') {
+                riskCategory = 'defiance';
+            }
         }
 
         // カテゴリごとの基本確率（custom以外）
