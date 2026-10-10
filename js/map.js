@@ -557,37 +557,50 @@ class MapSystem {
             });
         }
 
-        // 死亡処理実行（プレイヤー所持カードが落命した場合はモーダル表示＆デッキ除外）
-        if (deathsToTrigger.length > 0) {
-            this.app.handleShishiDeaths(deathsToTrigger);
-        }
+        const proceedWithNodeEntry = () => {
+            const launchActualNode = () => {
+                window.soundSystem.playTaiko(false);
 
-        window.soundSystem.playTaiko(false);
+                // ノード突入時の進行状況自動セーブ
+                if (this.app.saveRun) {
+                    this.app.saveRun(node.type);
+                }
 
-        // ノード突入時の進行状況自動セーブ
-        if (this.app.saveRun) {
-            this.app.saveRun(node.type);
-        }
+                // ノード種別に応じたシーン起動
+                switch (node.type) {
+                    case 'battle':
+                    case 'elite':
+                    case 'boss':
+                        this.launchBattle(node);
+                        break;
+                    case 'treasure':
+                        this.launchTreasure(node);
+                        break;
+                    case 'event':
+                        this.launchEvent(node);
+                        break;
+                    case 'shop':
+                        this.app.shop.openShop();
+                        break;
+                    case 'rest':
+                        this.app.shop.openRestSite();
+                        break;
+                }
+            };
 
-        // ノード種別に応じたシーン起動
-        switch (node.type) {
-            case 'battle':
-            case 'elite':
-            case 'boss':
-                this.launchBattle(node);
-                break;
-            case 'treasure':
-                this.launchTreasure(node);
-                break;
-            case 'event':
-                this.launchEvent(node);
-                break;
-            case 'shop':
-                this.app.shop.openShop();
-                break;
-            case 'rest':
-                this.app.shop.openRestSite();
-                break;
+            // 死亡処理実行（プレイヤー所持カードが落命した場合はモーダル表示＆デッキ除外 ➡ 首謀者落命パージ ➡ シーン起動）
+            if (deathsToTrigger.length > 0) {
+                this.app.handleShishiDeaths(deathsToTrigger, launchActualNode);
+            } else {
+                launchActualNode();
+            }
+        };
+
+        // 期間を過ぎた歴史事件カードの除外通知＆同数ランダム補充
+        if (typeof this.app.checkAndPurgeExpiredEventCards === 'function') {
+            this.app.checkAndPurgeExpiredEventCards(proceedWithNodeEntry);
+        } else {
+            proceedWithNodeEntry();
         }
     }
 

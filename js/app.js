@@ -729,29 +729,50 @@ class BakumatsuApp {
         return this.getUsableEventCardsForPeriod(targetYear - 1, targetYear + 1);
     }
 
-    // --- 敵側（CPU）歴史事件手札の補充 ---
+    // --- 敵側（CPU）歴史事件手札の補充・管理 ---
     replenishEnemyEventCards(period = null) {
         if (!Array.isArray(this.enemyEventCards)) {
             this.enemyEventCards = [];
         }
-        const targetCount = 3;
-        if (this.enemyEventCards.length >= targetCount) return;
 
-        const needed = targetCount - this.enemyEventCards.length;
         const currentP = period || this.currentPeriod || (this.map && this.map.getPeriodForFloor(this.map.currentAct || 1, this.map.currentFloor || 0));
         const startYear = currentP ? currentP.startYear : (this.currentYear || 1858);
         const endYear = currentP ? currentP.endYear : (this.currentYear || 1864);
         const enemyFaction = this.faction === 'tobaku' ? 'sabaku' : 'tobaku';
 
+        const deadMastermindCardIds = this.getMastermindDeadEventCardIds();
         const excludeIds = [
             ...this.enemyEventCards,
             ...this.deck,
-            ...Array.from(this.usedEventCards || [])
+            ...Array.from(this.usedEventCards || []),
+            ...deadMastermindCardIds
         ];
 
-        if (typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
-            const replenished = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, enemyFaction, needed, excludeIds);
-            this.enemyEventCards.push(...replenished);
+        // 1. 全体手札枚数が3枚未満の場合は最低3枚まで初期補充
+        const targetCount = 3;
+        if (this.enemyEventCards.length < targetCount) {
+            const needed = targetCount - this.enemyEventCards.length;
+            if (typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
+                const replenished = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, enemyFaction, needed, excludeIds);
+                this.enemyEventCards.push(...replenished);
+                excludeIds.push(...replenished);
+            }
+        }
+
+        // 2. 現在進行期間（startYear〜endYear）に使用可能なカードを敵が1枚も持っていない場合、
+        // 時代進行によるカード枯渇を防ぐため、現在期間のカードを最低1枚追加配布（首謀者落命カードは除外）
+        const usableInPeriod = this.enemyEventCards.filter(id => {
+            const c = typeof GAME_DATA !== 'undefined' && GAME_DATA.cards ? GAME_DATA.cards[id] : null;
+            return c && c.year >= startYear && c.year <= endYear && (!c.leaderShishi || !this.isMastermindDead(c.leaderShishi));
+        });
+
+        if (usableInPeriod.length === 0) {
+            if (typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
+                const periodCards = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, enemyFaction, 1, excludeIds);
+                if (periodCards && periodCards.length > 0) {
+                    this.enemyEventCards.push(...periodCards);
+                }
+            }
         }
     }
 
@@ -766,6 +787,11 @@ class BakumatsuApp {
         let maxScore = -Infinity;
 
         candidateCards.forEach(card => {
+            // 首謀者が落命している事件は発生不可のため除外
+            if (card.leaderShishi && this.isMastermindDead(card.leaderShishi)) {
+                return;
+            }
+
             let score = 0;
             const eventData = card.eventData || (GAME_DATA.events && GAME_DATA.events.find(e => e.id === card.eventId));
 
@@ -817,15 +843,241 @@ class BakumatsuApp {
         return bestCard;
     }
 
+    // --- 時代の変遷：期間を過ぎた歴史事件カードの山札除外・通知・同数ランダム入手 ---
+    checkAndPurgeExpiredEventCards(onComplete = null) {
+        const period = this.currentPeriod || (this.map && this.map.getPeriodForFloor(this.map.currentAct || 1, this.map.currentFloor || 0));
+        if (!period || typeof period.startYear !== 'number') {
+            if (typeof onComplete === 'function') onComplete();
+            return;
+        }
+
+        const startYear = period.startYear;
+        const endYear = period.endYear;
+
+        // 1. プレイヤーデッキ内の期限切れ（card.year < startYear）歴史事件カードを抽出・除外
+        const expiredPlayerCards = [];
+        for (let i = this.deck.length - 1; i >= 0; i--) {
+            const cardId = this.deck[i];
+            const card = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[cardId] : null;
+            if (card && card.type === 'event' && typeof card.year === 'number' && card.year < startYear) {
+                expiredPlayerCards.push(card);
+                this.deck.splice(i, 1);
+                if (!this.usedEventCards) this.usedEventCards = new Set();
+                this.usedEventCards.add(cardId);
+            }
+        }
+
+        // 2. 敵側（CPU）手札の期限切れ歴史事件カードも抽出・除外
+        let expiredEnemyCount = 0;
+        if (Array.isArray(this.enemyEventCards)) {
+            for (let i = this.enemyEventCards.length - 1; i >= 0; i--) {
+                const cardId = this.enemyEventCards[i];
+                const card = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[cardId] : null;
+                if (card && card.type === 'event' && typeof card.year === 'number' && card.year < startYear) {
+                    this.enemyEventCards.splice(i, 1);
+                    expiredEnemyCount++;
+                    if (!this.usedEventCards) this.usedEventCards = new Set();
+                    this.usedEventCards.add(cardId);
+                }
+            }
+        }
+
+        // 期限切れカードが無かった場合、敵手札の整合維持だけ行いコールバックを呼んで抜ける
+        if (expiredPlayerCards.length === 0) {
+            if (expiredEnemyCount > 0) {
+                this.replenishEnemyEventCards(period);
+            }
+            if (typeof onComplete === 'function') onComplete();
+            return;
+        }
+
+        // ヘッダーUIを更新
+        if (this.ui && typeof this.ui.updateHeader === 'function') {
+            this.ui.updateHeader();
+        }
+
+        const purgeCount = expiredPlayerCards.length;
+
+        // 3. 削除した山札と同じ枚数の歴史事件カードをランダムで入手
+        const deadMastermindCardIds = this.getMastermindDeadEventCardIds();
+        const excludeIds = [
+            ...this.deck,
+            ...Array.from(this.usedEventCards || []),
+            ...deadMastermindCardIds
+        ];
+
+        const acquiredPlayerCards = [];
+        if (typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
+            const newIds = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, this.faction, purgeCount, excludeIds);
+            newIds.forEach(id => {
+                this.addCardToDeck(id, true);
+                if (GAME_DATA.cards && GAME_DATA.cards[id]) {
+                    acquiredPlayerCards.push(GAME_DATA.cards[id]);
+                }
+            });
+        }
+
+        // 敵側も削除された枚数（または最低保証）を補充
+        const enemyFaction = this.faction === 'tobaku' ? 'sabaku' : 'tobaku';
+        const enemyExcludeIds = [
+            ...(this.enemyEventCards || []),
+            ...this.deck,
+            ...Array.from(this.usedEventCards || []),
+            ...deadMastermindCardIds
+        ];
+        const acquiredEnemyCards = [];
+        const enemyReplenishCount = Math.max(expiredEnemyCount, purgeCount);
+        if (enemyReplenishCount > 0 && typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
+            const enemyNewIds = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, enemyFaction, enemyReplenishCount, enemyExcludeIds);
+            if (!Array.isArray(this.enemyEventCards)) this.enemyEventCards = [];
+            enemyNewIds.forEach(id => {
+                this.enemyEventCards.push(id);
+                if (GAME_DATA.cards && GAME_DATA.cards[id]) {
+                    acquiredEnemyCards.push(GAME_DATA.cards[id]);
+                }
+            });
+        }
+        this.replenishEnemyEventCards(period);
+
+        // 4. ウィンドウ表示の流れ：
+        // 削除通知ウィンドウ -> 閉じた後に同数入手ウィンドウ -> 閉じた後に onComplete 実行
+        const proceedToAcquisition = () => {
+            if (acquiredPlayerCards.length > 0 && this.ui && typeof this.ui.showEventCardAcquiredModal === 'function') {
+                this.ui.showEventCardAcquiredModal(acquiredPlayerCards, onComplete, acquiredEnemyCards);
+            } else {
+                if (typeof onComplete === 'function') onComplete();
+            }
+        };
+
+        if (this.ui && typeof this.ui.showEventCardsExpiredModal === 'function') {
+            this.ui.showEventCardsExpiredModal(expiredPlayerCards, proceedToAcquisition);
+        } else {
+            proceedToAcquisition();
+        }
+    }
+
+    // --- 歴史の改変：首謀者落命による歴史事件カードの山札除外・通知・同数ランダム補充（B案） ---
+    checkAndPurgeMastermindDeadEventCards(onComplete = null) {
+        const period = this.currentPeriod || (this.map && this.map.getPeriodForFloor(this.map.currentAct || 1, this.map.currentFloor || 0));
+        const startYear = period ? period.startYear : (this.currentYear || 1858);
+        const endYear = period ? period.endYear : (this.currentYear || 1864);
+
+        // 1. プレイヤーデッキ内の首謀者落命（isMastermindDead）歴史事件カードを抽出・除外
+        const purgedPlayerCards = [];
+        for (let i = this.deck.length - 1; i >= 0; i--) {
+            const cardId = this.deck[i];
+            const card = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[cardId] : null;
+            if (card && card.type === 'event' && card.leaderShishi && this.isMastermindDead(card.leaderShishi)) {
+                purgedPlayerCards.push(card);
+                this.deck.splice(i, 1);
+                if (!this.usedEventCards) this.usedEventCards = new Set();
+                this.usedEventCards.add(cardId);
+            }
+        }
+
+        // 2. 敵側（CPU）手札の首謀者落命歴史事件カードも抽出・除外
+        let purgedEnemyCount = 0;
+        if (Array.isArray(this.enemyEventCards)) {
+            for (let i = this.enemyEventCards.length - 1; i >= 0; i--) {
+                const cardId = this.enemyEventCards[i];
+                const card = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[cardId] : null;
+                if (card && card.type === 'event' && card.leaderShishi && this.isMastermindDead(card.leaderShishi)) {
+                    this.enemyEventCards.splice(i, 1);
+                    purgedEnemyCount++;
+                    if (!this.usedEventCards) this.usedEventCards = new Set();
+                    this.usedEventCards.add(cardId);
+                }
+            }
+        }
+
+        // プレイヤーの首謀者落命除外カードが無かった場合、敵手札の整合維持だけ行いコールバックを呼んで抜ける
+        if (purgedPlayerCards.length === 0) {
+            if (purgedEnemyCount > 0) {
+                this.replenishEnemyEventCards(period);
+            }
+            if (typeof onComplete === 'function') onComplete();
+            return;
+        }
+
+        // ヘッダーUIを更新
+        if (this.ui && typeof this.ui.updateHeader === 'function') {
+            this.ui.updateHeader();
+        }
+
+        const purgeCount = purgedPlayerCards.length;
+
+        // 3. B案：除外した山札と同じ枚数の歴史事件カードを現在年代プールからランダム入手
+        const deadMastermindCardIds = this.getMastermindDeadEventCardIds();
+        const excludeIds = [
+            ...this.deck,
+            ...(this.enemyEventCards || []),
+            ...Array.from(this.usedEventCards || []),
+            ...deadMastermindCardIds
+        ];
+
+        const acquiredPlayerCards = [];
+        if (typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
+            const newIds = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, this.faction, purgeCount, excludeIds);
+            newIds.forEach(id => {
+                this.addCardToDeck(id, true);
+                if (GAME_DATA.cards && GAME_DATA.cards[id]) {
+                    acquiredPlayerCards.push(GAME_DATA.cards[id]);
+                }
+            });
+        }
+
+        // 敵側も削除された枚数（または最低保証）を補充
+        const enemyFaction = this.faction === 'tobaku' ? 'sabaku' : 'tobaku';
+        const enemyExcludeIds = [
+            ...(this.enemyEventCards || []),
+            ...this.deck,
+            ...Array.from(this.usedEventCards || []),
+            ...deadMastermindCardIds
+        ];
+        const acquiredEnemyCards = [];
+        const enemyReplenishCount = Math.max(purgedEnemyCount, purgeCount);
+        if (enemyReplenishCount > 0 && typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
+            const enemyNewIds = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, enemyFaction, enemyReplenishCount, enemyExcludeIds);
+            if (!Array.isArray(this.enemyEventCards)) this.enemyEventCards = [];
+            enemyNewIds.forEach(id => {
+                this.enemyEventCards.push(id);
+                if (GAME_DATA.cards && GAME_DATA.cards[id]) {
+                    acquiredEnemyCards.push(GAME_DATA.cards[id]);
+                }
+            });
+        }
+        this.replenishEnemyEventCards(period);
+
+        // 4. ウィンドウ表示の流れ：
+        // 首謀者落命による除外通知ウィンドウ -> 閉じた後に新カード同数入手ウィンドウ -> 閉じた後に onComplete 実行
+        const proceedToAcquisition = () => {
+            if (acquiredPlayerCards.length > 0 && this.ui && typeof this.ui.showEventCardAcquiredModal === 'function') {
+                this.ui.showEventCardAcquiredModal(acquiredPlayerCards, onComplete, acquiredEnemyCards);
+            } else {
+                if (typeof onComplete === 'function') onComplete();
+            }
+        };
+
+        if (this.ui && typeof this.ui.showMastermindDeadEventCardsPurgedModal === 'function') {
+            this.ui.showMastermindDeadEventCardsPurgedModal(purgedPlayerCards, proceedToAcquisition);
+        } else {
+            proceedToAcquisition();
+        }
+    }
+
     // --- 歴史事件完了時：新たな歴史事件カードを1枚入手 ---
+    // --- 歴史事件完了時：プレイヤーと同じように敵側にも新たな歴史事件カードを1枚配布・入手 ---
     rewardNewHistoricalEventCard(onClose = null) {
         const period = this.currentPeriod || (this.map && this.map.getPeriodForFloor(this.map.currentAct || 1, this.map.currentFloor || 0));
         const startYear = period ? period.startYear : 1858;
         const endYear = period ? period.endYear : 1864;
 
+        // 1. プレイヤー側のカード入手
+        const deadMastermindCardIds = this.getMastermindDeadEventCardIds();
         const excludeIds = [
             ...this.deck,
-            ...Array.from(this.usedEventCards || [])
+            ...Array.from(this.usedEventCards || []),
+            ...deadMastermindCardIds
         ];
 
         let newCardId = null;
@@ -838,12 +1090,39 @@ class BakumatsuApp {
 
         if (newCardId) {
             this.addCardToDeck(newCardId, true);
-            const card = GAME_DATA.cards[newCardId];
-            const cardName = card ? (card.originalTitle || card.name) : newCardId;
-            const cardYear = card ? card.year : startYear;
+        }
+
+        // 2. プレイヤーと同じように敵側にも新たな歴史事件カードを1枚配布・入手
+        const enemyFaction = this.faction === 'tobaku' ? 'sabaku' : 'tobaku';
+        const enemyExcludeIds = [
+            ...(this.enemyEventCards || []),
+            ...this.deck,
+            ...Array.from(this.usedEventCards || []),
+            ...deadMastermindCardIds
+        ];
+
+        let enemyNewCardId = null;
+        if (typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
+            const eIds = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, enemyFaction, 1, enemyExcludeIds);
+            if (eIds && eIds.length > 0) {
+                enemyNewCardId = eIds[0];
+                if (!Array.isArray(this.enemyEventCards)) this.enemyEventCards = [];
+                this.enemyEventCards.push(enemyNewCardId);
+            }
+        }
+
+        // 敵側の最低保証補充も合わせて確認
+        this.replenishEnemyEventCards(period);
+
+        const playerCard = newCardId ? GAME_DATA.cards[newCardId] : null;
+        const enemyCard = enemyNewCardId ? GAME_DATA.cards[enemyNewCardId] : null;
+
+        if (playerCard) {
+            const cardName = playerCard.originalTitle || playerCard.name;
+            const cardYear = playerCard.year || startYear;
 
             if (this.ui && typeof this.ui.showEventCardAcquiredModal === 'function') {
-                this.ui.showEventCardAcquiredModal(card, onClose);
+                this.ui.showEventCardAcquiredModal(playerCard, onClose, enemyCard);
             } else {
                 if (window.particleSystem && window.particleSystem.createFloatingText) {
                     window.particleSystem.createFloatingText(`📜【新歴史事件札入手】『${cardName}』(${cardYear}年)を手札に収めた！`, window.innerWidth / 2, window.innerHeight * 0.45, "#e2b714");
@@ -856,9 +1135,6 @@ class BakumatsuApp {
         } else {
             if (typeof onClose === 'function') onClose();
         }
-
-        // 敵側の手札も補充
-        this.replenishEnemyEventCards(period);
     }
 
     // --- 歴史事件マス：カード対決・影響度順解決エンジン ---
@@ -876,10 +1152,10 @@ class BakumatsuApp {
         // 敵側手札の補充（不足時）
         this.replenishEnemyEventCards(period);
 
-        // 敵側手札の中で現在進行期間に使用可能なカードを抽出
+        // 敵側手札の中で現在進行期間に使用可能なカードを抽出（首謀者落命カードは除外）
         const enemyUsableCards = (this.enemyEventCards || [])
             .map(id => GAME_DATA.cards[id])
-            .filter(c => c && c.year >= startYear && c.year <= endYear);
+            .filter(c => c && c.year >= startYear && c.year <= endYear && (!c.leaderShishi || !this.isMastermindDead(c.leaderShishi)));
 
         // 敵側（CPU）: 敵手札の中から「できるだけプレイヤーが不利になる歴史事件」をAI選定
         let enemyCard = this.chooseBestEnemyEventCard(enemyUsableCards);
@@ -889,7 +1165,10 @@ class BakumatsuApp {
         if (!enemyCard && defaultEvent && defaultEvent.historicalAdvantage === enemyFaction) {
             const candidateCardId = `event_card_${defaultEvent.id}`;
             if (GAME_DATA.cards && GAME_DATA.cards[candidateCardId]) {
-                enemyCard = GAME_DATA.cards[candidateCardId];
+                const cCandidate = GAME_DATA.cards[candidateCardId];
+                if (!cCandidate.leaderShishi || !this.isMastermindDead(cCandidate.leaderShishi)) {
+                    enemyCard = cCandidate;
+                }
             }
         }
 
@@ -920,11 +1199,14 @@ class BakumatsuApp {
             this.markEventCardUsed(playerCard.id);
         }
 
-        // 使用された敵側カードは敵手札から消費
-        if (enemyCard && Array.isArray(this.enemyEventCards)) {
-            const eIdx = this.enemyEventCards.indexOf(enemyCard.id);
-            if (eIdx !== -1) {
-                this.enemyEventCards.splice(eIdx, 1);
+        // 使用された敵側カードは敵手札から消費し、プレイヤーと同様に二度と入手不可としてマーク
+        if (enemyCard) {
+            this.markEventCardUsed(enemyCard.id);
+            if (Array.isArray(this.enemyEventCards)) {
+                const eIdx = this.enemyEventCards.indexOf(enemyCard.id);
+                if (eIdx !== -1) {
+                    this.enemyEventCards.splice(eIdx, 1);
+                }
             }
         }
 
@@ -1019,6 +1301,40 @@ class BakumatsuApp {
         return Boolean(this.savedShishi && this.savedShishi.has(cardId));
     }
 
+    // --- 歴史事件の首謀者死亡判定 ---
+    isMastermindDead(leaderKey) {
+        if (!leaderKey || !this.deadShishi) return false;
+        // 1. 直一致
+        if (this.deadShishi.has(leaderKey)) return true;
+
+        // 2. characterキーやcardIdでの網羅的マッチング
+        for (const deadId of this.deadShishi) {
+            if (deadId === leaderKey) return true;
+            const card = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[deadId] : null;
+            if (card) {
+                if (card.character && (card.character === leaderKey || leaderKey.includes(card.character))) {
+                    return true;
+                }
+                if (card.id && (card.id === leaderKey || leaderKey.startsWith(card.id))) {
+                    return true;
+                }
+            }
+            const leaderCard = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[leaderKey] : null;
+            if (leaderCard && leaderCard.character && card && card.character === leaderCard.character) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // --- 首謀者が落命している全歴史事件カードのIDリストを取得 ---
+    getMastermindDeadEventCardIds() {
+        if (typeof GAME_DATA === 'undefined' || !GAME_DATA.eventCards) return [];
+        return Object.values(GAME_DATA.eventCards)
+            .filter(c => c.leaderShishi && this.isMastermindDead(c.leaderShishi))
+            .map(c => c.id);
+    }
+
     killShishi(cardId, reason = '歴史の死線により落命', eventTitle = '歴史事件') {
         if (!this.deadShishi) this.deadShishi = new Set();
         if (this.isShishiSaved(cardId)) return null;
@@ -1042,8 +1358,11 @@ class BakumatsuApp {
         return deathInfo;
     }
 
-    handleShishiDeaths(deathsList) {
-        if (!Array.isArray(deathsList) || deathsList.length === 0) return;
+    handleShishiDeaths(deathsList, onComplete = null) {
+        if (!Array.isArray(deathsList) || deathsList.length === 0) {
+            if (typeof onComplete === 'function') onComplete();
+            return;
+        }
         const processed = [];
         deathsList.forEach(item => {
             const cardId = typeof item === 'string' ? item : item.cardId;
@@ -1053,15 +1372,23 @@ class BakumatsuApp {
             if (res) processed.push(res);
         });
 
+        const afterDeathChecks = () => {
+            this.checkAndPurgeMastermindDeadEventCards(onComplete);
+        };
+
         // プレイヤーが所持していた志士の死亡通知
         const ownedDeaths = processed.filter(p => p.wasOwned);
         if (ownedDeaths.length > 0) {
             if (this.ui && this.ui.showShishiDeathModal) {
-                this.ui.showShishiDeathModal(ownedDeaths);
+                this.ui.showShishiDeathModal(ownedDeaths, afterDeathChecks);
+            } else {
+                afterDeathChecks();
             }
             if (window.soundSystem && window.soundSystem.playWarning) {
                 window.soundSystem.playWarning();
             }
+        } else {
+            afterDeathChecks();
         }
         this.ui.updateHeader();
     }
@@ -1927,7 +2254,9 @@ class BakumatsuApp {
                             if (this.ui && this.ui.showShishiDeathModal && this.pendingSurvivalFailureDeaths) {
                                 const list = this.pendingSurvivalFailureDeaths;
                                 this.pendingSurvivalFailureDeaths = null;
-                                this.ui.showShishiDeathModal(list);
+                                this.ui.showShishiDeathModal(list, () => {
+                                    this.checkAndPurgeMastermindDeadEventCards();
+                                });
                             }
                         }, 600);
                     }
@@ -2005,8 +2334,15 @@ class BakumatsuApp {
                     if (this.ui && this.ui.showShishiDeathModal && list && list.length > 0) {
                         this.pendingEventDeaths = null;
                         this.pendingSurvivalFailureDeaths = null;
-                        this.ui.showShishiDeathModal(list);
+                        this.ui.showShishiDeathModal(list, () => {
+                            this.checkAndPurgeMastermindDeadEventCards();
+                        });
                     }
+                }, 700);
+            } else if (typeof unrescuedDeaths !== 'undefined' && unrescuedDeaths && unrescuedDeaths.length > 0) {
+                // プレイヤー非所持の志士が死亡した場合でも、首謀者落命によるイベント除外をチェック
+                setTimeout(() => {
+                    this.checkAndPurgeMastermindDeadEventCards();
                 }, 700);
             }
         } catch (err) {

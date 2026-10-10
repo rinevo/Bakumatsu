@@ -3550,9 +3550,9 @@ body {
 }
 
 /* 山札ポップウィンドウ（所持デッキ一覧モーダル・カード破棄モーダル）
-   上下中央ではなくヘッダーの下に配置し、戦果確認など他のポップウィンドウよりも最上位に表示する */
+   上下中央ではなくヘッダーの下に配置し、歴史事件対決画面や戦果確認など他のあらゆる画面よりも最上位に表示する */
 #modal-deck {
-    z-index: 950;
+    z-index: 1500;
     align-items: flex-start;
     padding-top: calc(var(--header-height, 84px) + 12px);
     padding-bottom: 16px;
@@ -3644,7 +3644,7 @@ body {
 }
 
 #modal-card-detail {
-    z-index: 1000; /* デッキ一覧(950)より前面 */
+    z-index: 1600; /* デッキ一覧(1500)よりさらに前面 */
     align-items: center;
     justify-content: center;
     padding: 20px;
@@ -4402,18 +4402,42 @@ body {
         font-size: 8.5px;
     }
 
-    /* 山札ポップウィンドウ（所持デッキ・カード破棄）のスマホ最適化 */
+    /* 山札・対決モーダルのスマホ最適化 */
     #modal-deck,
-    #modal-removal {
+    #modal-removal,
+    #modal-event-clash {
         padding-top: calc(var(--header-height, 76px) + 8px);
         padding-bottom: 8px;
     }
     #modal-deck .modal-content-box,
-    #modal-removal .modal-content-box {
+    #modal-removal .modal-content-box,
+    #modal-event-clash .clash-modal-box {
         width: 95%;
         padding: 14px 10px;
         max-height: calc(100vh - var(--header-height, 76px) - 16px);
         max-height: calc(100dvh - var(--header-height, 76px) - 16px);
+    }
+    .clash-modal-header {
+        flex-direction: column;
+        gap: 6px;
+    }
+    .clash-modal-header h2 {
+        font-size: 17px;
+    }
+    .clash-header-badge {
+        font-size: 12px;
+    }
+    .btn-clash-skip {
+        flex-direction: column;
+        padding: 6px 14px;
+        gap: 2px;
+    }
+    .skip-btn-main {
+        font-size: 12px;
+    }
+    .skip-btn-sub {
+        font-size: 11px;
+        opacity: 0.85;
     }
 }
 
@@ -4909,27 +4933,131 @@ body {
    歴史事件対決モーダル＆場（フィールド）カード提示システム
    ======================================================== */
 .modal-clash-overlay {
-    z-index: 9500;
+    z-index: 900;
+    align-items: flex-start;
+    padding-top: calc(var(--header-height, 84px) + 8px);
+    padding-bottom: 12px;
+    box-sizing: border-box;
 }
 .modal-clash-overlay.active {
     display: flex !important;
 }
 
+/* 歴史事件対決画面の背景画像（歴史事件の情景・絵巻） */
+#event-clash-backdrop {
+    background-image: linear-gradient(rgba(10, 11, 14, 0.55), rgba(10, 11, 14, 0.72)), url('../img/event.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+/* 期間経過による歴史事件カード削除通知モーダル */
+#modal-event-cards-expired {
+    z-index: 1400;
+}
+
+.expired-card-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.expired-card-stamp {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    background: rgba(180, 20, 20, 0.88);
+    border: 2px solid #ff4444;
+    color: #fff;
+    padding: 6px 14px;
+    font-size: 15px;
+    font-weight: bold;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    pointer-events: none;
+    z-index: 10;
+    letter-spacing: 2px;
+}
+.expired-card-wrapper .card-frame {
+    filter: grayscale(0.5) brightness(0.85);
+    opacity: 0.9;
+}
+
+/* 首謀者落命による歴史事件カード除外通知モーダル */
+#modal-event-cards-mastermind-dead {
+    z-index: 1420;
+}
+
+.mastermind-dead-stamp {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    background: rgba(140, 15, 15, 0.92);
+    border: 2px solid #ff4444;
+    color: #fff;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+    z-index: 10;
+    letter-spacing: 1px;
+    text-align: center;
+    line-height: 1.3;
+}
+
+#event-card-acquired-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.event-card-enemy-notice {
+    width: 100%;
+    max-width: 560px;
+    margin: 16px auto 0;
+    padding: 10px 18px;
+    background: rgba(192, 57, 43, 0.22);
+    border: 1px solid rgba(231, 76, 60, 0.55);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: #f1948a;
+    text-align: center;
+    line-height: 1.5;
+    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+
 .clash-modal-box {
     max-width: 960px;
     width: 95%;
-    max-height: 92vh;
+    max-height: calc(100vh - var(--header-height, 84px) - 20px);
+    max-height: calc(100dvh - var(--header-height, 84px) - 20px);
     display: flex;
     flex-direction: column;
-    background: radial-gradient(circle at center, #231b14 0%, #15100c 100%);
+    background: radial-gradient(circle at center, rgba(35, 27, 20, 0.94) 0%, rgba(21, 16, 12, 0.97) 100%);
     border: 2px solid #b8860b;
     box-shadow: 0 0 35px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(184, 134, 11, 0.2);
     border-radius: 8px;
-    padding: 18px 24px;
+    padding: 16px 24px;
     overflow-y: auto;
 }
 
 .clash-modal-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px 16px;
     text-align: center;
     border-bottom: 1px solid rgba(184, 134, 11, 0.4);
     padding-bottom: 10px;
@@ -4937,7 +5065,9 @@ body {
 }
 
 .clash-header-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: linear-gradient(135deg, #8b0000, #4a0000);
     color: #ffd700;
     font-size: 13px;
@@ -4945,8 +5075,10 @@ body {
     padding: 3px 14px;
     border-radius: 12px;
     border: 1px solid #ffd700;
-    margin-bottom: 6px;
+    margin: 0;
     letter-spacing: 1px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .clash-modal-header h2 {
@@ -4955,6 +5087,8 @@ body {
     margin: 0;
     letter-spacing: 2px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .clash-period-hint {
@@ -4964,24 +5098,28 @@ body {
     margin: 0 0 14px 0;
 }
 
-/* 場（アリーナ・対決フィールド） */
+/* 場（アリーナ・対決フィールド）：画面幅に関わりなく常に縦並び */
 .clash-arena-field {
-    display: grid;
-    grid-template-columns: 1fr 140px 1fr;
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    gap: 10px;
     background: rgba(10, 8, 6, 0.65);
     border: 1px solid rgba(212, 175, 55, 0.3);
     border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .clash-field-side {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    max-width: 280px;
 }
 
 .clash-field-header {
@@ -4989,8 +5127,9 @@ body {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: 200px;
-    margin-bottom: 8px;
+    max-width: 260px;
+    gap: 8px;
+    margin-bottom: 6px;
 }
 
 .side-badge {
@@ -4998,6 +5137,8 @@ body {
     font-weight: bold;
     padding: 2px 8px;
     border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .side-badge.player {
@@ -5015,19 +5156,22 @@ body {
 .side-status {
     font-size: 11px;
     color: #aaa;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .clash-card-slot {
-    width: 160px;
-    min-height: 220px;
+    width: 170px;
+    min-height: 235px;
     border: 2px dashed rgba(184, 134, 11, 0.4);
     border-radius: 6px;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 6px;
+    padding: 4px;
     background: rgba(20, 16, 12, 0.5);
     transition: all 0.3s ease;
+    box-sizing: border-box;
 }
 
 .clash-card-slot.has-card {
@@ -5044,37 +5188,22 @@ body {
     line-height: 1.4;
 }
 
-/* VS・発動順序 */
+/* VSディバイダー */
 .clash-vs-divider {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    text-align: center;
+    width: 100%;
+    margin: 4px 0;
 }
 
 .clash-vs-badge {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 900;
     color: #e63946;
     text-shadow: 0 0 10px rgba(230, 57, 70, 0.8), 0 2px 4px #000;
     letter-spacing: 2px;
-    margin-bottom: 6px;
-}
-
-.clash-order-label {
-    font-size: 10px;
-    color: #ffd700;
-    border-bottom: 1px solid rgba(255, 215, 0, 0.4);
-    padding-bottom: 2px;
-    margin-bottom: 6px;
-    font-weight: bold;
-}
-
-.clash-order-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
+    line-height: 1;
 }
 
 .clash-order-step {
@@ -5174,30 +5303,53 @@ body {
 
 .clash-cards-grid {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     overflow-x: auto;
-    padding: 8px 4px;
-    min-height: 180px;
-    align-items: center;
+    overflow-y: hidden;
+    padding: 26px 12px 14px 12px;
+    min-height: 275px;
+    align-items: flex-end;
+    box-sizing: border-box;
+}
+
+/* 場のスロット内のカードはホバーで上に飛び出さないように固定 */
+.clash-card-slot .card-frame {
+    cursor: default;
+    transition: none !important;
+}
+.clash-card-slot .card-frame:hover {
+    transform: none !important;
+    box-shadow: inherit !important;
 }
 
 .clash-player-card-item {
     position: relative;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s ease;
     flex-shrink: 0;
-    border-radius: 6px;
+    border-radius: 8px;
+}
+
+/* 手札内の子カード要素の二重ホバー飛び出しを無効化 */
+.clash-player-card-item .card-frame {
+    transition: none !important;
+}
+.clash-player-card-item .card-frame:hover {
+    transform: none !important;
+    box-shadow: inherit !important;
 }
 
 .clash-player-card-item.usable:hover {
-    transform: translateY(-8px) scale(1.04);
-    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 10px 24px rgba(255, 215, 0, 0.45);
+    z-index: 10;
 }
 
 .clash-player-card-item.selected {
-    transform: translateY(-10px) scale(1.05);
-    box-shadow: 0 0 20px #ffd700, 0 10px 25px rgba(0,0,0,0.8);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 0 20px #ffd700, 0 10px 25px rgba(0, 0, 0, 0.8);
     outline: 3px solid #ffd700;
+    z-index: 10;
 }
 
 .clash-player-card-item.unusable-era {
@@ -5221,11 +5373,32 @@ body {
     line-height: 1.3;
 }
 
+.mastermind-dead-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 0, 0, 0.78);
+    color: #ff4d4d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 11.5px;
+    font-weight: bold;
+    border-radius: 4px;
+    pointer-events: none;
+    line-height: 1.35;
+    padding: 6px;
+    border: 2px solid rgba(255, 60, 60, 0.5);
+    box-sizing: border-box;
+}
+
 /* フッター操作ボタン */
 .clash-modal-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
     margin-top: 14px;
     padding-top: 10px;
     border-top: 1px solid rgba(184, 134, 11, 0.3);
@@ -5240,6 +5413,17 @@ body {
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.35;
+}
+
+.skip-btn-main,
+.skip-btn-sub {
+    white-space: nowrap;
 }
 
 .btn-clash-skip:hover {

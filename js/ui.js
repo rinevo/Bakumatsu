@@ -1725,6 +1725,14 @@ class UIManager {
             return;
         }
 
+        // 上部常設ヘッダーの表示と最新ステータス更新
+        this.updateHeader();
+        const header = document.getElementById('main-header');
+        if (header) {
+            header.classList.add('visible');
+            header.classList.remove('title-mode');
+        }
+
         const effectiveStartYear = startYear !== undefined ? startYear : (currentYear || 1858);
         const effectiveEndYear = endYear !== undefined ? endYear : (currentYear || 1864);
         const effectiveLabel = periodLabel || (currentPeriod ? currentPeriod.label : `${effectiveStartYear}〜${effectiveEndYear}年`);
@@ -1748,6 +1756,7 @@ class UIManager {
         }
 
         // 敵側カードの場への投下・提示演出
+        const enemyHandTotal = Array.isArray(this.app.enemyEventCards) ? this.app.enemyEventCards.length : 0;
         if (enemySlot) {
             enemySlot.innerHTML = '';
             if (enemyCard) {
@@ -1755,11 +1764,11 @@ class UIManager {
                 eCardEl.classList.add('enemy-card-slammed');
                 enemySlot.classList.add('has-card');
                 enemySlot.appendChild(eCardEl);
-                if (enemyStatus) enemyStatus.textContent = '【場に提示中】';
+                if (enemyStatus) enemyStatus.innerHTML = `【場に提示中】 <span style="font-size:0.8rem; opacity:0.85; color:#f1948a;">(敵手札: ${enemyHandTotal}枚)</span>`;
             } else {
                 enemySlot.classList.remove('has-card');
                 enemySlot.innerHTML = '<div class="clash-slot-placeholder">敵陣営は手札を出さず（静観）</div>';
-                if (enemyStatus) enemyStatus.textContent = '提示なし（静観）';
+                if (enemyStatus) enemyStatus.innerHTML = `提示なし（静観） <span style="font-size:0.8rem; opacity:0.85; color:#aaa;">(敵手札: ${enemyHandTotal}枚)</span>`;
             }
         }
 
@@ -1791,54 +1800,11 @@ class UIManager {
         };
 
         const updateOrderPreview = () => {
-            if (!orderContainer) return;
-            orderContainer.innerHTML = '';
-
-            const list = [];
-            if (enemyCard) {
-                list.push({
-                    card: enemyCard,
-                    side: '敵陣営',
-                    sideClass: 'enemy',
-                    importance: enemyCard.importance || 1
-                });
-            }
-            if (selectedPlayerCard) {
-                list.push({
-                    card: selectedPlayerCard,
-                    side: '自陣営',
-                    sideClass: 'player',
-                    importance: selectedPlayerCard.importance || 1
-                });
-            }
-
-            if (list.length === 0 && defaultEvent) {
-                list.push({
-                    card: defaultEvent,
-                    side: '史実進行',
-                    sideClass: 'neutral',
-                    importance: defaultEvent.importance || 1
-                });
-            }
-
-            // 影響度の大きい順にソート (★3 > ★2 > ★1)
-            list.sort((a, b) => b.importance - a.importance);
-
-            list.forEach((item, idx) => {
-                const stars = '★'.repeat(item.importance) + '☆'.repeat(3 - item.importance);
-                const orderEl = document.createElement('div');
-                orderEl.className = `clash-order-step ${item.sideClass}`;
-                orderEl.innerHTML = `
-                    <span class="step-num">${idx + 1}</span>
-                    <span class="step-side ${item.sideClass}">【${item.side}】</span>
-                    <strong class="step-name">${item.card.name || item.card.title}</strong>
-                    <span class="step-imp">影響度 ${stars}</span>
-                `;
-                orderContainer.appendChild(orderEl);
-            });
-
             if (executeBtn) {
                 executeBtn.disabled = (selectedPlayerCard === null && !isPlayerSkipped);
+            }
+            if (orderContainer) {
+                orderContainer.innerHTML = '';
             }
         };
 
@@ -1849,12 +1815,20 @@ class UIManager {
                 playerCardsGrid.innerHTML = `<div class="clash-empty-notice">現在所持している歴史事件カードはありません。「情勢を静観」してください。</div>`;
             } else {
                 allEventCards.forEach(card => {
-                    const isUsable = (card.year >= effectiveStartYear && card.year <= effectiveEndYear);
+                    const isEraMatch = (card.year >= effectiveStartYear && card.year <= effectiveEndYear);
+                    const isLeaderDead = Boolean(card.leaderShishi && this.app && typeof this.app.isMastermindDead === 'function' && this.app.isMastermindDead(card.leaderShishi));
+                    const isUsable = isEraMatch && !isLeaderDead;
+
                     const wrapper = document.createElement('div');
-                    wrapper.className = `clash-player-card-item ${isUsable ? 'usable' : 'unusable-era'}`;
+                    wrapper.className = `clash-player-card-item ${isUsable ? 'usable' : (isLeaderDead ? 'unusable-leader-dead' : 'unusable-era')}`;
 
                     const cardEl = this.createCardElement(card);
-                    if (!isUsable) {
+                    if (isLeaderDead) {
+                        const overlay = document.createElement('div');
+                        overlay.className = 'mastermind-dead-overlay';
+                        overlay.innerHTML = `<span>首謀者落命<br><small>(${card.leaderName || '首謀者'} 死亡)</small></span>`;
+                        cardEl.appendChild(overlay);
+                    } else if (!isEraMatch) {
                         const overlay = document.createElement('div');
                         overlay.className = 'era-mismatch-overlay';
                         overlay.innerHTML = `<span>時代不一致<br><small>(${card.year}年)</small></span>`;
@@ -1896,7 +1870,11 @@ class UIManager {
         }
 
         // 適合するカードがない場合は自動的に静観を選択可能に
-        const hasUsable = allEventCards.some(c => c.year >= effectiveStartYear && c.year <= effectiveEndYear);
+        const hasUsable = allEventCards.some(c => {
+            const isEra = c.year >= effectiveStartYear && c.year <= effectiveEndYear;
+            const isDead = c.leaderShishi && this.app && typeof this.app.isMastermindDead === 'function' && this.app.isMastermindDead(c.leaderShishi);
+            return isEra && !isDead;
+        });
         if (!hasUsable) {
             isPlayerSkipped = true;
             if (skipBtn) skipBtn.classList.add('active');
@@ -1920,8 +1898,131 @@ class UIManager {
         if (window.soundSystem) window.soundSystem.playTaiko(false);
     }
 
+    // --- 首謀者落命による歴史事件カード除外通知モーダル ---
+    showMastermindDeadEventCardsPurgedModal(purgedCards, onConfirm = null) {
+        const modal = document.getElementById('modal-event-cards-mastermind-dead');
+        if (!modal) {
+            if (typeof onConfirm === 'function') onConfirm();
+            return;
+        }
+
+        const container = document.getElementById('event-cards-mastermind-dead-container');
+        const closeBtn = document.getElementById('btn-close-event-cards-mastermind-dead');
+        const backdrop = document.getElementById('event-cards-mastermind-dead-backdrop');
+
+        if (container) {
+            container.innerHTML = '';
+            const list = Array.isArray(purgedCards) ? purgedCards : (purgedCards ? [purgedCards] : []);
+            list.forEach(card => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'expired-card-wrapper';
+                wrapper.style.display = 'flex';
+                wrapper.style.flexDirection = 'column';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.position = 'relative';
+
+                const cardEl = this.createCardElement(card);
+                cardEl.style.transform = 'scale(0.95)';
+                cardEl.style.margin = '8px';
+                wrapper.appendChild(cardEl);
+
+                const stamp = document.createElement('div');
+                stamp.className = 'mastermind-dead-stamp';
+                const leaderText = card.leaderName ? `【首謀者『${card.leaderName}』落命・除外】` : '【首謀者落命・除外】';
+                stamp.textContent = leaderText;
+                wrapper.appendChild(stamp);
+
+                container.appendChild(wrapper);
+            });
+        }
+
+        let isClosed = false;
+        const closeModal = () => {
+            if (isClosed) return;
+            isClosed = true;
+            modal.classList.remove('active');
+            if (window.soundSystem && window.soundSystem.playTaiko) {
+                window.soundSystem.playTaiko(false);
+            }
+            if (typeof onConfirm === 'function') onConfirm();
+        };
+
+        if (closeBtn) {
+            closeBtn.onclick = closeModal;
+        }
+        if (backdrop) {
+            backdrop.onclick = closeModal;
+        }
+
+        modal.classList.add('active');
+        if (window.soundSystem && window.soundSystem.playWarning) {
+            window.soundSystem.playWarning();
+        }
+    }
+
+    // --- 期間経過による歴史事件カード削除通知モーダル ---
+    showEventCardsExpiredModal(expiredCards, onConfirm = null) {
+        const modal = document.getElementById('modal-event-cards-expired');
+        if (!modal) {
+            if (typeof onConfirm === 'function') onConfirm();
+            return;
+        }
+
+        const container = document.getElementById('event-cards-expired-container');
+        const closeBtn = document.getElementById('btn-close-event-cards-expired');
+        const backdrop = document.getElementById('event-cards-expired-backdrop');
+
+        if (container) {
+            container.innerHTML = '';
+            const list = Array.isArray(expiredCards) ? expiredCards : (expiredCards ? [expiredCards] : []);
+            list.forEach(card => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'expired-card-wrapper';
+                wrapper.style.display = 'flex';
+                wrapper.style.flexDirection = 'column';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.position = 'relative';
+
+                const cardEl = this.createCardElement(card);
+                cardEl.style.transform = 'scale(0.95)';
+                cardEl.style.margin = '8px';
+                wrapper.appendChild(cardEl);
+
+                const stamp = document.createElement('div');
+                stamp.className = 'expired-card-stamp';
+                stamp.textContent = '【期限経過・除外】';
+                wrapper.appendChild(stamp);
+
+                container.appendChild(wrapper);
+            });
+        }
+
+        let isClosed = false;
+        const closeModal = () => {
+            if (isClosed) return;
+            isClosed = true;
+            modal.classList.remove('active');
+            if (window.soundSystem && window.soundSystem.playTaiko) {
+                window.soundSystem.playTaiko(false);
+            }
+            if (typeof onConfirm === 'function') onConfirm();
+        };
+
+        if (closeBtn) {
+            closeBtn.onclick = closeModal;
+        }
+        if (backdrop) {
+            backdrop.onclick = closeModal;
+        }
+
+        modal.classList.add('active');
+        if (window.soundSystem && window.soundSystem.playTaiko) {
+            window.soundSystem.playTaiko(true);
+        }
+    }
+
     // --- 新たな歴史事件カード獲得モーダル ---
-    showEventCardAcquiredModal(card, onClose = null) {
+    showEventCardAcquiredModal(cardsInput, onClose = null, enemyCard = null) {
         const modal = document.getElementById('modal-event-card-acquired');
         if (!modal) {
             if (typeof onClose === 'function') onClose();
@@ -1932,21 +2033,52 @@ class UIManager {
         const closeBtn = document.getElementById('btn-close-event-card-acquired');
         const backdrop = document.getElementById('event-card-acquired-backdrop');
 
+        const cards = Array.isArray(cardsInput) ? cardsInput : (cardsInput ? [cardsInput] : []);
+
         if (container) {
             container.innerHTML = '';
-            if (card) {
-                const cardWrapper = document.createElement('div');
-                cardWrapper.style.display = 'flex';
-                cardWrapper.style.flexDirection = 'column';
-                cardWrapper.style.alignItems = 'center';
-                cardWrapper.style.gap = '12px';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.alignItems = 'center';
+            container.style.justifyContent = 'center';
+            container.style.width = '100%';
 
-                const cardEl = this.createCardElement(card);
-                cardEl.style.transform = 'scale(1.1)';
-                cardEl.style.margin = '16px auto';
-                cardWrapper.appendChild(cardEl);
+            if (cards.length > 0) {
+                const cardsRow = document.createElement('div');
+                cardsRow.style.display = 'flex';
+                cardsRow.style.justifyContent = 'center';
+                cardsRow.style.alignItems = 'center';
+                cardsRow.style.flexWrap = 'wrap';
+                cardsRow.style.gap = '16px';
+                cardsRow.style.width = '100%';
 
-                container.appendChild(cardWrapper);
+                cards.forEach(card => {
+                    const cardWrapper = document.createElement('div');
+                    cardWrapper.style.display = 'flex';
+                    cardWrapper.style.flexDirection = 'column';
+                    cardWrapper.style.alignItems = 'center';
+
+                    const cardEl = this.createCardElement(card);
+                    cardEl.style.transform = cards.length > 1 ? 'scale(0.95)' : 'scale(1.1)';
+                    cardEl.style.margin = '12px auto';
+                    cardWrapper.appendChild(cardEl);
+
+                    cardsRow.appendChild(cardWrapper);
+                });
+
+                // 1. 上段：獲得した歴史事件カード一覧
+                container.appendChild(cardsRow);
+
+                // 2. 下段：敵側にもカードが配布された旨の動向バナー（カードの下に配置）
+                const enemyCardsList = Array.isArray(enemyCard) ? enemyCard : (enemyCard ? [enemyCard] : []);
+                if (enemyCardsList.length > 0) {
+                    const enemyNotice = document.createElement('div');
+                    enemyNotice.className = 'event-card-enemy-notice';
+                    const enemyFactionName = (this.app && this.app.faction === 'tobaku') ? '幕府・佐幕勢力' : '薩長・討幕勢力';
+                    const enemyCardNames = enemyCardsList.map(c => `『<strong>${c.name}</strong>』(${c.year}年)`).join('、');
+                    enemyNotice.innerHTML = `⚔️【敵陣の動向】<strong>${enemyFactionName}</strong>も新たな歴史事件札 ${enemyCardNames} を手札に収めました！`;
+                    container.appendChild(enemyNotice);
+                }
             }
         }
 
@@ -1974,3 +2106,4 @@ class UIManager {
         }
     }
 }
+

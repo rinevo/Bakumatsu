@@ -585,6 +585,48 @@
         </div>
     </div>
 
+    <!-- 期間経過による歴史事件カード削除通知モーダル -->
+    <div id="modal-event-cards-expired" class="game-modal modal-clash-overlay">
+        <div class="modal-backdrop" id="event-cards-expired-backdrop"></div>
+        <div class="modal-content-box reward-box">
+            <div class="modal-header">
+                <h2>📜【時代の変遷】歴史事件札の期限経過</h2>
+            </div>
+            <div class="reward-content">
+                <p class="reward-flavor" style="text-align: center; color: #dfb15b; font-size: 1.05rem; margin-bottom: 12px;">
+                    時代の潮流が移り変わり、過去の時代となった以下の歴史事件札が山札から役目を終えて除外されました。
+                </p>
+                <div id="event-cards-expired-container" style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 16px; margin: 16px 0; min-height: 200px;">
+                    <!-- 削除された歴史事件カード要素 -->
+                </div>
+                <div class="reward-actions" style="display: flex; justify-content: center; margin-top: 16px;">
+                    <button id="btn-close-event-cards-expired" class="btn-wood large" style="min-width: 260px;">新たな時代の歴史事件札を授かる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 首謀者落命による歴史事件カード除外通知モーダル -->
+    <div id="modal-event-cards-mastermind-dead" class="game-modal modal-clash-overlay">
+        <div class="modal-backdrop" id="event-cards-mastermind-dead-backdrop"></div>
+        <div class="modal-content-box reward-box">
+            <div class="modal-header">
+                <h2>📜【歴史の改変】首謀者落命による事件不発</h2>
+            </div>
+            <div class="reward-content">
+                <p class="reward-flavor" style="text-align: center; color: #dfb15b; font-size: 1.05rem; margin-bottom: 12px;">
+                    歴史事件を主導・決行する首謀者たる志士が落命したため、以下の歴史事件札は発生不可となり山札から除外されました。
+                </p>
+                <div id="event-cards-mastermind-dead-container" style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 16px; margin: 16px 0; min-height: 200px;">
+                    <!-- 除外された歴史事件カード要素 -->
+                </div>
+                <div class="reward-actions" style="display: flex; justify-content: center; margin-top: 16px;">
+                    <button id="btn-close-event-cards-mastermind-dead" class="btn-wood large" style="min-width: 260px;">新たな歴史事件札を授かる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 歴史事件カード獲得モーダル -->
     <div id="modal-event-card-acquired" class="game-modal modal-clash-overlay">
         <div class="modal-backdrop" id="event-card-acquired-backdrop"></div>
@@ -596,7 +638,7 @@
                 <p class="reward-flavor" style="text-align: center; color: #dfb15b; font-size: 1.05rem; margin-bottom: 12px;">
                     歴史の激動と岐路を乗り越え、新たな歴史事件札を手札に収めました。
                 </p>
-                <div id="event-card-acquired-container" style="display: flex; justify-content: center; align-items: center; margin: 16px 0; min-height: 220px;">
+                <div id="event-card-acquired-container" style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 16px 0; min-height: 220px; width: 100%;">
                     <!-- 獲得した歴史事件カード要素 -->
                 </div>
                 <div class="reward-actions" style="display: flex; justify-content: center; margin-top: 12px;">
@@ -645,25 +687,7 @@
 
                 <!-- 対峙する場（フィールド）エリア -->
                 <div class="clash-arena-field">
-                    <!-- プレイヤー側の場の提示スロット -->
-                    <div class="clash-field-side player-side">
-                        <div class="clash-field-header">
-                            <span class="side-badge player">自陣営の提示</span>
-                            <span class="side-status" id="clash-player-status">手札から選択中…</span>
-                        </div>
-                        <div id="clash-player-card-slot" class="clash-card-slot">
-                            <div class="clash-slot-placeholder">下の手札からカードを選択してください</div>
-                        </div>
-                    </div>
-
-                    <!-- 激突VSインジケーター -->
-                    <div class="clash-vs-divider">
-                        <div class="clash-vs-badge">VS</div>
-                        <div class="clash-order-label">発動順序</div>
-                        <div id="clash-order-items" class="clash-order-list"></div>
-                    </div>
-
-                    <!-- 敵側の場の提示スロット -->
+                    <!-- 敵側の場の提示スロット（上段） -->
                     <div class="clash-field-side enemy-side">
                         <div class="clash-field-header">
                             <span class="side-badge enemy">敵陣営の提示</span>
@@ -671,6 +695,22 @@
                         </div>
                         <div id="clash-enemy-card-slot" class="clash-card-slot">
                             <!-- 敵側カードが動的表示 -->
+                        </div>
+                    </div>
+
+                    <!-- 激突VSインジケーター（中段） -->
+                    <div class="clash-vs-divider">
+                        <div class="clash-vs-badge">VS</div>
+                    </div>
+
+                    <!-- プレイヤー側の場の提示スロット（下段） -->
+                    <div class="clash-field-side player-side">
+                        <div class="clash-field-header">
+                            <span class="side-badge player">自陣営の提示</span>
+                            <span class="side-status" id="clash-player-status">手札から選択中…</span>
+                        </div>
+                        <div id="clash-player-card-slot" class="clash-card-slot">
+                            <div class="clash-slot-placeholder">下の手札からカードを選択してください</div>
                         </div>
                     </div>
                 </div>
@@ -687,7 +727,7 @@
                 </div>
             </div>
             <div class="clash-modal-footer">
-                <button id="btn-clash-skip-player" class="btn-wood btn-clash-skip">情勢を静観する（手札を出さない）</button>
+                <button id="btn-clash-skip-player" class="btn-wood btn-clash-skip"><span class="skip-btn-main">情勢を静観する</span><span class="skip-btn-sub">（手札を出さない）</span></button>
                 <button id="btn-execute-event-clash" class="btn-wood large btn-clash-execute" disabled>歴史事件を発動する</button>
             </div>
         </div>

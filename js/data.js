@@ -13872,6 +13872,77 @@ if (GAME_DATA.cards && GAME_DATA.shishiBios) {
 }
 
 // ==========================================
+// 歴史事件の首謀者（主要首魁・キーパーソン）マスター定義
+// 首謀者となる志士が落命した場合、その歴史事件は不発（発生不可）となり山札から除外される
+// ==========================================
+GAME_DATA.eventMasterminds = {
+    // 1858〜1861年
+    "event_andei_purge": { leaderId: "ii_naosuke", name: "井伊直弼" }, // 安政の大獄
+    "event_harris_treaty": { leaderId: "ii_naosuke", name: "井伊直弼" }, // 日米修好通商条約
+    "event_kazunomiya_kobu_gattai": { leaderId: "ando_nobumasa", name: "安藤信正" }, // 和宮降嫁
+    "event_sakashitamon": { leaderId: "ando_nobumasa", name: "安藤信正" }, // 坂下門外の変
+    "event_tosa_kinnoto_formation": { leaderId: "takechi_ideology", name: "武市半平太" }, // 土佐勤王党結成
+    "event_izo_assassination": { leaderId: "takechi_ideology", name: "武市半平太" }, // 京都暗殺風雲
+    "event_izo_execution": { leaderId: "takechi_ideology", name: "武市半平太" }, // 土佐勤王党の獄
+
+    // 1862〜1863年
+    "event_hisamitsu_joraku_seichugumi": { leaderId: "shimazu_hisamitsu", name: "島津久光" }, // 島津久光上洛
+    "event_teradaya_1862": { leaderId: "shimazu_hisamitsu", name: "島津久光" }, // 寺田屋事件
+    "event_teradaya_conflict": { leaderId: "shimazu_hisamitsu", name: "島津久光" }, // 寺田屋騒動
+    "event_satsuma_after_teradaya": { leaderId: "shimazu_hisamitsu", name: "島津久光" }, // 寺田屋騒動後
+    "event_namamugi": { leaderId: "shimazu_hisamitsu", name: "島津久光" }, // 生麦事件
+    "event_namugi_incident": { leaderId: "shimazu_hisamitsu", name: "島津久光" }, // 生麦事件
+    "event_satsuma_british_war": { leaderId: "shimazu_hisamitsu", name: "島津久光" }, // 薩英戦争
+    "event_gotenyama": { leaderId: "takasugi_kiheitai", name: "高杉晋作" }, // 御殿山焼き討ち
+    "event_shimonoseki": { leaderId: "kusaka_revolt", name: "久坂玄瑞" }, // 下関攘夷砲火
+    "event_shinsengumi_formation": { leaderId: "kondo_kotetsu", name: "近藤勇" }, // 新選組結成
+    "event_serizawa_assassination": { leaderId: "kondo_kotetsu", name: "近藤勇" }, // 芹沢鴨暗殺
+    "event_roshigumi_departure": { leaderId: "kiyokawa_leader", name: "清河八郎" }, // 浪士組の出立
+    "event_tenchu_revolt": { leaderId: "yoshimura_revolt", name: "吉村寅太郎" }, // 天誅組の変
+    "event_ikuno_uprising": { leaderId: "hirano_kuniomi", name: "平野国臣" }, // 生野の変
+    "event_hachigatsu_seihen": { leaderId: "aizu_shield", name: "松平容保" }, // 八月十八日の政変
+    "event_august_coup": { leaderId: "aizu_shield", name: "松平容保" }, // 八月十八日の政変
+
+    // 1864〜1865年
+    "event_ikedaya": { leaderId: "kondo_kotetsu", name: "近藤勇" }, // 池田屋事件
+    "event_kinmon": { leaderId: "kusaka_revolt", name: "久坂玄瑞" }, // 禁門の変
+    "event_hamaguri_gate": { leaderId: "kusaka_revolt", name: "久坂玄瑞" }, // 禁門の変
+    "event_tennozan_maki_stand": { leaderId: "maki_revolt", name: "真木和泉" }, // 天王山の自刃
+    "event_choshu_expedition": { leaderId: "tokugawa_yoshinobu", name: "徳川慶喜" }, // 第一次長州征討
+    "event_tenguto_rising": { leaderId: "takeda_kounsai", name: "武田耕雲斎" }, // 水戸天狗党の挙兵
+    "event_kozanshi_rising": { leaderId: "takasugi_kiheitai", name: "高杉晋作" }, // 功山寺挙兵
+    "event_sakuma_assassination": { leaderId: "kawakami_gensai", name: "河上彦斎" }, // 佐久間象山暗殺
+    "event_sannan_seppuku": { leaderId: "kondo_kotetsu", name: "近藤勇" }, // 山南敬助切腹
+
+    // 1866〜1867年
+    "event_satcho_protocol": { leaderId: "ryoma_kaiwentai", name: "坂本龍馬" }, // 薩長盟約
+    "event_satcho_alliance": { leaderId: "ryoma_kaiwentai", name: "坂本龍馬" }, // 薩長同盟
+    "event_senchu_hassaku": { leaderId: "ryoma_kaiwentai", name: "坂本龍馬" }, // 船中八策
+    "event_second_choshu_war": { leaderId: "takasugi_kiheitai", name: "高杉晋作" }, // 第二次長州征討
+    "event_taisei_hokan": { leaderId: "tokugawa_yoshinobu", name: "徳川慶喜" }, // 大政奉還
+    "event_restoration_council": { leaderId: "iwakura_imperial", name: "岩倉具視" }, // 王政復古
+    "event_ousei_fukko": { leaderId: "iwakura_imperial", name: "岩倉具視" }, // 王政復古の大号令
+    "event_satsuma_residence": { leaderId: "saigo_jigen", name: "西郷隆盛" }, // 江戸薩摩藩邸焼討
+    "event_aburakoji": { leaderId: "kondo_kotetsu", name: "近藤勇" }, // 油小路の変
+    "event_aburakoji_hattori": { leaderId: "kondo_kotetsu", name: "近藤勇" }, // 油小路の死闘
+
+    // 1868〜1869年（戊辰戦争期）
+    "event_tobafushimi": { leaderId: "saigo_jigen", name: "西郷隆盛" }, // 鳥羽伏見の戦い
+    "event_boshin_war": { leaderId: "saigo_jigen", name: "西郷隆盛" }, // 戊辰戦争
+    "event_sekihotai_march": { leaderId: "sagara_souzou", name: "相楽総三" }, // 赤報隊の進軍
+    "event_edo_opening": { leaderId: "saigo_jigen", name: "西郷隆盛" }, // 江戸開城
+    "event_ueno_war": { leaderId: "omura_reform", name: "大村益次郎" }, // 上野戦争
+    "event_nagaoka_defense": { leaderId: "kawai_artillery", name: "河井継之助" }, // 長岡城攻防
+    "event_aizu_war": { leaderId: "aizu_shield", name: "松平容保" }, // 会津戦争
+    "event_aizu_defense_council": { leaderId: "aizu_shield", name: "松平容保" }, // 会津若松籠城
+    "event_nakano_takeko": { leaderId: "nakano_takeko", name: "中野竹子" }, // 娘子隊の薙刀
+    "event_yae_spencer": { leaderId: "yamamoto_yae", name: "山本八重" }, // 鶴ヶ城の銃姫
+    "event_nagareyama_farewell": { leaderId: "hijikata_fukucho", name: "土方歳三" }, // 流山の訣別
+    "event_ippongi_kanmon": { leaderId: "hijikata_fukucho", name: "土方歳三" }, // 一本木関門の激闘
+    "event_hakodate_government": { leaderId: "enomoto_naval", name: "榎本武揚" } // 箱館政権
+};
+
+// ==========================================
 // 歴史事件カード（Historical Event Cards）生成＆登録
 // ==========================================
 GAME_DATA.eventCards = {};
@@ -13901,6 +13972,9 @@ if (Array.isArray(GAME_DATA.events)) {
             });
         }
 
+        // 首謀者（主要首魁）の特定
+        const mm = GAME_DATA.eventMasterminds ? GAME_DATA.eventMasterminds[ev.id] : null;
+
         const eventCard = {
             id: cardId,
             eventId: ev.id,
@@ -13915,6 +13989,8 @@ if (Array.isArray(GAME_DATA.events)) {
             period: ev.period || `${ev.year}年`,
             cost: 0,
             deathShishi: relatedDeaths,
+            leaderShishi: mm ? mm.leaderId : null,
+            leaderName: mm ? mm.name : null,
             desc: ev.desc || "",
             rarity: (ev.importance === 3) ? "legendary" : ((ev.importance === 2) ? "rare" : "common"),
             eventData: ev
