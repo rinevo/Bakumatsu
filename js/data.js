@@ -2810,7 +2810,7 @@ const GAME_DATA = {
         "samurai_pipe": {
             id: "samurai_pipe",
             name: "志士の煙管",
-            desc: "休息マスで休息した際、HP回復量が最大HPの 70% から 100%（全快）に増加する。",
+            desc: "休息マスで休息した際、HP回復量が最大HPの 50% から 100%（全快）に増加する。",
             price: 140
         },
         "yoshida_shoin_brush": {

@@ -682,26 +682,62 @@ class UIManager {
             yearIndicator.textContent = `【${currentPeriod.label}】`;
         }
 
-        // フロアごとに縦並びで配置（数年単位の時代区分で階層を区切って表示）
-        const floorRows = {};
+        // 時代区分（Period）の範囲ごとに階層をグループ化
+        const periodGroups = [];
+        let currentGroup = null;
         for (let f = 0; f <= maxFloor; f++) {
-            const row = document.createElement('div');
-            row.className = 'map-floor-row';
-            row.dataset.floor = f;
-
             const period = mapSystem.getPeriodForFloor ? mapSystem.getPeriodForFloor(mapSystem.currentAct, f) : null;
-            const periodLabel = period ? period.label : `${1858 + f}年`;
-            const isCurrentPeriod = currentPeriod && period && (currentPeriod.id === period.id);
-
-            const yearTag = document.createElement('div');
-            yearTag.className = `map-floor-year-tag ${isCurrentPeriod ? 'active-year' : ''}`;
-            yearTag.textContent = period ? `${period.startYear}〜${period.endYear}年` : periodLabel;
-            yearTag.title = period ? period.label : '';
-            row.appendChild(yearTag);
-
-            floorRows[f] = row;
-            nodesContainer.appendChild(row);
+            const periodId = period ? period.id : `floor_${f}`;
+            if (!currentGroup || currentGroup.periodId !== periodId) {
+                currentGroup = {
+                    periodId,
+                    period,
+                    startFloor: f,
+                    endFloor: f
+                };
+                periodGroups.push(currentGroup);
+            } else {
+                currentGroup.endFloor = f;
+            }
         }
+
+        // 区切り線生成ヘルパー（上下を線で区切って年範囲を明示）
+        const createPeriodDivider = (group, type) => {
+            const divider = document.createElement('div');
+            const isCurrent = currentPeriod && group.period && (currentPeriod.id === group.period.id);
+            divider.className = `map-period-divider map-period-divider-${type} ${isCurrent ? 'active-period' : ''}`;
+
+            const label = document.createElement('div');
+            label.className = 'map-period-divider-label';
+            const eraPart = group.period && group.period.eraName ? `（${group.period.eraName}）` : '';
+            const periodText = group.period ? `${group.period.startYear}〜${group.period.endYear}年${eraPart}` : '時代区分';
+            const boundText = type === 'start' ? '開始' : '終了';
+            const currentBadge = isCurrent ? ' 【現在】' : '';
+            label.textContent = `◆ ${periodText} ${boundText}${currentBadge} ◆`;
+
+            divider.appendChild(label);
+            return divider;
+        };
+
+        const floorRows = {};
+
+        // flex-direction: column-reverse により、DOM追加順（下から上）で配置
+        periodGroups.forEach(group => {
+            // 範囲の下側境界（開始線）
+            nodesContainer.appendChild(createPeriodDivider(group, 'start'));
+
+            // 範囲内の各フロア行（※各行ごとの年タグは撤廃）
+            for (let f = group.startFloor; f <= group.endFloor; f++) {
+                const row = document.createElement('div');
+                row.className = 'map-floor-row';
+                row.dataset.floor = f;
+                floorRows[f] = row;
+                nodesContainer.appendChild(row);
+            }
+
+            // 範囲の上側境界（終了線）
+            nodesContainer.appendChild(createPeriodDivider(group, 'end'));
+        });
 
         this.cachedNodeElements = {};
 
@@ -1239,10 +1275,10 @@ class UIManager {
     renderRestSite() {
         this.updateHeader();
         const hasPipe = this.app.hasRelic("samurai_pipe");
-        const healAmt = Math.floor(this.app.maxHp * (hasPipe ? 1.00 : 0.70));
+        const healAmt = Math.floor(this.app.maxHp * (hasPipe ? 1.00 : 0.50));
         const healDesc = document.getElementById('rest-heal-desc');
         if (healDesc) {
-            const pipeBonusText = hasPipe ? '（志士の煙管により100%全快に強化）' : '（最大HPの70%）';
+            const pipeBonusText = hasPipe ? '（志士の煙管により100%全快に強化）' : '（最大HPの50%）';
             healDesc.textContent = `HPを ${healAmt} 回復します。${pipeBonusText}`;
         }
         const negotiateDesc = document.getElementById('rest-negotiate-desc');
