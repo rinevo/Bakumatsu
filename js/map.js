@@ -771,21 +771,6 @@ class MapSystem {
                 node.eventId = null;
                 node.title = node.isChokepoint ? '歴史の関門' : '歴史事件';
                 node.shortTitle = node.title;
-
-                // 志士命運メタデータ: この期間（startYear〜endYear）に史実死線を持つ所持志士がいるかを判定
-                if (GAME_DATA.shishiDeaths) {
-                    const fateDeaths = Object.values(GAME_DATA.shishiDeaths).filter(d => {
-                        const deathYear = d.deathYear || d.year || Math.floor((d.deathSortKey || 0) / 100);
-                        return deathYear >= period.startYear && deathYear <= period.endYear;
-                    });
-                    const ownedFate = fateDeaths.find(d => ownedCardIds.has(d.cardId) && !this.app.isShishiSaved(d.cardId) && !this.app.isShishiDead(d.cardId) && !(this.app.isShishiDeathPreventedByDeadMastermind && this.app.isShishiDeathPreventedByDeadMastermind(d.cardId)));
-                    if (ownedFate) {
-                        node.isFateNode = true;
-                        node.deathShishiCardId = ownedFate.cardId;
-                        node.deathShishiWarning = ownedFate.name;
-                        node.isOwnedFateNode = true;
-                    }
-                }
             }
         });
     }

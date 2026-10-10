@@ -729,19 +729,6 @@ class UIManager {
                 }
             }
 
-            // 命運マス（志士落命・生死分岐）の判定
-            let fateBadgeHtml = '';
-            const isOwnedFate = node.isOwnedFateNode || (node.deathShishiCardId && this.app.deck && this.app.deck.includes(node.deathShishiCardId));
-            if (node.isFateNode && !node.completed) {
-                if (isOwnedFate) {
-                    nodeDiv.classList.add('owned-fate-node');
-                    fateBadgeHtml = `<div class="node-fate-badge owned" title="【⚠️ 志士の命運】通過すると『${node.deathShishiWarning || '志士'}』が落命します！">⚠️ 命運:${node.deathShishiWarning || '志士'}</div>`;
-                } else {
-                    nodeDiv.classList.add('fate-node');
-                    fateBadgeHtml = `<div class="node-fate-badge" title="【史実命運】『${node.deathShishiWarning || '志士'}』の生死分岐点">命運:${node.deathShishiWarning || '志士'}</div>`;
-                }
-            }
-
             let titleContent = node.title;
             if (node.type === 'event') {
                 const chokePrefix = node.isChokepoint ? '⛩️ ' : '';
@@ -758,7 +745,6 @@ class UIManager {
             }
 
             nodeDiv.innerHTML = `
-                ${fateBadgeHtml}
                 ${lockBadgeHtml}
                 <div class="node-icon">${node.icon}</div>
                 <div class="node-title">${titleContent}</div>
