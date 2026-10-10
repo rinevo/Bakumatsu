@@ -22,6 +22,42 @@ class MapSystem {
         };
     }
 
+    getPeriodForFloor(act, floor) {
+        if (typeof GAME_DATA !== 'undefined' && typeof GAME_DATA.getPeriodForFloor === 'function') {
+            return GAME_DATA.getPeriodForFloor(act, floor);
+        }
+        return {
+            id: `act${act}_p`,
+            startYear: 1858,
+            endYear: 1864,
+            eraName: "幕末動乱期",
+            label: "1858〜1864年"
+        };
+    }
+
+    getYearForFloor(act, floor) {
+        const p = this.getPeriodForFloor(act, floor);
+        return p ? p.startYear : 1860;
+    }
+
+    getEraName(year) {
+        switch(year) {
+            case 1858: return "安政5年";
+            case 1859: return "安政6年";
+            case 1860: return "万延元年";
+            case 1861: return "文久元年";
+            case 1862: return "文久2年";
+            case 1863: return "文久3年";
+            case 1864: return "元治元年";
+            case 1865: return "慶応元年";
+            case 1866: return "慶応2年";
+            case 1867: return "慶応3年";
+            case 1868: return "明治元年";
+            case 1869: return "明治2年";
+            default: return `${year}年`;
+        }
+    }
+
     generateAct(actNumber) {
         this.currentAct = actNumber;
         this.currentFloor = 0;
@@ -30,6 +66,12 @@ class MapSystem {
         this.previousFloor = 0;
         this.nodes = [];
         this.connections = [];
+
+        // 現在の進行期間（数年単位）を幕初期フロアの期間に初期化
+        const initPeriod = this.getPeriodForFloor(actNumber, 0);
+        this.app.currentPeriod = initPeriod;
+        this.app.currentYear = initPeriod.startYear;
+        this.app.currentSortKey = initPeriod.startYear * 100 + 1;
 
         // 世論（トレンド）を新幕ごとにランダム決定
         const trend = GAME_DATA.trends[Math.floor(Math.random() * GAME_DATA.trends.length)];
@@ -56,6 +98,11 @@ class MapSystem {
                     title: '歴史事件',
                     icon: '📜',
                     eventId: null,
+                    period: initPeriod,
+                    startYear: initPeriod.startYear,
+                    endYear: initPeriod.endYear,
+                    year: initPeriod.startYear,
+                    eraName: initPeriod.eraName,
                     completed: false
                 };
                 this.nodes.push(node);
@@ -73,6 +120,11 @@ class MapSystem {
                     title: '戦場',
                     icon: '⚔️',
                     eventId: null,
+                    period: initPeriod,
+                    startYear: initPeriod.startYear,
+                    endYear: initPeriod.endYear,
+                    year: initPeriod.startYear,
+                    eraName: initPeriod.eraName,
                     completed: false
                 };
                 this.nodes.push(node);
@@ -249,6 +301,7 @@ class MapSystem {
                 }
 
                 const id = `act${actNumber}_f${f}_n${c}`;
+                const p = this.getPeriodForFloor(actNumber, f);
                 const node = {
                     id,
                     floor: f,
@@ -256,6 +309,11 @@ class MapSystem {
                     type,
                     title,
                     icon,
+                    period: p,
+                    startYear: p.startYear,
+                    endYear: p.endYear,
+                    year: p.startYear,
+                    eraName: p.eraName,
                     isChokepoint,
                     completed: false
                 };
@@ -287,6 +345,7 @@ class MapSystem {
         // 最終フロア: ボスノード
         const bossId = `act${actNumber}_boss`;
         const isFinal = (actNumber === 3);
+        const bossPeriod = this.getPeriodForFloor(actNumber, floorCount);
         const bossNode = {
             id: bossId,
             floor: floorCount,
@@ -294,6 +353,11 @@ class MapSystem {
             type: 'boss',
             title: isFinal ? '【最終決戦】天下統一の陣' : '【幕末の決戦】大陣',
             icon: '🏯',
+            period: bossPeriod,
+            startYear: bossPeriod.startYear,
+            endYear: bossPeriod.endYear,
+            year: bossPeriod.startYear,
+            eraName: bossPeriod.eraName,
             isFinalBoss: isFinal,
             completed: false
         };
@@ -421,10 +485,11 @@ class MapSystem {
         this.currentFloor = node.floor;
         node.completed = true;
 
-        // --- 志士死亡判定（通過・迂回および年代経過） ---
-        if (node.sortKey) {
-            this.app.currentSortKey = Math.max(this.app.currentSortKey || 0, node.sortKey);
-        }
+        // --- 進行時代区分（数年単位 / Period）の更新 ---
+        const period = node.period || this.getPeriodForFloor(this.currentAct, node.floor);
+        this.app.currentPeriod = period;
+        this.app.currentYear = period.startYear;
+        this.app.currentSortKey = period.startYear * 100 + 1;
 
         const deathsToTrigger = [];
 
@@ -454,22 +519,40 @@ class MapSystem {
             }
         });
 
-        // 2. 年代経過（currentSortKey）による死亡判定
-        if (this.app.currentSortKey && GAME_DATA.shishiDeaths) {
+        // 2. 年代経過による死亡判定（現在の期間の開始年より過去の史実死線志士）
+        if (this.app.currentPeriod && GAME_DATA.shishiDeaths) {
             Object.values(GAME_DATA.shishiDeaths).forEach(deathDef => {
                 const cId = deathDef.cardId;
-                if (deathDef.deathSortKey && deathDef.deathSortKey < this.app.currentSortKey) {
+                const deathYear = deathDef.deathYear || deathDef.year || Math.floor((deathDef.deathSortKey || 0) / 100);
+                if (deathYear < this.app.currentPeriod.startYear) {
                     if (!this.app.isShishiSaved(cId) && !this.app.isShishiDead(cId)) {
                         if (!deathsToTrigger.some(d => d.cardId === cId)) {
-                            const y = deathDef.deathYear || deathDef.year || Math.floor((deathDef.deathSortKey || 0) / 100);
-                            const m = deathDef.deathMonth || deathDef.month || ((deathDef.deathSortKey || 0) % 100);
                             deathsToTrigger.push({
                                 cardId: cId,
-                                reason: `史実の年月（${y}年${m}月）を経過したため落命`,
+                                reason: `史実の時期（${deathYear}年）を経過したため落命`,
                                 eventTitle: deathDef.eventTitle
                             });
                         }
                     }
+                }
+            });
+        }
+
+        // 3. 志士の死亡が発生する歴史事件カードが未使用のまま発生期間を経過した場合の死亡判定
+        if (GAME_DATA.eventCards && this.app.currentPeriod) {
+            Object.values(GAME_DATA.eventCards).forEach(evCard => {
+                if (evCard.deathShishi && evCard.deathShishi.length > 0 && evCard.year < this.app.currentPeriod.startYear) {
+                    evCard.deathShishi.forEach(cId => {
+                        if (!this.app.isShishiSaved(cId) && !this.app.isShishiDead(cId)) {
+                            if (!deathsToTrigger.some(d => d.cardId === cId)) {
+                                deathsToTrigger.push({
+                                    cardId: cId,
+                                    reason: `歴史事件カード『${evCard.originalTitle || evCard.name}』(${evCard.year}年)が未使用のまま時代(${this.app.currentPeriod.label})を経過したため、史実の死線により落命`,
+                                    eventTitle: evCard.originalTitle || evCard.name
+                                });
+                            }
+                        }
+                    });
                 }
             });
         }
@@ -644,174 +727,37 @@ class MapSystem {
     }
 
     assignChronologicalEvents(actNumber) {
-        const actEvents = this.getChronologicalEventsForAct(actNumber);
-        if (actEvents.length === 0) return;
-
-        const faction = this.app ? this.app.faction : null;
-        const allChokeEventIds = MapSystem.ALL_CHOKEPOINT_EVENT_IDS;
-        const chokeId = MapSystem.CHOKEPOINT_EVENTS[actNumber];
-        const chokeEvent = actEvents.find(e => e.id === chokeId);
-        const chokeSortKey = chokeEvent ? (chokeEvent.sortKey || 0) : 999999;
-
-        // プレイヤー所持志士のうち、まだ生存確定・死亡していない志士の死亡イベントを抽出
         const ownedCardIds = new Set(this.app && this.app.deck ? this.app.deck : []);
-        const urgentDeathEvents = [];
-        const allDeathEventIds = new Set(
-            GAME_DATA.shishiDeaths ? Object.values(GAME_DATA.shishiDeaths).map(d => d.eventId) : []
-        );
-        if (GAME_DATA.shishiDeaths) {
-            Object.values(GAME_DATA.shishiDeaths).forEach(d => {
-                if (ownedCardIds.has(d.cardId) && !this.app.isShishiSaved(d.cardId) && !this.app.isShishiDead(d.cardId)) {
-                    const ev = actEvents.find(e => e.id === d.eventId);
-                    if (ev) urgentDeathEvents.push(ev);
-                }
-            });
-        }
 
-        // イベントノードをフロアごとにグループ化（フロア順に厳格配置）
-        const eventNodesByFloor = {};
-        this.nodes.filter(n => n.type === 'event').forEach(node => {
-            if (!eventNodesByFloor[node.floor]) eventNodesByFloor[node.floor] = [];
-            eventNodesByFloor[node.floor].push(node);
-        });
+        // マスに直接特定の歴史事件を事前配置せず、数年単位の時代区分（Period）を設定した空白マスとして初期化
+        this.nodes.forEach(node => {
+            const period = this.getPeriodForFloor(actNumber, node.floor);
+            node.period = period;
+            node.startYear = period.startYear;
+            node.endYear = period.endYear;
+            node.year = period.startYear;
+            node.eraName = period.eraName;
+            node.sortKey = period.startYear * 100 + 1;
 
-        const floors = Object.keys(eventNodesByFloor).map(Number).sort((a, b) => a - b);
-        const assignedIds = new Set();
-        allChokeEventIds.forEach(id => assignedIds.add(id));
+            if (node.type === 'event') {
+                node.eventId = null;
+                node.title = node.isChokepoint ? '歴史の関門' : '歴史事件';
+                node.shortTitle = node.title;
 
-        const chokepointFloor = floors.find(f => eventNodesByFloor[f].some(n => n.isChokepoint));
-
-        let currentMinSortKey = 0;
-
-        floors.forEach(f => {
-            const nodesOnFloor = eventNodesByFloor[f];
-
-            nodesOnFloor.forEach(node => {
-                let selectedEvent = null;
-
-                if (node.isChokepoint) {
-                    selectedEvent = chokeEvent;
-                } else {
-                    const isBeforeChoke = chokepointFloor !== undefined && f < chokepointFloor;
-                    const isAfterChoke = chokepointFloor !== undefined && f > chokepointFloor;
-
-                    const minKey = isAfterChoke ? Math.max(currentMinSortKey, chokeSortKey) : currentMinSortKey;
-                    const maxKey = isBeforeChoke ? chokeSortKey : Infinity;
-
-                    let pool = actEvents.filter(e =>
-                        !allChokeEventIds.has(e.id) &&
-                        !assignedIds.has(e.id) &&
-                        (e.sortKey || 0) >= minKey &&
-                        (e.sortKey || 0) <= maxKey
-                    );
-
-                    // 開始地点（Floor 0）は幕の序盤イベント（最初の5件など）を優先
-                    if (f === 0) {
-                        const earlyPool = pool.filter(e => (e.sortKey || 0) <= (actEvents[4]?.sortKey || maxKey));
-                        if (earlyPool.length > 0) pool = earlyPool;
-                    }
-
-                    // 万が一プールが枯渇した場合でも、年代の単調増加および関門境界を厳格に維持
-                    if (pool.length === 0) {
-                        pool = actEvents.filter(e =>
-                            !allChokeEventIds.has(e.id) &&
-                            !assignedIds.has(e.id) &&
-                            (e.sortKey || 0) >= currentMinSortKey &&
-                            (e.sortKey || 0) <= maxKey
-                        );
-                    }
-                    if (pool.length === 0) {
-                        pool = actEvents.filter(e =>
-                            !allChokeEventIds.has(e.id) &&
-                            !assignedIds.has(e.id) &&
-                            (e.sortKey || 0) <= maxKey
-                        );
-                    }
-                    if (pool.length === 0) {
-                        pool = actEvents.filter(e => !allChokeEventIds.has(e.id) && !assignedIds.has(e.id));
-                    }
-                    if (pool.length === 0) {
-                        pool = actEvents;
-                    }
-
-                    // 優先度ソート:
-                    // 1. 所持志士の命運がかかった事件（urgentDeathEvents）を最優先
-                    // 2. 同じ時期（同一年、または直近の年代帯）に有名志士が死亡する歴史事件があれば一般事件より優先！
-                    // 3. 次の有名志士死亡事件が控えている場合、過去の一般イベントでの停滞を防ぎ死亡事件を優先
-                    // 4. 年代昇順（sortKey）
-                    // 5. 自陣営向け選択肢を持つものを優先
-                    const urgentForThisWindow = urgentDeathEvents.filter(ue =>
-                        !assignedIds.has(ue.id) && (ue.sortKey || 0) >= minKey && (ue.sortKey || 0) <= maxKey
-                    );
-
-                    const unassignedDeaths = pool.filter(e => allDeathEventIds.has(e.id));
-                    const nextDeathEvent = unassignedDeaths[0];
-
-                    pool.sort((a, b) => {
-                        const aUrgent = urgentForThisWindow.some(u => u.id === a.id);
-                        const bUrgent = urgentForThisWindow.some(u => u.id === b.id);
-                        if (aUrgent && !bUrgent) return -1;
-                        if (!aUrgent && bUrgent) return 1;
-
-                        const aDeath = allDeathEventIds.has(a.id);
-                        const bDeath = allDeathEventIds.has(b.id);
-                        const yearA = Math.floor((a.sortKey || 0) / 100);
-                        const yearB = Math.floor((b.sortKey || 0) / 100);
-
-                        // 同じ時期（同一年）に有名志士が死亡する歴史事件があれば優先配置！
-                        if (yearA === yearB) {
-                            if (aDeath && !bDeath) return -1;
-                            if (!aDeath && bDeath) return 1;
-                        }
-
-                        // 次の有名志士死亡事件が控えている場合、過去の一般イベントでの停滞を防ぎ死亡事件を優先
-                        if (nextDeathEvent && f >= 2) {
-                            const targetYear = Math.floor((nextDeathEvent.sortKey || 0) / 100);
-                            if (a.id === nextDeathEvent.id && yearB < targetYear) return -1;
-                            if (b.id === nextDeathEvent.id && yearA < targetYear) return 1;
-                        }
-
-                        const diff = (a.sortKey || 0) - (b.sortKey || 0);
-                        if (diff !== 0) return diff;
-
-                        if (faction) {
-                            const aFav = (a.choices || []).some(c => c.faction === faction || !c.faction);
-                            const bFav = (b.choices || []).some(c => c.faction === faction || !c.faction);
-                            return (bFav ? 1 : 0) - (aFav ? 1 : 0);
-                        }
-                        return 0;
+                // 志士命運メタデータ: この期間（startYear〜endYear）に史実死線を持つ所持志士がいるかを判定
+                if (GAME_DATA.shishiDeaths) {
+                    const fateDeaths = Object.values(GAME_DATA.shishiDeaths).filter(d => {
+                        const deathYear = d.deathYear || d.year || Math.floor((d.deathSortKey || 0) / 100);
+                        return deathYear >= period.startYear && deathYear <= period.endYear;
                     });
-
-                    selectedEvent = pool[0];
-                }
-
-                if (selectedEvent) {
-                    assignedIds.add(selectedEvent.id);
-                    node.eventId = selectedEvent.id;
-                    node.period = selectedEvent.period || (selectedEvent.year ? `${selectedEvent.year}年` : '1860年');
-                    node.shortTitle = selectedEvent.shortTitle || selectedEvent.title;
-                    node.title = `${node.period}\n${node.shortTitle}`;
-                    node.sortKey = selectedEvent.sortKey || 0;
-
-                    // 志士命運メタデータをノードに付与
-                    if (GAME_DATA.shishiDeaths) {
-                        const deathEntry = Object.values(GAME_DATA.shishiDeaths).find(d => d.eventId === selectedEvent.id);
-                        if (deathEntry) {
-                            node.isFateNode = true;
-                            node.deathShishiCardId = deathEntry.cardId;
-                            node.deathShishiWarning = deathEntry.name;
-                            if (ownedCardIds.has(deathEntry.cardId)) {
-                                node.isOwnedFateNode = true;
-                            }
-                        }
+                    const ownedFate = fateDeaths.find(d => ownedCardIds.has(d.cardId) && !this.app.isShishiSaved(d.cardId) && !this.app.isShishiDead(d.cardId));
+                    if (ownedFate) {
+                        node.isFateNode = true;
+                        node.deathShishiCardId = ownedFate.cardId;
+                        node.deathShishiWarning = ownedFate.name;
+                        node.isOwnedFateNode = true;
                     }
                 }
-            });
-
-            // フロア完了後、このフロアで割り当てられたイベントの年代に基づいて次フロアの最小年代を更新
-            const floorSortKeys = nodesOnFloor.map(n => n.sortKey).filter(Boolean);
-            if (floorSortKeys.length > 0) {
-                currentMinSortKey = Math.max(currentMinSortKey, Math.min(...floorSortKeys));
             }
         });
     }
@@ -917,9 +863,13 @@ class MapSystem {
             this.visitedEventIds.push(eventToTrigger.id);
         }
 
-        this.app.currentEvent = eventToTrigger;
-        this.app.switchScreen('screen-event');
-        this.app.ui.renderEvent(eventToTrigger);
+        if (this.app && typeof this.app.startHistoricalEventClash === 'function') {
+            this.app.startHistoricalEventClash(node, eventToTrigger);
+        } else {
+            this.app.currentEvent = eventToTrigger;
+            this.app.switchScreen('screen-event');
+            this.app.ui.renderEvent(eventToTrigger);
+        }
     }
 
     onActCompleted() {

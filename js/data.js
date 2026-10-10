@@ -12,6 +12,10 @@ const GAME_DATA = {
     canFactionAcquireCard: function(cardId, faction) {
         const card = this.cards[cardId];
         if (!card) return true;
+        // 使用済みの歴史事件カードは二度と入手不可
+        if (typeof window !== 'undefined' && window.bakumatsuApp && typeof window.bakumatsuApp.isEventCardUsed === 'function' && window.bakumatsuApp.isEventCardUsed(cardId)) {
+            return false;
+        }
         // 史実死亡した志士は以降入手不可
         if (typeof window !== 'undefined' && window.bakumatsuApp && window.bakumatsuApp.deadShishi && window.bakumatsuApp.deadShishi.has(cardId)) {
             return false;
@@ -13866,3 +13870,187 @@ if (GAME_DATA.cards && GAME_DATA.shishiBios) {
         }
     });
 }
+
+// ==========================================
+// 歴史事件カード（Historical Event Cards）生成＆登録
+// ==========================================
+GAME_DATA.eventCards = {};
+
+if (Array.isArray(GAME_DATA.events)) {
+    GAME_DATA.events.forEach(ev => {
+        const cardId = `event_card_${ev.id}`;
+        
+        // 当該事件で史実上死亡する志士のリストを抽出
+        const relatedDeaths = [];
+        if (GAME_DATA.shishiDeaths) {
+            Object.values(GAME_DATA.shishiDeaths).forEach(deathDef => {
+                if (deathDef.eventId === ev.id) {
+                    relatedDeaths.push(deathDef.cardId);
+                }
+            });
+        }
+        
+        // 選択肢内の targetShishi も統合
+        if (Array.isArray(ev.choices)) {
+            ev.choices.forEach(ch => {
+                if (Array.isArray(ch.targetShishi)) {
+                    ch.targetShishi.forEach(sid => {
+                        if (!relatedDeaths.includes(sid)) relatedDeaths.push(sid);
+                    });
+                }
+            });
+        }
+
+        const eventCard = {
+            id: cardId,
+            eventId: ev.id,
+            name: ev.shortTitle ? `【事件】${ev.shortTitle}` : `【事件】${ev.title}`,
+            originalTitle: ev.title,
+            type: "event",
+            faction: ev.historicalAdvantage || "neutral",
+            importance: ev.importance || 1, // 1: 動乱(★), 2: 重大政変(★★), 3: 天下決戦(★★★)
+            year: ev.year || 1860,
+            month: ev.month || 1,
+            sortKey: ev.sortKey || (ev.year * 100 + (ev.month || 1)),
+            period: ev.period || `${ev.year}年`,
+            cost: 0,
+            deathShishi: relatedDeaths,
+            desc: ev.desc || "",
+            rarity: (ev.importance === 3) ? "legendary" : ((ev.importance === 2) ? "rare" : "common"),
+            eventData: ev
+        };
+
+        GAME_DATA.eventCards[cardId] = eventCard;
+        if (GAME_DATA.cards) {
+            GAME_DATA.cards[cardId] = eventCard;
+        }
+    });
+}
+
+// 特定の年代（year）に適合する歴史事件カードのリストを取得するユーティリティ
+GAME_DATA.getEventCardsForYear = function(year, faction = null) {
+    if (!this.eventCards) return [];
+    return Object.values(this.eventCards).filter(c => {
+        if (c.year !== year) return false;
+        if (faction && c.faction !== 'neutral' && c.faction !== faction) return false;
+        return true;
+    });
+};
+
+// 数年単位の時代区分（Period）の定義取得
+GAME_DATA.getPeriodForFloor = function(act, floor) {
+    if (act === 1) {
+        if (floor <= 8) {
+            return {
+                id: "act1_early",
+                startYear: 1858,
+                endYear: 1861,
+                eraName: "安政〜文久初期",
+                label: "1858〜1861年（安政〜文久初期）"
+            };
+        } else {
+            return {
+                id: "act1_late",
+                startYear: 1862,
+                endYear: 1864,
+                eraName: "文久〜元治動乱期",
+                label: "1862〜1864年（文久〜元治動乱期）"
+            };
+        }
+    } else if (act === 2) {
+        if (floor <= 9) {
+            return {
+                id: "act2_early",
+                startYear: 1865,
+                endYear: 1866,
+                eraName: "慶応前期・長州再征期",
+                label: "1865〜1866年（慶応前期）"
+            };
+        } else {
+            return {
+                id: "act2_late",
+                startYear: 1867,
+                endYear: 1868,
+                eraName: "慶応後期・大政奉還期",
+                label: "1867〜1868年（慶応後期）"
+            };
+        }
+    } else {
+        return {
+            id: "act3_full",
+            startYear: 1868,
+            endYear: 1869,
+            eraName: "明治初頭・戊辰決戦期",
+            label: "1868〜1869年（明治初頭・戊辰決戦）"
+        };
+    }
+};
+
+// 数年単位の期間（startYear〜endYear）に適合する歴史事件カードのリストを取得
+GAME_DATA.getEventCardsForPeriod = function(startYear, endYear, faction = null) {
+    if (!this.eventCards) return [];
+    return Object.values(this.eventCards).filter(c => {
+        if (c.year < startYear || c.year > endYear) return false;
+        if (faction && c.faction !== 'neutral' && c.faction !== faction) return false;
+        return true;
+    });
+};
+
+// 数年単位の期間（startYear〜endYear）に適合する歴史事件からランダムに1件取得
+GAME_DATA.getRandomHistoricalEventForPeriod = function(startYear, endYear, faction = null) {
+    if (!Array.isArray(this.events)) return null;
+    let pool = this.events.filter(e => {
+        const y = e.year || 1860;
+        if (y < startYear || y > endYear) return false;
+        if (faction && e.historicalAdvantage && e.historicalAdvantage !== 'neutral' && e.historicalAdvantage !== faction) return false;
+        return true;
+    });
+    if (pool.length === 0) {
+        pool = this.events.filter(e => {
+            const y = e.year || 1860;
+            return y >= startYear && y <= endYear;
+        });
+    }
+    if (pool.length === 0) pool = this.events;
+    return pool[Math.floor(Math.random() * pool.length)];
+};
+
+// 数年単位の期間（startYear〜endYear）に適合する歴史事件カードからランダムに指定枚数（count枚）取得（除外ID指定可）
+GAME_DATA.getRandomEventCardIdsForPeriod = function(startYear, endYear, faction = null, count = 1, excludeIds = []) {
+    if (!this.eventCards) return [];
+    const excludeSet = new Set(excludeIds || []);
+    let pool = Object.values(this.eventCards).filter(c => {
+        if (excludeSet.has(c.id)) return false;
+        if (c.year < startYear || c.year > endYear) return false;
+        if (faction && c.faction !== 'neutral' && c.faction !== faction) return false;
+        return true;
+    });
+
+    // 不足する場合は陣営制限を緩和（中立・全体から）
+    if (pool.length < count && faction) {
+        const fallback = Object.values(this.eventCards).filter(c => {
+            if (excludeSet.has(c.id) || pool.some(p => p.id === c.id)) return false;
+            return c.year >= startYear && c.year <= endYear;
+        });
+        pool = [...pool, ...fallback];
+    }
+
+    // それでも不足する場合は全体プールから補填
+    if (pool.length < count) {
+        const widePool = Object.values(this.eventCards).filter(c => {
+            if (excludeSet.has(c.id) || pool.some(p => p.id === c.id)) return false;
+            return true;
+        });
+        pool = [...pool, ...widePool];
+    }
+
+    const shuffled = [...pool].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count).map(c => c.id);
+};
+
+// 陣営ごとの推奨初期歴史事件カードID（互換用フォールバック）
+GAME_DATA.starterEventCards = {
+    tobaku: ["event_card_event_andei_purge", "event_card_event_sakuradamon", "event_card_event_tosa_kinnoto_formation"],
+    sabaku: ["event_card_event_andei_purge", "event_card_event_sakuradamon", "event_card_event_kazunomiya_kobu_gattai"]
+};
+

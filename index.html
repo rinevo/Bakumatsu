@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>幕末風雲録：双極の蒼穹 - Rogue Deck-Build -</title>
-    <link rel="stylesheet" href="css/style.css?v=1728006500">
+    <link rel="stylesheet" href="css/style.css?v=1728009900">
 </head>
 <body>
     <!-- Canvas エフェクトオーバーレイ（墨飛沫・斬撃・火花・コネクトリンク描画） -->
@@ -585,6 +585,27 @@
         </div>
     </div>
 
+    <!-- 歴史事件カード獲得モーダル -->
+    <div id="modal-event-card-acquired" class="game-modal modal-clash-overlay">
+        <div class="modal-backdrop" id="event-card-acquired-backdrop"></div>
+        <div class="modal-content-box reward-box">
+            <div class="modal-header">
+                <h2>📜【歴史の潮流】新たな歴史事件札を入手！</h2>
+            </div>
+            <div class="reward-content">
+                <p class="reward-flavor" style="text-align: center; color: #dfb15b; font-size: 1.05rem; margin-bottom: 12px;">
+                    歴史の激動と岐路を乗り越え、新たな歴史事件札を手札に収めました。
+                </p>
+                <div id="event-card-acquired-container" style="display: flex; justify-content: center; align-items: center; margin: 16px 0; min-height: 220px;">
+                    <!-- 獲得した歴史事件カード要素 -->
+                </div>
+                <div class="reward-actions" style="display: flex; justify-content: center; margin-top: 12px;">
+                    <button id="btn-close-event-card-acquired" class="btn-wood large" style="min-width: 220px;">手札に収めて進軍する</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 志士落命通知モーダル -->
     <div id="modal-shishi-death" class="game-modal modal-death-overlay">
         <div class="modal-backdrop" id="shishi-death-backdrop"></div>
@@ -609,15 +630,78 @@
         </div>
     </div>
 
+    <!-- 歴史事件対決モーダル（手札選択＆敵側の場への提示表示） -->
+    <div id="modal-event-clash" class="game-modal modal-clash-overlay">
+        <div class="modal-backdrop" id="event-clash-backdrop"></div>
+        <div class="modal-content-box clash-modal-box">
+            <div class="modal-header clash-modal-header">
+                <div class="clash-header-badge" id="clash-era-badge">【1858〜1861年】歴史事件の死線</div>
+                <h2>【歴史の岐路】歴史事件の対決</h2>
+            </div>
+            <div class="clash-modal-body">
+                <p id="clash-usable-period-hint" class="clash-period-hint">
+                    （史実発生年が現在の進行時期に含まれる札のみ場に出すことができます）
+                </p>
+
+                <!-- 対峙する場（フィールド）エリア -->
+                <div class="clash-arena-field">
+                    <!-- プレイヤー側の場の提示スロット -->
+                    <div class="clash-field-side player-side">
+                        <div class="clash-field-header">
+                            <span class="side-badge player">自陣営の提示</span>
+                            <span class="side-status" id="clash-player-status">手札から選択中…</span>
+                        </div>
+                        <div id="clash-player-card-slot" class="clash-card-slot">
+                            <div class="clash-slot-placeholder">下の手札からカードを選択してください</div>
+                        </div>
+                    </div>
+
+                    <!-- 激突VSインジケーター -->
+                    <div class="clash-vs-divider">
+                        <div class="clash-vs-badge">VS</div>
+                        <div class="clash-order-label">発動順序</div>
+                        <div id="clash-order-items" class="clash-order-list"></div>
+                    </div>
+
+                    <!-- 敵側の場の提示スロット -->
+                    <div class="clash-field-side enemy-side">
+                        <div class="clash-field-header">
+                            <span class="side-badge enemy">敵陣営の提示</span>
+                            <span class="side-status" id="clash-enemy-status">敵が場に提示</span>
+                        </div>
+                        <div id="clash-enemy-card-slot" class="clash-card-slot">
+                            <!-- 敵側カードが動的表示 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- プレイヤー手札選択エリア -->
+                <div class="clash-player-hand-section">
+                    <div class="clash-hand-header">
+                        <h3>【手札の歴史事件カードを選択】</h3>
+                        <span class="clash-hand-hint">※影響度の高い事件（★3 > ★2 > ★1）から順に発生します</span>
+                    </div>
+                    <div id="clash-player-cards-container" class="clash-cards-grid">
+                        <!-- プレイヤーの所持歴史事件カードが動的生成 -->
+                    </div>
+                </div>
+            </div>
+            <div class="clash-modal-footer">
+                <button id="btn-clash-skip-player" class="btn-wood btn-clash-skip">情勢を静観する（手札を出さない）</button>
+                <button id="btn-execute-event-clash" class="btn-wood large btn-clash-execute" disabled>歴史事件を発動する</button>
+            </div>
+        </div>
+    </div>
+
     <!-- スクリプトの読み込み（依存順序に注意：独立したファイル） -->
-    <script src="js/audio.js?v=1728006500"></script>
-    <script src="js/particles.js?v=1728006500"></script>
-    <script src="js/data.js?v=1728006500"></script>
-    <script src="js/battle.js?v=1728006500"></script>
-    <script src="js/map.js?v=1728006500"></script>
-    <script src="js/shop.js?v=1728006500"></script>
-    <script src="js/ui.js?v=1728006500"></script>
-    <script src="js/app.js?v=1728006500"></script>
+    <script src="js/audio.js?v=1728009900"></script>
+    <script src="js/particles.js?v=1728009900"></script>
+    <script src="js/data.js?v=1728009900"></script>
+    <script src="js/battle.js?v=1728009900"></script>
+    <script src="js/map.js?v=1728009900"></script>
+    <script src="js/shop.js?v=1728009900"></script>
+    <script src="js/ui.js?v=1728009900"></script>
+    <script src="js/app.js?v=1728009900"></script>
 </body>
 </html>
 

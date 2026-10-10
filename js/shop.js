@@ -65,13 +65,44 @@ class ShopSystem {
         const candidateCardIds = Object.keys(GAME_DATA.cards).filter(id => {
             const c = GAME_DATA.cards[id];
             if (this.app.isShishiDead && this.app.isShishiDead(id)) return false;
+            if (this.app.isEventCardUsed && this.app.isEventCardUsed(id)) return false;
             if (GAME_DATA.canFactionAcquireCard && !GAME_DATA.canFactionAcquireCard(id, this.app.faction)) return false;
             return (c.faction === this.app.faction || c.faction === 'neutral') &&
                    c.rarity !== 'starter' && c.type !== 'curse';
         });
 
-        const shuffledCards = [...candidateCardIds].sort(() => 0.5 - Math.random());
-        const selectedCards = shuffledCards.slice(0, 4);
+        // 進行中の時代区分（Period）の取得
+        const currentPeriod = this.app.currentPeriod || (
+            (this.app.map && GAME_DATA.getPeriodForFloor)
+                ? GAME_DATA.getPeriodForFloor(this.app.map.currentAct || 1, this.app.map.currentFloor || 0)
+                : null
+        );
+
+        // 進行期間の歴史事件カード候補
+        const periodEventCards = candidateCardIds.filter(id => {
+            const c = GAME_DATA.cards[id];
+            return c && c.type === 'event' && currentPeriod && c.year >= currentPeriod.startYear && c.year <= currentPeriod.endYear;
+        });
+
+        const selectedCards = [];
+        const poolCopy = [...candidateCardIds];
+
+        // 進行期間の歴史事件カード枠（約80%の確率で1枠確保）
+        if (periodEventCards.length > 0 && Math.random() < 0.80) {
+            const playerDeck = this.app.deck || [];
+            const unowned = periodEventCards.filter(id => !playerDeck.includes(id));
+            const targetPool = unowned.length > 0 ? unowned : periodEventCards;
+            const pickedEventId = targetPool[Math.floor(Math.random() * targetPool.length)];
+            selectedCards.push(pickedEventId);
+            const idx = poolCopy.indexOf(pickedEventId);
+            if (idx !== -1) poolCopy.splice(idx, 1);
+        }
+
+        // 残りの販売スロット（合計4枚）をシャッフルから選定
+        const shuffledRemaining = poolCopy.sort(() => 0.5 - Math.random());
+        while (selectedCards.length < 4 && shuffledRemaining.length > 0) {
+            selectedCards.push(shuffledRemaining.shift());
+        }
 
         // レリック「和同開珎（25%引）」および「蘭和辞書（20%引）」の効果適用
         let discount = 1.0;

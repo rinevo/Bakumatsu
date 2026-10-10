@@ -151,8 +151,14 @@ class BattleSystem {
         this.initEnemyDeck(enemyData);
         this.drawEnemyCards(3);
 
-        // プレイヤーデッキ初期化（シャッフルして山札へ）
-        this.drawPile = this.shuffleArray([...this.app.deck]);
+        // プレイヤー戦闘デッキ初期化（歴史事件カードは戦闘デッキから除外して山札へ）
+        const combatDeck = this.app.getCombatCardsInDeck
+            ? this.app.getCombatCardsInDeck()
+            : this.app.deck.filter(id => {
+                const c = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[id] : null;
+                return c && c.type !== 'event';
+            });
+        this.drawPile = this.shuffleArray([...combatDeck]);
         this.discardPile = [];
         this.exhaustPile = [];
         this.hand = [];
@@ -524,7 +530,7 @@ class BattleSystem {
         let cost = (masterCard && masterCard.cost !== undefined) ? masterCard.cost : (card.cost || 0);
 
         // 関税自主権喪失の呪いが手札にある場合、全コスト+1
-        const hasTariff = this.hand.some(c => c.id === 'curse_tariff');
+        const hasTariff = Array.isArray(this.hand) && this.hand.some(c => c && c.id === 'curse_tariff');
         if (hasTariff) {
             cost += 1;
         }
@@ -1165,6 +1171,7 @@ class BattleSystem {
             const c = GAME_DATA.cards[id];
             if (c.rarity === 'starter' || c.type === 'curse') return false;
             if (this.app.isShishiDead && this.app.isShishiDead(id)) return false;
+            if (this.app.isEventCardUsed && this.app.isEventCardUsed(id)) return false;
             if (GAME_DATA.canFactionAcquireCard && !GAME_DATA.canFactionAcquireCard(id, this.app.faction)) return false;
             return c.faction === this.app.faction || c.faction === 'neutral';
         });
@@ -1215,8 +1222,33 @@ class BattleSystem {
         const chosenCards = [];
         const poolCopy = [...availablePool];
 
-        for (let i = 0; i < rewardCount; i++) {
-            if (poolCopy.length === 0) break;
+        // 進行中の時代区分（Period）の取得
+        const currentPeriod = this.app.currentPeriod || (
+            (this.app.map && GAME_DATA.getPeriodForFloor)
+                ? GAME_DATA.getPeriodForFloor(this.app.map.currentAct || 1, this.app.map.currentFloor || 0)
+                : null
+        );
+
+        // 進行中の期間に合致する歴史事件カード候補
+        const periodEventPool = poolCopy.filter(id => {
+            const c = GAME_DATA.cards[id];
+            return c && c.type === 'event' && currentPeriod && c.year >= currentPeriod.startYear && c.year <= currentPeriod.endYear;
+        });
+
+        // 進行中の期間の歴史事件カードを高確率（約75%）で1枚報酬枠に優先選出
+        if (periodEventPool.length > 0 && Math.random() < 0.75 && rewardCount > 0) {
+            const playerDeck = this.app.deck || [];
+            const unownedPeriodEvents = periodEventPool.filter(id => !playerDeck.includes(id));
+            const targetEvents = unownedPeriodEvents.length > 0 ? unownedPeriodEvents : periodEventPool;
+            const pickedEventId = targetEvents[Math.floor(Math.random() * targetEvents.length)];
+
+            chosenCards.push(pickedEventId);
+            const pIdx = poolCopy.indexOf(pickedEventId);
+            if (pIdx !== -1) poolCopy.splice(pIdx, 1);
+        }
+
+        // 残りの報酬枠を通常抽選
+        while (chosenCards.length < rewardCount && poolCopy.length > 0) {
             const targetRarity = pickRarity();
             // 対象レアリティのカード群をフィルタ
             let matching = poolCopy.filter(id => GAME_DATA.cards[id].rarity === targetRarity);
