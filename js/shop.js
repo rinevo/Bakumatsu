@@ -325,17 +325,18 @@ class ShopSystem {
 
     restHeal() {
         const sit = this.app.getFactionSituation ? this.app.getFactionSituation() : 'neutral';
-        let healRatio = 0.35;
+        let healRatio = 0.70; // 基本回復量を従来の倍（35% → 70%）に引き上げ
         if (sit === 'extreme_disadvantage') {
             healRatio = 0.0; // 追手急襲・四面楚歌: 休息不能（回復0%）
         } else if (sit === 'super_disadvantage') {
-            healRatio = 0.05; // 追手迫る極限状態: 5%のみ回復
+            healRatio = 0.10; // 追手迫る極限状態: 10%のみ回復（従来の倍）
         } else if (sit === 'disadvantage') {
-            healRatio = 0.15; // 警戒態勢・野営困難: 15%に低下
+            healRatio = 0.30; // 警戒態勢・野営困難: 30%に低下（従来の倍）
         }
         if (this.app.hasRelic("samurai_pipe")) {
-            healRatio += 0.15; // 志士の煙管所持で+15%
+            healRatio += 0.30; // 志士の煙管所持で+30%（70% + 30% = 最大100%全回復）
         }
+        healRatio = Math.min(1.0, healRatio);
         const healAmount = Math.floor(this.app.maxHp * healRatio);
         this.app.healPlayer(healAmount);
         if (healAmount === 0 && window.particleSystem && window.particleSystem.createFloatingText) {

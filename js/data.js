@@ -1698,6 +1698,255 @@ const GAME_DATA = {
                 b.comboCount += 1;
             }
         },
+        "imuta_shohei": {
+            id: "imuta_shohei",
+            name: "伊牟田尚平：赤羽橋の斬撃",
+            faction: "tobaku",
+            character: "imuta",
+            type: "shishi",
+            cost: 1,
+            attack: 7,
+            shield: 0,
+            desc: "敵に 7 ダメージ。敵が佐幕派なら追加 4 ダメージ。【連携：清河八郎】場に清河八郎がいれば、相手の次ターン攻撃力を -3 低下させる。",
+            rarity: "uncommon",
+            partnerId: "kiyokawa_leader",
+            onPlay: (b, self) => {
+                let dmg = 7;
+                if (b.enemy && b.enemy.faction === 'sabaku') {
+                    dmg += 4;
+                }
+                b.dealDamageToEnemy(dmg);
+                if (b.playedThisTurn.some(c => c.character === 'kiyokawa')) {
+                    if (b.enemy && b.enemy.intent && b.enemy.intent.damage) {
+                        b.enemy.intent.damage = Math.max(0, b.enemy.intent.damage - 3);
+                    }
+                    if (window.particleSystem && window.particleSystem.showComboText) {
+                        window.particleSystem.showComboText("【虎尾の盟約！】", b.comboCount);
+                    }
+                    if (window.soundSystem && window.soundSystem.playConnectLink) {
+                        window.soundSystem.playConnectLink();
+                    }
+                }
+            }
+        },
+        "arimura_jizaemon": {
+            id: "arimura_jizaemon",
+            name: "有村次左衛門：首級の一閃",
+            faction: "tobaku",
+            character: "arimura",
+            type: "shishi",
+            cost: 2,
+            attack: 14,
+            shield: 0,
+            desc: "敵に 14 ダメージ、自傷 3 ダメージ。敵のシールドを無視して貫通。【連携：武田耕雲斎】場に水戸志士がいれば、自傷が無効化され追加 6 ダメージ（計20貫通）。",
+            rarity: "rare",
+            partnerId: "takeda_kounsai",
+            onPlay: (b, self) => {
+                const hasMito = b.playedThisTurn.some(c => c.character === 'takeda_kounsai' || c.character === 'toko' || c.id === 'tokugawa_nariaki');
+                let dmg = 14;
+                if (hasMito) {
+                    dmg += 6;
+                    if (window.particleSystem && window.particleSystem.showComboText) {
+                        window.particleSystem.showComboText("【雪中の首級！】", b.comboCount);
+                    }
+                    if (window.soundSystem && window.soundSystem.playConnectLink) {
+                        window.soundSystem.playConnectLink();
+                    }
+                } else {
+                    b.damagePlayerDirect(3);
+                }
+                if (b.enemy) {
+                    b.enemy.hp = Math.max(0, b.enemy.hp - dmg);
+                    if (window.soundSystem && window.soundSystem.playSlash) {
+                        window.soundSystem.playSlash();
+                    }
+                }
+            }
+        },
+        "arima_tota": {
+            id: "arima_tota",
+            name: "有馬藤太：流山の捕縛",
+            faction: "tobaku",
+            character: "arima_tota",
+            type: "shishi",
+            cost: 1,
+            attack: 5,
+            shield: 6,
+            desc: "敵に 5 ダメージ、防 6。敵の次ターン攻撃力を -2。【連携：西郷隆盛】場に西郷隆盛がいれば、敵の攻撃意図を半減させ、自陣のシールドを +6。",
+            rarity: "uncommon",
+            partnerId: "saigo_jigen",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(5);
+                b.gainPlayerShield(6);
+                if (b.enemy && b.enemy.intent && b.enemy.intent.damage) {
+                    b.enemy.intent.damage = Math.max(0, b.enemy.intent.damage - 2);
+                }
+                if (b.playedThisTurn.some(c => c.character === 'saigo')) {
+                    if (b.enemy && b.enemy.intent && b.enemy.intent.damage) {
+                        b.enemy.intent.damage = Math.floor(b.enemy.intent.damage / 2);
+                    }
+                    b.gainPlayerShield(6);
+                    if (window.particleSystem && window.particleSystem.showComboText) {
+                        window.particleSystem.showComboText("【薩摩軍監の威令！】", b.comboCount);
+                    }
+                    if (window.soundSystem && window.soundSystem.playConnectLink) {
+                        window.soundSystem.playConnectLink();
+                    }
+                }
+            }
+        },
+        "ohashi_totsuan": {
+            id: "ohashi_totsuan",
+            name: "大橋訥庵：思誠塾の倡義",
+            faction: "tobaku",
+            character: "ohashi",
+            type: "shishi",
+            cost: 1,
+            attack: 0,
+            shield: 5,
+            desc: "防 5。山札から戦術カードを1枚引き、そのコストをこのターン 0 にする。【連携：武田耕雲斎】場に武田耕雲斎がいれば、追加で 1 ドロー＆気力 +1。",
+            rarity: "uncommon",
+            partnerId: "takeda_kounsai",
+            onPlay: (b, self) => {
+                b.gainPlayerShield(5);
+                const tacticIdx = b.drawPile.findIndex(c => c.type === 'tactic');
+                if (tacticIdx !== -1) {
+                    const card = b.drawPile.splice(tacticIdx, 1)[0];
+                    card.tempCost = 0;
+                    b.hand.push(card);
+                } else {
+                    b.drawCards(1);
+                }
+                if (b.playedThisTurn.some(c => c.character === 'takeda_kounsai')) {
+                    b.drawCards(1);
+                    b.gainPlayerEnergy(1);
+                    if (window.particleSystem && window.particleSystem.showComboText) {
+                        window.particleSystem.showComboText("【尊攘倡義の檄！】", b.comboCount);
+                    }
+                    if (window.soundSystem && window.soundSystem.playConnectLink) {
+                        window.soundSystem.playConnectLink();
+                    }
+                }
+            }
+        },
+        "ariga_hanya": {
+            id: "ariga_hanya",
+            name: "有賀半弥：東禅寺の義烈",
+            faction: "tobaku",
+            character: "ariga",
+            type: "shishi",
+            cost: 1,
+            attack: 8,
+            shield: 2,
+            desc: "敵に 8 ダメージ、防 2。このターンの次攻撃ダメージ +3。【連携：藤田東湖】場に藤田東湖がいれば、ダメージが倍増（16ダメージ）し、気力を +1 回復。",
+            rarity: "uncommon",
+            partnerId: "fujita_toko",
+            onPlay: (b, self) => {
+                let dmg = 8;
+                const hasToko = b.playedThisTurn.some(c => c.character === 'toko');
+                if (hasToko) {
+                    dmg = 16;
+                    b.gainPlayerEnergy(1);
+                    if (window.particleSystem && window.particleSystem.showComboText) {
+                        window.particleSystem.showComboText("【破約攘夷の義烈！】", b.comboCount);
+                    }
+                    if (window.soundSystem && window.soundSystem.playConnectLink) {
+                        window.soundSystem.playConnectLink();
+                    }
+                }
+                b.dealDamageToEnemy(dmg);
+                b.gainPlayerShield(2);
+                b.applyPlayerBuff("strength", 3);
+            }
+        },
+        "nasu_shingo": {
+            id: "nasu_shingo",
+            name: "那須信吾：追手門の刺客",
+            faction: "tobaku",
+            character: "nasu",
+            type: "shishi",
+            cost: 1,
+            attack: 9,
+            shield: 0,
+            desc: "敵に 9 ダメージ。敵に出血 2 を付与。【連携：武市半平太】場に武市半平太がいれば、追加で 5 ダメージ（計14）＆出血 4 を付与し気力 +1。",
+            rarity: "uncommon",
+            partnerId: "takechi_ideology",
+            onPlay: (b, self) => {
+                let dmg = 9;
+                let bleed = 2;
+                if (b.playedThisTurn.some(c => c.character === 'takechi')) {
+                    dmg += 5;
+                    bleed += 2;
+                    b.gainPlayerEnergy(1);
+                    if (window.particleSystem && window.particleSystem.showComboText) {
+                        window.particleSystem.showComboText("【勤王党の天誅！】", b.comboCount);
+                    }
+                    if (window.soundSystem && window.soundSystem.playConnectLink) {
+                        window.soundSystem.playConnectLink();
+                    }
+                }
+                b.dealDamageToEnemy(dmg);
+                b.applyStatusToEnemy("bleed", bleed);
+            }
+        },
+        "tokugawa_nariaki": {
+            id: "tokugawa_nariaki",
+            name: "徳川斉昭：水戸烈公",
+            faction: "tobaku",
+            character: "tokugawa_nariaki",
+            type: "shishi",
+            cost: 2,
+            attack: 10,
+            shield: 8,
+            desc: "敵に 10 ダメージ、防 8。場に出たとき世論【討幕】+5%、戦闘中味方攻撃力 +1。【連携：藤田東湖】場に藤田東湖がいれば、敵全体に 8 ダメージを与え、カードを 2 枚引く。",
+            rarity: "rare",
+            partnerId: "fujita_toko",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(10);
+                b.gainPlayerShield(8);
+                b.modifyPublicOpinion(5);
+                b.applyPlayerBuff("strength", 1);
+                if (b.playedThisTurn.some(c => c.character === 'toko')) {
+                    b.dealDamageToEnemy(8);
+                    b.drawCards(2);
+                    if (window.particleSystem && window.particleSystem.showComboText) {
+                        window.particleSystem.showComboText("【回天烈風の号令！】", b.comboCount);
+                    }
+                    if (window.soundSystem && window.soundSystem.playConnectLink) {
+                        window.soundSystem.playConnectLink();
+                    }
+                }
+            }
+        },
+        "haga_gido": {
+            id: "haga_gido",
+            name: "芳賀宜道：靖兵隊の副長",
+            faction: "sabaku",
+            character: "haga",
+            type: "shishi",
+            cost: 1,
+            attack: 6,
+            shield: 6,
+            desc: "敵に 6 ダメージ、防 6。【連携：永倉新八】場または捨て札に永倉新八がいれば、追加で防 6 を得て、反撃態勢（攻撃を受けた時 8 反射）。",
+            rarity: "uncommon",
+            partnerId: "nagakura_bushin",
+            onPlay: (b, self) => {
+                b.dealDamageToEnemy(6);
+                b.gainPlayerShield(6);
+                const hasNagakura = b.playedThisTurn.some(c => c.character === 'nagakura') ||
+                    (b.discardPile && b.discardPile.some(c => c.character === 'nagakura'));
+                if (hasNagakura) {
+                    b.gainPlayerShield(6);
+                    b.applyPlayerBuff("thorns", 8);
+                    if (window.particleSystem && window.particleSystem.showComboText) {
+                        window.particleSystem.showComboText("【靖兵隊・不抜の陣！】", b.comboCount);
+                    }
+                    if (window.soundSystem && window.soundSystem.playConnectLink) {
+                        window.soundSystem.playConnectLink();
+                    }
+                }
+            }
+        },
 
         // --- ⚡ 西洋兵器・列強カード（中立・強力だが介入度上昇） ---
         "weapon_minie": {
@@ -2561,7 +2810,7 @@ const GAME_DATA = {
         "samurai_pipe": {
             id: "samurai_pipe",
             name: "志士の煙管",
-            desc: "休息マスで休息した際、HP回復量が最大HPの 35% から 50% に増加する。",
+            desc: "休息マスで休息した際、HP回復量が最大HPの 70% から 100%（全快）に増加する。",
             price: 140
         },
         "yoshida_shoin_brush": {
@@ -3428,13 +3677,13 @@ const GAME_DATA = {
                 {
                     riskCategory: "orthodox",
                     opinionChange: 12,
-                    text: "【討幕派】襲撃に加勢し、幕府の中枢を揺さぶる",
-                    effectDesc: "志士『有馬新七』を獲得。HPを 38 失うが、列強介入-5%と 30両を得る。",
+                    text: "【討幕派】有村次左衛門ら襲撃隊に加勢し、幕府の中枢を揺さぶる",
+                    effectDesc: "志士『有村次左衛門』を獲得。HPを 38 失うが、列強介入-5%と 30両を得る。",
                     faction: "tobaku",
                     shishiBonus: [
                         {
-                            character: "arima",
-                            desc: "精忠組の烈気！被ダメージを20軽減し、次戦攻撃力+6！",
+                            character: "arimura",
+                            desc: "薩摩脱藩の烈気！被ダメージを20軽減し、次戦攻撃力+6！",
                             apply: (app) => {
                                 app.healPlayer(20);
                                 app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 6;
@@ -3442,7 +3691,7 @@ const GAME_DATA = {
                         }
                     ],
                     action: (app) => {
-                        app.addCardToDeck("arima_revolt");
+                        app.addCardToDeck("arimura_jizaemon");
                         app.damagePlayer(38);
                         app.modifyImperialGauge(-5);
                         app.gold += 30;
@@ -4116,7 +4365,7 @@ const GAME_DATA = {
                 {
                     riskCategory: "defiance",
                     opinionChange: 8,
-                    text: "旧来の兵制を維持する",
+                    text: "【長州・洋式兵学】旧来の門閥兵制を排し、大村益次郎を招いて最新西洋兵学による軍制改革を断行する",
                     effectDesc: "志士『大村益次郎』を獲得。列強介入-4%、25両を得る。",
                     action: (app) => {
                         app.addCardToDeck("omura_reform");
@@ -4548,11 +4797,11 @@ const GAME_DATA = {
                 {
                     riskCategory: "defiance",
                     opinionChange: 8,
-                    text: "【討幕派】攘夷の決行として襲撃を支援し、異国勢力の江戸駐留を動揺させる",
-                    effectDesc: "志士『平野国臣』を獲得。列強介入 +10% だが、世論討幕 8%上昇。",
+                    text: "【討幕派】伊牟田尚平ら薩摩浪士の赤羽橋での襲撃を支援し、異国勢力の江戸駐留を動揺させる",
+                    effectDesc: "志士『伊牟田尚平』を獲得。列強介入 +10% だが、世論討幕 8%上昇。",
                     faction: "tobaku",
                     action: (app) => {
-                        app.addCardToDeck("hirano_kuniomi");
+                        app.addCardToDeck("imuta_shohei");
                         app.modifyImperialGauge(10);
                     }
                 },
@@ -4590,11 +4839,11 @@ const GAME_DATA = {
                 {
                     riskCategory: "defiance",
                     opinionChange: 8,
-                    text: "【討幕派】破約攘夷の義挙として水戸浪士の脱走路を援護する",
-                    effectDesc: "志士『相楽総三』を獲得。次戦攻撃力 +4、列強介入 +8%。",
+                    text: "【討幕派】有賀半弥ら水戸浪士の義挙を援護し、破約攘夷の気概を天下に示す",
+                    effectDesc: "志士『有賀半弥』を獲得。次戦攻撃力 +4、列強介入 +8%。",
                     faction: "tobaku",
                     action: (app) => {
-                        app.addCardToDeck("sagara_souzou");
+                        app.addCardToDeck("ariga_hanya");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
                         app.modifyImperialGauge(8);
                     }
@@ -4691,11 +4940,11 @@ const GAME_DATA = {
                 {
                     riskCategory: "orthodox",
                     opinionChange: 8,
-                    text: "【討幕派】刺客たちの逃亡を助け、長州の久坂玄瑞ら尊攘派との連絡路を開く",
-                    effectDesc: "志士『久坂玄瑞』を獲得。軍資金 25両 獲得、HP 8 回復。",
+                    text: "【討幕派】刺客・那須信吾らの逃亡を助け、土佐勤王党の実権掌握を確固たるものにする",
+                    effectDesc: "志士『那須信吾』を獲得。軍資金 25両 獲得、HP 8 回復。",
                     faction: "tobaku",
                     action: (app) => {
-                        app.addCardToDeck("kusaka_revolt");
+                        app.addCardToDeck("nasu_shingo");
                         app.gold += 25;
                         app.healPlayer(8);
                     }
@@ -5927,10 +6176,10 @@ const GAME_DATA = {
                 {
                     riskCategory: "defiance",
                     opinionChange: 8,
-                    text: "外国使節を拒絶し、攘夷の姿勢を示す",
-                    effectDesc: "志士『武市半平太』を獲得。次の戦闘の攻撃力+3、HPを 26 失う。",
+                    text: "【攘夷派】水戸烈公・徳川斉昭らと共に外国使節を拒絶し、攘夷の姿勢を示す",
+                    effectDesc: "志士『徳川斉昭』を獲得。次の戦闘の攻撃力+3、HPを 26 失う。",
                     action: (app) => {
-                        app.addCardToDeck("takechi_ideology");
+                        app.addCardToDeck("tokugawa_nariaki");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
                         app.damagePlayer(26);
                     }
@@ -6984,10 +7233,10 @@ const GAME_DATA = {
                 {
                     riskCategory: "reckless",
                     opinionChange: 5,
-                    text: "打ち払いを徹底し、強硬な態度を示す",
-                    effectDesc: "志士『有馬新七』を獲得。HPを 16 失うが、次の戦闘の攻撃力+2。",
+                    text: "【尊王攘夷】水戸藩主・徳川斉昭の強硬攘夷論に賛同し、打ち払いの徹底を主張する",
+                    effectDesc: "志士『徳川斉昭』を獲得。HPを 16 失うが、次の戦闘の攻撃力+2。",
                     action: (app) => {
-                        app.addCardToDeck("arima_revolt");
+                        app.addCardToDeck("tokugawa_nariaki");
                         app.damagePlayer(16);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 2;
                     }
@@ -8200,16 +8449,16 @@ const GAME_DATA = {
             act: 2,
             importance: 2,
             title: "靖兵隊の結成、不抜の誓い",
-            desc: "甲州勝沼の敗戦後、永倉新八と原田左之助は徳川への義を貫くため新選組を離れ「靖兵隊」を結成した。真の武士道を掲げる二人に加わるか。",
+            desc: "甲州勝沼の敗戦後、永倉新八と芳賀宜道らは徳川への義を貫くため新選組を離れ「靖兵隊」を結成した。真の武士道を掲げる二人に加わるか。",
             choices: [
                 {
                     riskCategory: "defiance",
                     opinionChange: -8,
-                    text: "【佐幕派】彰義隊から脱陣し、日光山でのゲリラ抗戦を決意する",
-                    effectDesc: "志士『原田左之助』を獲得。HPを 26 失うが、次回戦闘の攻撃力+3。",
+                    text: "【佐幕派】永倉新八・芳賀宜道と共に彰義隊から脱陣し、靖兵隊を結成して日光山でのゲリラ抗戦を決意する",
+                    effectDesc: "志士『芳賀宜道』を獲得。HPを 26 失うが、次回戦闘の攻撃力+3。",
                     faction: "sabaku",
                     action: (app) => {
-                        app.addCardToDeck("harada_spear");
+                        app.addCardToDeck("haga_gido");
                         app.damagePlayer(26);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
                     }
@@ -8943,11 +9192,11 @@ const GAME_DATA = {
                 {
                     riskCategory: "reckless",
                     opinionChange: -8,
-                    text: "【討幕派】浪士の義挙に呼応し、江戸城下の尊攘派ネットワークを拡大する",
-                    effectDesc: "志士『武市半平太』を獲得。襲撃失敗と浪士壊滅により幕府取締りが厳重化し世論逆風。HP 26 ダメージを受けるが、次戦攻撃力 +3。",
+                    text: "【討幕派】大橋訥庵の倡義と水戸浪士の義挙に呼応し、江戸城下の尊攘派ネットワークを拡大する",
+                    effectDesc: "志士『大橋訥庵』を獲得。襲撃失敗と浪士壊滅により幕府取締りが厳重化し世論逆風。HP 26 ダメージを受けるが、次戦攻撃力 +3。",
                     faction: "tobaku",
                     action: (app) => {
-                        app.addCardToDeck("takechi_ideology");
+                        app.addCardToDeck("ohashi_totsuan");
                         app.damagePlayer(26);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
                     }
@@ -8955,11 +9204,11 @@ const GAME_DATA = {
                 {
                     riskCategory: "orthodox",
                     opinionChange: -8,
-                    text: "【佐幕派】老中を身を挺して護衛し、城内へ無事に退避させる",
-                    effectDesc: "志士『阿部正弘』を獲得。HP を 6 回復し、軍資金 30両 を獲得。",
+                    text: "【佐幕派】老中・安藤信正を身を挺して護衛し、城内へ無事に退避させる",
+                    effectDesc: "志士『安藤信正』を獲得。HP を 6 回復し、軍資金 30両 を獲得。",
                     faction: "sabaku",
                     action: (app) => {
-                        app.addCardToDeck("abe_defense");
+                        app.addCardToDeck("ando_nobumasa");
                         app.healPlayer(6);
                         app.gold += 30;
                     }
@@ -9411,11 +9660,11 @@ const GAME_DATA = {
                 {
                     riskCategory: "orthodox",
                     opinionChange: 12,
-                    text: "【討幕派】大久保大和の正体を見破り、新選組の残党網を遮断して治安を確立する",
-                    effectDesc: "志士『有馬新七』を獲得。軍資金 35両 を獲得し、HP を 8 回復する。",
+                    text: "【討幕派】有馬藤太と共に大久保大和の正体を見破り、新選組の残党網を遮断して治安を確立する",
+                    effectDesc: "志士『有馬藤太』を獲得。軍資金 35両 を獲得し、HP を 8 回復する。",
                     faction: "tobaku",
                     action: (app) => {
-                        app.addCardToDeck("arima_revolt");
+                        app.addCardToDeck("arima_tota");
                         app.gold += 35;
                         app.healPlayer(8);
                     }
@@ -10245,11 +10494,11 @@ const GAME_DATA = {
                 {
                     riskCategory: "safe",
                     opinionChange: -8,
-                    text: "【佐幕派】旧幕府の金座・銀座の貨幣流通を死守し、奥羽諸藩の軍用資金を調達する",
-                    effectDesc: "志士『小栗忠順』を獲得。軍資金 35両 を獲得し、次戦防御力 +6。",
+                    text: "【佐幕派】榎本武揚ら旧幕軍と共に幕府の正金・軍用資金を確保し、北辺への抗戦準備を整える",
+                    effectDesc: "志士『榎本武揚』を獲得。軍資金 35両 を獲得し、次戦防御力 +6。",
                     faction: "sabaku",
                     action: (app) => {
-                        app.addCardToDeck("oguri_reform");
+                        app.addCardToDeck("enomoto_naval");
                         app.gold += 35;
                         if (window.app && window.app.battle) window.app.battle.gainPlayerShield(6);
                     }

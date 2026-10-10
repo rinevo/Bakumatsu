@@ -508,6 +508,11 @@ class MapSystem {
                     if (deathDef.eventId === sn.eventId) {
                         const cId = deathDef.cardId;
                         if (!this.app.isShishiSaved(cId) && !this.app.isShishiDead(cId)) {
+                            // 首謀者落命により事件が消滅した志士は歴史改変により生存
+                            if (this.app.isShishiDeathPreventedByDeadMastermind && this.app.isShishiDeathPreventedByDeadMastermind(cId)) {
+                                this.app.markShishiSurvived(cId);
+                                return;
+                            }
                             deathsToTrigger.push({
                                 cardId: cId,
                                 reason: `歴史事件『${sn.shortTitle || sn.title || deathDef.eventTitle}』の地を通過したため、史実の運命により落命`,
@@ -526,6 +531,11 @@ class MapSystem {
                 const deathYear = deathDef.deathYear || deathDef.year || Math.floor((deathDef.deathSortKey || 0) / 100);
                 if (deathYear < this.app.currentPeriod.startYear) {
                     if (!this.app.isShishiSaved(cId) && !this.app.isShishiDead(cId)) {
+                        // 首謀者落命により事件が消滅した志士は、歴史上の死亡時期を過ぎても落命しない！
+                        if (this.app.isShishiDeathPreventedByDeadMastermind && this.app.isShishiDeathPreventedByDeadMastermind(cId)) {
+                            this.app.markShishiSurvived(cId);
+                            return;
+                        }
                         if (!deathsToTrigger.some(d => d.cardId === cId)) {
                             deathsToTrigger.push({
                                 cardId: cId,
@@ -544,6 +554,11 @@ class MapSystem {
                 if (evCard.deathShishi && evCard.deathShishi.length > 0 && evCard.year < this.app.currentPeriod.startYear) {
                     evCard.deathShishi.forEach(cId => {
                         if (!this.app.isShishiSaved(cId) && !this.app.isShishiDead(cId)) {
+                            // 首謀者落命により事件が消滅した志士は落命しない
+                            if (this.app.isShishiDeathPreventedByDeadMastermind && this.app.isShishiDeathPreventedByDeadMastermind(cId)) {
+                                this.app.markShishiSurvived(cId);
+                                return;
+                            }
                             if (!deathsToTrigger.some(d => d.cardId === cId)) {
                                 deathsToTrigger.push({
                                     cardId: cId,
@@ -763,7 +778,7 @@ class MapSystem {
                         const deathYear = d.deathYear || d.year || Math.floor((d.deathSortKey || 0) / 100);
                         return deathYear >= period.startYear && deathYear <= period.endYear;
                     });
-                    const ownedFate = fateDeaths.find(d => ownedCardIds.has(d.cardId) && !this.app.isShishiSaved(d.cardId) && !this.app.isShishiDead(d.cardId));
+                    const ownedFate = fateDeaths.find(d => ownedCardIds.has(d.cardId) && !this.app.isShishiSaved(d.cardId) && !this.app.isShishiDead(d.cardId) && !(this.app.isShishiDeathPreventedByDeadMastermind && this.app.isShishiDeathPreventedByDeadMastermind(d.cardId)));
                     if (ownedFate) {
                         node.isFateNode = true;
                         node.deathShishiCardId = ownedFate.cardId;

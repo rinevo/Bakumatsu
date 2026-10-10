@@ -4966,7 +4966,7 @@ body {
 }
 .expired-card-stamp {
     position: absolute;
-    top: 35%;
+    top: 62%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-12deg);
     background: rgba(180, 20, 20, 0.88);
@@ -4993,7 +4993,7 @@ body {
 
 .mastermind-dead-stamp {
     position: absolute;
-    top: 35%;
+    top: 62%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-12deg);
     background: rgba(140, 15, 15, 0.92);

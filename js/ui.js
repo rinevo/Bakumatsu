@@ -128,8 +128,8 @@ class UIManager {
                 if (situation === 'super_advantage') situationDesc = "【絶大優勢】全攻撃+4、開幕防+10、敵士気動揺、商人20%引、勝利小判+25両";
                 else if (situation === 'advantage') situationDesc = "【やや優勢】全攻撃+2、開幕防+5、商人10%引、勝利小判+10両";
                 else if (situation === 'neutral') situationDesc = "【情勢拮抗】シールド獲得時+1、標準相場";
-                else if (situation === 'disadvantage') situationDesc = "⚠️【やや劣勢】敵剛力+4、敵防20、自軍開幕脱力2、商人価格1.4倍、勝利小判-50%、カード提示2枚、休息回復15%";
-                else if (situation === 'super_disadvantage') situationDesc = "🚨【孤立無援】毎ターン手札-1枚、敵剛力+10、敵防60、開幕脱力3&脆弱3、毎ターン投石6ダメ、商人価格2倍、勝利小判-75%、カード提示1枚、休息回復5%";
+                else if (situation === 'disadvantage') situationDesc = "⚠️【やや劣勢】敵剛力+4、敵防20、自軍開幕脱力2、商人価格1.4倍、勝利小判-50%、カード提示2枚、休息回復30%";
+                else if (situation === 'super_disadvantage') situationDesc = "🚨【孤立無援】毎ターン手札-1枚、敵剛力+10、敵防60、開幕脱力3&脆弱3、毎ターン投石6ダメ、商人価格2倍、勝利小判-75%、カード提示1枚、休息回復10%";
                 else if (situation === 'extreme_disadvantage') situationDesc = "☠️【朝敵討滅令・完全孤立】毎ターン手札-2枚、敵剛力+12、敵防80、開幕脱力4&脆弱4、毎ターン投石8ダメ、商人価格2.5倍、勝利小判0両、カード提示0枚、休息回復0%！";
 
                 opinionContainer.title = `世論動乱（天下の大勢）: ${phase.name} (${sign}${this.app.publicOpinion}%)\n${phase.desc}\n自陣営状況: ${situationDesc}`;
@@ -1253,10 +1253,10 @@ class UIManager {
     renderRestSite() {
         this.updateHeader();
         const hasPipe = this.app.hasRelic("samurai_pipe");
-        const healAmt = Math.floor(this.app.maxHp * (hasPipe ? 0.50 : 0.35));
+        const healAmt = Math.floor(this.app.maxHp * (hasPipe ? 1.00 : 0.70));
         const healDesc = document.getElementById('rest-heal-desc');
         if (healDesc) {
-            const pipeBonusText = hasPipe ? '（志士の煙管により50%に強化）' : '（最大HPの35%）';
+            const pipeBonusText = hasPipe ? '（志士の煙管により100%全快に強化）' : '（最大HPの70%）';
             healDesc.textContent = `HPを ${healAmt} 回復します。${pipeBonusText}`;
         }
         const negotiateDesc = document.getElementById('rest-negotiate-desc');
@@ -1899,7 +1899,7 @@ class UIManager {
     }
 
     // --- 首謀者落命による歴史事件カード除外通知モーダル ---
-    showMastermindDeadEventCardsPurgedModal(purgedCards, onConfirm = null) {
+    showMastermindDeadEventCardsPurgedModal(purgedCards, onConfirm = null, savedShishiList = []) {
         const modal = document.getElementById('modal-event-cards-mastermind-dead');
         if (!modal) {
             if (typeof onConfirm === 'function') onConfirm();
@@ -1912,6 +1912,28 @@ class UIManager {
 
         if (container) {
             container.innerHTML = '';
+
+            // 首謀者落命により事件消滅・死線回避となった志士の救出バナー表示
+            if (Array.isArray(savedShishiList) && savedShishiList.length > 0) {
+                const banner = document.createElement('div');
+                banner.className = 'saved-shishi-mastermind-banner';
+                banner.style.width = '100%';
+                banner.style.margin = '0 0 16px 0';
+                banner.style.padding = '12px 18px';
+                banner.style.background = 'rgba(20, 60, 30, 0.9)';
+                banner.style.border = '1px solid #48bb78';
+                banner.style.borderRadius = '8px';
+                banner.style.color = '#e6fffa';
+                banner.style.fontSize = '1.0rem';
+                banner.style.lineHeight = '1.5';
+                banner.style.textAlign = 'center';
+                banner.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+
+                const shishiNames = savedShishiList.map(s => `『${s.name}』`).join('・');
+                banner.innerHTML = `🕊️ <strong>【歴史改変・死線回避】</strong> 首謀者落命により事件が消滅したため、志士 ${shishiNames} は史実の死線を免れ、生存が確定しました！`;
+                container.appendChild(banner);
+            }
+
             const list = Array.isArray(purgedCards) ? purgedCards : (purgedCards ? [purgedCards] : []);
             list.forEach(card => {
                 const wrapper = document.createElement('div');
