@@ -424,9 +424,27 @@ class SoundSystem {
         setTimeout(() => this.playTaiko(true), notes.length * 140);
     }
 
-    // --- 志士獲得・達成ファンファーレ ---
+    // --- 志士獲得・生存達成ファンファーレ（和風祝祭・英雄生還旋律） ---
     playFanfare() {
-        this.playVictory();
+        if (this.isSeMuted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        // 陽旋法・祝祭の上昇アルペジオ (D4 -> F4 -> G4 -> A4 -> C5 -> D5)
+        const fanfareNotes = [293.66, 349.23, 392.00, 440.00, 523.25, 587.33];
+        fanfareNotes.forEach((freq, idx) => {
+            setTimeout(() => {
+                this.playKotoNote(freq, 0.7);
+            }, idx * 110);
+        });
+
+        // 締めくくりの祝いの響き（高音ハーモニー ＆ 大太鼓）
+        setTimeout(() => {
+            if (!this.ctx) return;
+            this.playKotoNote(587.33, 1.2); // D5
+            this.playKotoNote(880.00, 1.2); // A5 (オクターブ上の華やかさ)
+            this.playTaiko(true);
+        }, fanfareNotes.length * 110);
     }
 
     // --- 作戦失敗・歴史の蹉跌（和風・重厚な失意と打撃の音） ---

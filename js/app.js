@@ -2518,7 +2518,15 @@ class BakumatsuApp {
 
         // サウンド
         if (window.soundSystem) {
-            if (outcome === 'great' && window.soundSystem.playVictory) {
+            const isSurvivalSuccess = baseChoice.isSurvivalRoute && (outcome === 'great' || outcome === 'success');
+            if (isSurvivalSuccess) {
+                // 生存ルート成功時は祝祭ファンファーレを演奏
+                if (window.soundSystem.playFanfare) {
+                    window.soundSystem.playFanfare();
+                } else if (window.soundSystem.playVictory) {
+                    window.soundSystem.playVictory();
+                }
+            } else if (outcome === 'great' && window.soundSystem.playVictory) {
                 window.soundSystem.playVictory();
             } else if (outcome === 'success' && window.soundSystem.playTaiko) {
                 window.soundSystem.playTaiko(true);
