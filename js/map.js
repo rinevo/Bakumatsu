@@ -743,6 +743,9 @@ class MapSystem {
 
     // 必ず通る関門（チョークポイント）に割り当てる重大歴史事件の定義
     static get CHOKEPOINT_EVENTS() {
+        if (typeof GAME_DATA !== 'undefined' && GAME_DATA.chokepointEvents) {
+            return GAME_DATA.chokepointEvents;
+        }
         return {
             1: 'event_august_coup',         // 第一幕関門: 八月十八日の政変、都の転換 (186308)
             2: 'event_second_choshu_war',   // 第二幕関門: 第二次長州征討、四境戦争の激闘 (186606)
@@ -751,6 +754,9 @@ class MapSystem {
     }
 
     static get ALL_CHOKEPOINT_EVENT_IDS() {
+        if (typeof GAME_DATA !== 'undefined' && GAME_DATA.allChokepointEventIds) {
+            return GAME_DATA.allChokepointEventIds;
+        }
         return new Set(Object.values(MapSystem.CHOKEPOINT_EVENTS));
     }
 

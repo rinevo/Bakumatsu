@@ -14204,12 +14204,28 @@ GAME_DATA.eventMasterminds = {
 };
 
 // ==========================================
+// 必ず発生する歴史の関門（チョークポイント）事件の定義
+// ==========================================
+GAME_DATA.chokepointEvents = {
+    1: 'event_august_coup',         // 第一幕関門: 八月十八日の政変、都の転換 (1863年8月)
+    2: 'event_second_choshu_war',   // 第二幕関門: 第二次長州征討、四境戦争の激闘 (1866年6月)
+    3: 'event_aizu_war'             // 終幕関門: 会津戦争、白虎の決意 (1868年8月)
+};
+
+GAME_DATA.allChokepointEventIds = new Set(Object.values(GAME_DATA.chokepointEvents));
+
+// ==========================================
 // 歴史事件カード（Historical Event Cards）生成＆登録
 // ==========================================
 GAME_DATA.eventCards = {};
 
 if (Array.isArray(GAME_DATA.events)) {
     GAME_DATA.events.forEach(ev => {
+        // 歴史の関門（チョークポイント）として必ず発生する歴史事件はカード化・配布しない
+        if (GAME_DATA.allChokepointEventIds && GAME_DATA.allChokepointEventIds.has(ev.id)) {
+            return;
+        }
+
         const cardId = `event_card_${ev.id}`;
         
         // 当該事件で史実上死亡する志士のリストを抽出
@@ -14356,6 +14372,11 @@ GAME_DATA.getRandomHistoricalEventForPeriod = function(startYear, endYear, facti
 GAME_DATA.getRandomEventCardIdsForPeriod = function(startYear, endYear, faction = null, count = 1, excludeIds = []) {
     if (!this.eventCards) return [];
     const excludeSet = new Set(excludeIds || []);
+    // 関門イベントカードID（万一登録されていても配布対象から完全に除外）
+    const chokepoints = this.allChokepointEventIds || (typeof MapSystem !== 'undefined' ? MapSystem.ALL_CHOKEPOINT_EVENT_IDS : null);
+    if (chokepoints) {
+        chokepoints.forEach(evId => excludeSet.add(`event_card_${evId}`));
+    }
     let pool = Object.values(this.eventCards).filter(c => {
         if (excludeSet.has(c.id)) return false;
         if (c.year < startYear || c.year > endYear) return false;
@@ -14385,9 +14406,9 @@ GAME_DATA.getRandomEventCardIdsForPeriod = function(startYear, endYear, faction 
     return shuffled.slice(0, count).map(c => c.id);
 };
 
-// 陣営ごとの推奨初期歴史事件カードID（互換用フォールバック）
+// 陣営ごとの推奨初期歴史事件カードID（互換用フォールバック：双方で重複しない固有3枚）
 GAME_DATA.starterEventCards = {
-    tobaku: ["event_card_event_andei_purge", "event_card_event_sakuradamon", "event_card_event_tosa_kinnoto_formation"],
-    sabaku: ["event_card_event_andei_purge", "event_card_event_sakuradamon", "event_card_event_kazunomiya_kobu_gattai"]
+    tobaku: ["event_card_event_sakuradamon", "event_card_event_tosa_kinnoto_formation", "event_card_event_sanai_hitotsubashi_plot"],
+    sabaku: ["event_card_event_andei_purge", "event_card_event_kazunomiya_kobu_gattai", "event_card_event_harris_treaty"]
 };
 

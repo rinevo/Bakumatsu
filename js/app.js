@@ -1300,7 +1300,7 @@ class BakumatsuApp {
         const enemyFaction = this.faction === 'tobaku' ? 'sabaku' : 'tobaku';
         if (!enemyCard && defaultEvent && defaultEvent.historicalAdvantage === enemyFaction) {
             const candidateCardId = `event_card_${defaultEvent.id}`;
-            if (GAME_DATA.cards && GAME_DATA.cards[candidateCardId] && !this.deck.includes(candidateCardId)) {
+            if (GAME_DATA.cards && GAME_DATA.cards[candidateCardId] && !this.deck.includes(candidateCardId) && !this.isEventCardUsed(candidateCardId)) {
                 const cCandidate = GAME_DATA.cards[candidateCardId];
                 if (!cCandidate.leaderShishi || !this.isMastermindDead(cCandidate.leaderShishi)) {
                     enemyCard = cCandidate;
