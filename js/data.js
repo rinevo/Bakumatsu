@@ -4072,6 +4072,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act2_normal_british_marine",
                     opinionChange: 8,
                     text: "砲台を死守し、攘夷の意地を示す",
                     effectDesc: "志士『高杉晋作』を獲得。四国連合艦隊の猛砲撃に晒されHPを 30 失い、最大HP-5。次戦の攻撃力+3。",
@@ -4232,6 +4234,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     opinionChange: -12,
                     text: "【佐幕派】榎本武揚と共に五稜郭の全砲門を開き、最後の決戦に挑む",
                     effectDesc: "志士『榎本武揚』を獲得。HPを 38 失うが、次回戦闘の攻撃力+4。",
@@ -5669,9 +5673,10 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act1_normal_1",
                     isSurvivalRoute: true,
                     targetShishi: ["yoshida_teaching"],
-                    riskCategory: "reckless",
                     opinionChange: 10,
                     text: "【🕊️ 生存ルート】伝馬町牢屋敷の警備を強襲し、処刑寸前の吉田松陰を密かに脱出させる",
                     effectDesc: "【生存ルート】志士『吉田松陰』を救出し歴史改変！HP 35 ダメージを受けるが、松陰は生存確定となり以降もデッキで使用可能！",
@@ -5819,6 +5824,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     opinionChange: -12,
                     text: "城壁に立ち、最後の一戦に挑む",
                     effectDesc: "『松平容保：会津の義気』をデッキに加え、HPを 38 失う。",
@@ -5854,6 +5861,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_ouetsu",
                     opinionChange: 12,
                     faction: "tobaku",
                     text: "【討幕派】板垣退助・伊地知正治の指揮下で新政府軍の砲撃陣地を展開し、鶴ヶ城を包囲制圧する",
@@ -7734,6 +7743,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act1_normal_1",
                     isSurvivalRoute: true,
                     targetShishi: ["kiyokawa_leader"],
                     opinionChange: -5,
@@ -7903,6 +7914,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act1_normal_choshu_spy",
                     opinionChange: -8,
                     text: "【佐幕派】京都守護職・会津藩兵と新選組を指揮し、御所九門を厳重封鎖する",
                     effectDesc: "志士『松平容保：会津の義気』を獲得。御所死守の激闘によりHPを 25 失い、最大HP-5。世論佐幕+30%。",
@@ -7937,6 +7950,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act2_normal_1",
                     isSurvivalRoute: true,
                     targetShishi: ["ryoma_kaiwentai","nakaoka_mediator"],
                     opinionChange: 0,
@@ -7976,6 +7991,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act2_normal_satsuma_samurai",
                     opinionChange: -8,
                     text: "【佐幕派】京都見廻組を率い、近江屋の不穏分子を急襲する",
                     effectDesc: "志士『佐々木只三郎』を獲得。HPを 26 失うが、次の戦闘の攻撃力+3。",
@@ -8120,6 +8137,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     isSurvivalRoute: true,
                     targetShishi: ["hijikata_fukucho"],
                     opinionChange: -10,
@@ -8134,6 +8153,8 @@ const GAME_DATA = {
 
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_ouetsu",
                     opinionChange: 12,
                     text: "【討幕派】一本木関門を突破し、箱館五稜郭へ総攻撃を仕掛ける",
                     effectDesc: "志士『黒田清隆』を獲得。HPを 38 失うが、次回戦闘の攻撃力+4。",
@@ -8157,6 +8178,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "safe",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     opinionChange: -12,
                     text: "【佐幕派】遊撃隊の銃撃で援護し、退路を切り開く",
                     effectDesc: "志士『伊庭八郎』を獲得。HPを 38 失うが、次回戦闘の攻撃力+4。",
@@ -8548,9 +8571,10 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     isSurvivalRoute: true,
                     targetShishi: ["harada_spear"],
-                    riskCategory: "reckless",
                     opinionChange: -8,
                     text: "【🕊️ 生存ルート】寛永寺黒門口の砲煙をかいくぐり、重傷の原田左之助を担ぎ出して安全圏へ離脱する",
                     effectDesc: "【生存ルート】志士『原田左之助』を救出！HP 35 ダメージを受けるが、原田は生存確定となり以降もデッキで使用可能！",
@@ -8585,6 +8609,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shogitai",
                     opinionChange: 12,
                     faction: "tobaku",
                     text: "【討幕派】大村益次郎の精密砲撃作戦に従い、アームストロング砲で黒門口の防衛線を粉砕する",
@@ -8655,6 +8681,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     opinionChange: -8,
                     text: "【佐幕派】虎徹を握る近藤勇の陣頭指揮に従い、敵本陣へ突進する",
                     effectDesc: "志士『近藤勇』を獲得。HPを 26 失うが、次回戦闘の攻撃力+3。",
@@ -8812,9 +8840,10 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     isSurvivalRoute: true,
                     targetShishi: ["koga_naval"],
-                    riskCategory: "reckless",
                     opinionChange: -8,
                     text: "【🕊️ 生存ルート】甲鉄艦のガトリング掃射から回天艦長・甲賀源吾を身を挺して庇い操舵室へ押し戻す",
                     effectDesc: "【生存ルート】志士『甲賀源吾』を救出！HP 35 ダメージを受けるが、甲賀は生存確定となり以降もデッキで使用可能！",
@@ -8827,6 +8856,8 @@ const GAME_DATA = {
 
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     opinionChange: -8,
                     text: "【佐幕派】土方歳三率いる斬り込み抜刀隊を援護し、敵甲板を制圧する",
                     effectDesc: "志士『土方歳三』を獲得。次回戦闘の攻撃力+3、列強介入-4%。",
@@ -8839,6 +8870,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_ouetsu",
                     opinionChange: 8,
                     text: "【討幕派】甲鉄艦のガトリング砲で迎え撃ち、敵の奇襲を粉砕する",
                     effectDesc: "志士『川村純義』を獲得。次回戦闘の攻撃力+3、列強介入-4%。",
@@ -8885,6 +8918,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "defiance",
+                    hasBattle: true,
+                    battleEnemy: "act1_normal_1",
                     opinionChange: 12,
                     text: "【討幕派】武市半平太の密命に応じ、天誅の刃で佐幕要人を討つ",
                     faction: "tobaku",
@@ -8897,6 +8932,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act1_elite_izo",
                     opinionChange: -12,
                     text: "【佐幕派】京都守護職・新選組の警戒網を強化し、刺客の襲撃を退ける",
                     faction: "sabaku",
@@ -8982,9 +9019,10 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act1_normal_1",
                     isSurvivalRoute: true,
                     targetShishi: ["takeda_kounsai"],
-                    riskCategory: "reckless",
                     opinionChange: 10,
                     text: "【🕊️ 生存ルート】敦賀の降伏本陣を電撃急襲し、処刑前の武田耕雲斎を救出して越前山中へ退避させる",
                     effectDesc: "【生存ルート】志士『武田耕雲斎』を救出！HP 35 ダメージを受けるが、耕雲斎は生存確定となり以降もデッキで使用可能！",
@@ -9030,6 +9068,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act2_normal_denshitai",
                     opinionChange: 12,
                     text: "【討幕派】大村益次郎の陣図に従い、最新火器で幕府総軍を四境で撃破する",
                     effectDesc: "志士『大村益次郎』を獲得。弾薬消耗で軍資金60両拠出、列強介入+20%。世論討幕+35%、神器レリック『大村益次郎の陣図』を獲得！",
@@ -9043,6 +9083,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act2_normal_satsuma_samurai",
                     opinionChange: -12,
                     text: "【佐幕派】小笠原長行と共に小倉口・長岡防衛線を死守し、猛火に耐える",
                     effectDesc: "志士『小笠原長行』を獲得。最新兵器の猛攻に晒されHPを 32 失い、最大HP-10。幕府軍備より軍資金 100両と『新式ミニエ銃』を獲得、世論佐幕+30%！",
@@ -9275,6 +9317,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act1_normal_1",
                     opinionChange: 8,
                     text: "【討幕派】高杉・久坂らと共に突入し、公使館を一気に焼き払う",
                     effectDesc: "志士『高杉晋作：奇兵隊の突進』を獲得。HP 26 ダメージを受けるが、次戦攻撃力 +4、列強介入 +10%。",
@@ -9390,6 +9434,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act1_elite_serizawa",
                     opinionChange: -12,
                     text: "【佐幕派】土方・沖田と共に豪雨の闇に紛れて八木邸へ斬り込み、芹沢を一刀両断する",
                     effectDesc: "志士『近藤勇』を獲得。豪剣の返り討ちにより HP 32 ダメージを受けるが、次戦攻撃力 +5、レリックを獲得。",
@@ -9459,6 +9505,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "orthodox",
+                    hasBattle: true,
+                    battleEnemy: "act2_normal_1",
                     opinionChange: 12,
                     text: "【討幕派】晋作の決起に参陣し、奇兵隊と共に下関会所を電撃急襲する",
                     effectDesc: "志士『高杉晋作：奇兵隊の突進』を獲得。HP 32 ダメージを受けるが、次戦攻撃力 +5、世論討幕 +12%。",
@@ -9663,9 +9711,10 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     isSurvivalRoute: true,
                     targetShishi: ["kondo_kotetsu"],
-                    riskCategory: "reckless",
                     opinionChange: -10,
                     text: "【🕊️ 生存ルート】板橋刑場へ偽りの救出部隊を突入させ、刑執行直前に近藤勇局長を電撃救出する",
                     effectDesc: "【生存ルート】志士『近藤勇』を救出！HP 38 ダメージを受けるが、近藤局長は生存確定となり以降もデッキで使用可能！",
@@ -9720,6 +9769,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     opinionChange: -8,
                     text: "【佐幕派】少年隊の気概に応え、大壇口に駆けつけて共に死線を耐え抜く",
                     effectDesc: "志士『山川大蔵：彼岸獅子の奮戦』を獲得。悲壮な銃撃戦で HP 28 ダメージを受けるが、次戦防御力 +8。",
@@ -9768,6 +9819,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     opinionChange: -8,
                     text: "【佐幕派】中野竹子の娘子隊と共に抜刀突撃を敢行し、新政府軍の銃列を突き崩す",
                     effectDesc: "志士『中野竹子：薙刀の一陣』を獲得。壮烈な激闘により HP 28 ダメージを受けるが、次戦攻撃力 +5。",
@@ -9816,6 +9869,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     opinionChange: -12,
                     text: "【佐幕派】蟠竜丸の艦砲射撃で新政府艦「朝陽」を撃沈し、最後の意地を見せる",
                     effectDesc: "志士『榎本武揚』を獲得。壮絶な砲撃戦で HP 32 ダメージを受けるが、次戦攻撃力 +6。",
@@ -9870,6 +9925,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act1_normal_2",
                     isSurvivalRoute: true,
                     targetShishi: ["sakuma_gunnery"],
                     opinionChange: 0,
@@ -9965,9 +10022,10 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act2_normal_1",
                     isSurvivalRoute: true,
                     targetShishi: ["okada_izo", "takechi_ideology"],
-                    riskCategory: "reckless",
                     opinionChange: 12,
                     text: "【🕊️ 生存ルート】決死の牢破りを決行し、警備の土佐藩士をなぎ倒して武市と以蔵を救出する",
                     effectDesc: "【生存ルート】志士『武市半平太』『岡田以蔵』の両名を救出！HP 38 ダメージを受けるが、両名は生存確定となり以降もデッキで使用可能！",
@@ -10127,6 +10185,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     isSurvivalRoute: true,
                     targetShishi: ["oguri_reform"],
                     opinionChange: -10,
@@ -10407,6 +10467,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act1_normal_shinsengumi",
                     opinionChange: -12,
                     text: "【佐幕派】服部武雄の凄絶なる二刀流に加勢し、多勢の新選組包囲陣を相手に獅子奮迅の太刀を振るう",
                     effectDesc: "志士『服部武雄：不抜の二刀』を獲得。死闘の重傷で HP 32 ダメージを受けるが、次戦攻撃力 +6。",
@@ -10419,6 +10481,8 @@ const GAME_DATA = {
                 },
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act2_normal_satsuma_samurai",
                     opinionChange: -12,
                     text: "【佐幕派】新選組隊士として包囲陣を固め、離隊した御陵衛士を掃討して隊の規律を守る",
                     effectDesc: "志士『永倉新八』を獲得。HP を 8 回復し、軍資金 25両 を獲得。",
@@ -10566,6 +10630,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "reckless",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     opinionChange: -8,
                     text: "【佐幕派】中野竹子率いる娘子隊の結成を後押しし、鶴ヶ城柳橋の迎撃戦へ共に出陣する",
                     effectDesc: "志士『中野竹子：薙刀の一陣』を獲得。HP 26 ダメージを受けるが、次戦攻撃力 +5、世論佐幕 8%。",
@@ -10620,6 +10686,8 @@ const GAME_DATA = {
             choices: [
                 {
                     riskCategory: "defiance",
+                    hasBattle: true,
+                    battleEnemy: "act3_normal_shinseifu",
                     opinionChange: -8,
                     text: "【佐幕派】八重のスペンサー銃の乱射に加勢し、夜襲の敵兵を狙撃して本丸を守り抜く",
                     effectDesc: "志士『山本八重：不抜の銃姫』を獲得。激しい銃撃戦で HP 26 ダメージを受けるが、次回攻撃力 +5、世論佐幕 8%。",
@@ -14420,11 +14488,11 @@ GAME_DATA.getRandomEventCardIdsForPeriod = function(startYear, endYear, faction 
         pool = [...pool, ...fallback];
     }
 
-    // それでも不足する場合は全体プールから補填
+    // それでも不足する場合は現在以降の全体プールから補填（過去年代 c.year < startYear のカードは絶対に配布しない）
     if (pool.length < count) {
         const widePool = Object.values(this.eventCards).filter(c => {
             if (excludeSet.has(c.id) || pool.some(p => p.id === c.id)) return false;
-            return true;
+            return c.year >= startYear;
         });
         pool = [...pool, ...widePool];
     }

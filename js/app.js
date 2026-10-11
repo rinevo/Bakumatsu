@@ -724,7 +724,12 @@ class BakumatsuApp {
             }
             if (replenishIds.length === 0 && GAME_DATA.starterEventCards) {
                 const starters = GAME_DATA.starterEventCards[this.faction] || GAME_DATA.starterEventCards.tobaku || [];
-                replenishIds = starters.filter(sId => !excludeIds.includes(sId));
+                replenishIds = starters.filter(sId => {
+                    if (excludeIds.includes(sId)) return false;
+                    const card = GAME_DATA.cards[sId];
+                    if (card && typeof card.year === 'number' && card.year < startYear) return false;
+                    return true;
+                });
             }
             replenishIds.forEach(sId => {
                 if (this.addCardToDeck(sId, true)) {

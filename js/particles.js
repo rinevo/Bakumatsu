@@ -169,6 +169,21 @@ class ParticleSystem {
         this.createSparks(x, y, count >= 2 ? 18 : 10, false);
     }
 
+    createFloatingText(text, x, y, color = '#e6be65') {
+        const posX = (typeof x === 'number' && !isNaN(x)) ? x : (window.innerWidth / 2);
+        const posY = (typeof y === 'number' && !isNaN(y)) ? y : (window.innerHeight * 0.4);
+        this.textFloats.push({
+            text,
+            count: 1,
+            x: posX,
+            y: posY,
+            life: 1.0,
+            maxLife: 1.0,
+            scale: 0.6,
+            customColor: color
+        });
+    }
+
     update(dt) {
         // パーティクル更新
         for (let i = this.particles.length - 1; i >= 0; i--) {
@@ -288,15 +303,15 @@ class ParticleSystem {
             this.ctx.textBaseline = 'middle';
 
             this.ctx.fillStyle = 'rgba(10, 10, 12, 0.9)';
-            this.ctx.shadowColor = t.isEnemy || t.count >= 3
+            this.ctx.shadowColor = t.customColor || (t.isEnemy || t.count >= 3
                 ? 'rgba(215, 40, 40, 0.8)'
-                : 'rgba(212, 175, 55, 0.8)';
+                : 'rgba(212, 175, 55, 0.8)');
             this.ctx.shadowBlur = 24;
             this.ctx.fillText(t.text, 0, 0);
 
-            // 金または朱のハイライト縁取り
+            // 金または朱のハイライト縁取り（またはカスタム色）
             this.ctx.lineWidth = 2;
-            this.ctx.strokeStyle = t.isEnemy || t.count >= 3 ? '#ff3b30' : '#e6be65';
+            this.ctx.strokeStyle = t.customColor || (t.isEnemy || t.count >= 3 ? '#ff3b30' : '#e6be65');
             this.ctx.strokeText(t.text, 0, 0);
 
             this.ctx.restore();

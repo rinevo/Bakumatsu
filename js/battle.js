@@ -56,6 +56,7 @@ class BattleSystem {
         this.imperialMultiplier = 1.0;
         this.shieldBonus = 0;
         this.handDrawBonus = 0;
+        this.isProcessingCard = false;
 
         // 手札温存（キープ）設定（最大5枚まで）
         this.maxKeepCount = 5;
@@ -552,13 +553,17 @@ class BattleSystem {
     }
 
     playCard(cardIndex) {
+        if (this.isProcessingCard) return;
         if (cardIndex < 0 || cardIndex >= this.hand.length) return;
         const card = this.hand[cardIndex];
         if (!this.canPlayCard(card)) {
-            window.soundSystem.playWarning();
+            if (window.soundSystem && window.soundSystem.playWarning) {
+                window.soundSystem.playWarning();
+            }
             return;
         }
 
+        this.isProcessingCard = true;
         const cost = this.calculateCardCost(card);
         this.playerEnergy -= cost;
 
@@ -566,77 +571,91 @@ class BattleSystem {
         this.hand.splice(cardIndex, 1);
         this.playedThisTurn.push(card);
 
-        // 連鎖カウント増加
-        this.comboCount++;
-        const comboKanji = this.getComboKanji(this.comboCount);
-        window.particleSystem.showComboText(comboKanji, this.comboCount);
-        window.soundSystem.playCombo(this.comboCount);
-
-        // コネクト・リンク判定（特定キャラクター同士の共鳴）
-        this.checkConnectLink(card);
-
-        // 基本カード効果（攻撃・防御）
-        let baseAttack = card.attack || 0;
-        let baseShield = card.shield || 0;
-
-        if (baseAttack > 0) {
-            // 筋力バフ加算
-            let totalAttack = baseAttack + (this.playerBuffs.strength || 0);
-            // 連鎖ボーナス（3連鎖目以降少しダメージUP）
-            if (this.comboCount >= 3) {
-                totalAttack += Math.floor((this.comboCount - 2) * 1.5);
+        try {
+            // 連鎖カウント増加
+            this.comboCount++;
+            const comboKanji = this.getComboKanji(this.comboCount);
+            if (window.particleSystem && window.particleSystem.showComboText) {
+                window.particleSystem.showComboText(comboKanji, this.comboCount);
             }
-            // プレイヤー脱力（Weak）デバフ：与ダメージ25%減
-            if (this.playerDebuffs && this.playerDebuffs.weak > 0) {
-                totalAttack = Math.floor(totalAttack * 0.75);
+            if (window.soundSystem && window.soundSystem.playCombo) {
+                window.soundSystem.playCombo(this.comboCount);
             }
-            this.dealDamageToEnemy(totalAttack);
-        }
 
-        if (baseShield > 0) {
-            let totalShield = baseShield + this.shieldBonus;
-            this.gainPlayerShield(totalShield);
-        }
+            // コネクト・リンク判定（特定キャラクター同士の共鳴）
+            this.checkConnectLink(card);
 
-        // カード固有効果の実行
-        if (card.onPlay) {
-            card.onPlay(this, card);
-        }
+            // 基本カード効果（攻撃・防御）
+            let baseAttack = card.attack || 0;
+            let baseShield = card.shield || 0;
 
-        // レリックのカード使用時効果
-        this.app.relics.forEach(relicId => {
-            const r = GAME_DATA.relics[relicId];
-            if (r && r.onCardPlayed) {
-                r.onCardPlayed(this, card);
-            }
-        });
-
-        // 墓地または除外へ送る
-        if (card.type === 'item' || card.consumable) {
-            // アイテムカード（消費道具）: 戦闘中は除外(exhaustPile)へ送り、永続デッキ(this.app.deck)からも完全に消滅
-            this.exhaustPile.push(card.id);
-            if (this.app && Array.isArray(this.app.deck)) {
-                const idx = this.app.deck.indexOf(card.id);
-                if (idx !== -1) {
-                    this.app.deck.splice(idx, 1);
+            if (baseAttack > 0) {
+                // 筋力バフ加算
+                let totalAttack = baseAttack + (this.playerBuffs.strength || 0);
+                // 連鎖ボーナス（3連鎖目以降少しダメージUP）
+                if (this.comboCount >= 3) {
+                    totalAttack += Math.floor((this.comboCount - 2) * 1.5);
                 }
+                // プレイヤー脱力（Weak）デバフ：与ダメージ25%減
+                if (this.playerDebuffs && this.playerDebuffs.weak > 0) {
+                    totalAttack = Math.floor(totalAttack * 0.75);
+                }
+                this.dealDamageToEnemy(totalAttack);
             }
-            if (window.particleSystem && window.particleSystem.createFloatingText) {
-                window.particleSystem.createFloatingText("道具消費（デッキから消滅）", window.innerWidth / 2, window.innerHeight * 0.7, "#ffa500");
+
+            if (baseShield > 0) {
+                let totalShield = baseShield + this.shieldBonus;
+                this.gainPlayerShield(totalShield);
             }
-        } else if (card.type !== 'shishi' && card.exhaust) {
-            this.exhaustPile.push(card.id);
-        } else {
-            this.discardPile.push(card.id);
-        }
 
-        // 敵死亡判定
-        if (this.enemy && this.enemy.hp <= 0) {
-            this.handleEnemyDefeated();
-            return;
-        }
+            // カード固有効果の実行
+            if (card.onPlay) {
+                card.onPlay(this, card);
+            }
 
-        this.app.ui.updateBattleUI();
+            // レリックのカード使用時効果
+            if (this.app && Array.isArray(this.app.relics)) {
+                this.app.relics.forEach(relicId => {
+                    const r = GAME_DATA.relics[relicId];
+                    if (r && r.onCardPlayed) {
+                        r.onCardPlayed(this, card);
+                    }
+                });
+            }
+
+            // 墓地または除外へ送る
+            if (card.type === 'item' || card.consumable) {
+                // アイテムカード（消費道具）: 戦闘中は除外(exhaustPile)へ送り、永続デッキ(this.app.deck)からも完全に消滅
+                this.exhaustPile.push(card.id);
+                if (this.app && Array.isArray(this.app.deck)) {
+                    const idx = this.app.deck.indexOf(card.id);
+                    if (idx !== -1) {
+                        this.app.deck.splice(idx, 1);
+                    }
+                }
+                if (window.particleSystem && window.particleSystem.createFloatingText) {
+                    window.particleSystem.createFloatingText("道具消費（デッキから消滅）", window.innerWidth / 2, window.innerHeight * 0.7, "#ffa500");
+                }
+            } else if (card.type !== 'shishi' && card.exhaust) {
+                this.exhaustPile.push(card.id);
+            } else {
+                this.discardPile.push(card.id);
+            }
+        } catch (err) {
+            console.error("Error executing card effect for", card.name || card.id, err);
+        } finally {
+            this.isProcessingCard = false;
+
+            // 敵死亡判定
+            if (this.enemy && this.enemy.hp <= 0) {
+                this.handleEnemyDefeated();
+                return;
+            }
+
+            if (this.app && this.app.ui && typeof this.app.ui.updateBattleUI === 'function') {
+                this.app.ui.updateBattleUI();
+            }
+        }
     }
 
     checkConnectLink(currentCard) {
@@ -743,10 +762,40 @@ class BattleSystem {
     damagePlayerDirect(amount) {
         this.playerHp = Math.max(0, this.playerHp - amount);
         this.app.hp = this.playerHp;
-        window.soundSystem.playHeavySlash();
+        if (window.soundSystem && window.soundSystem.playHeavySlash) {
+            window.soundSystem.playHeavySlash();
+        }
 
         if (this.playerHp <= 0) {
             this.handlePlayerDefeated("戦闘により力尽きた…");
+        }
+    }
+
+    damagePlayer(amount) {
+        this.damagePlayerDirect(amount);
+    }
+
+    destroyEnemyShield(amount) {
+        if (!this.enemy || typeof this.enemy.shield !== 'number') return;
+        const destroyed = Math.min(this.enemy.shield, amount);
+        this.enemy.shield = Math.max(0, this.enemy.shield - amount);
+        if (window.particleSystem && window.particleSystem.createFloatingText) {
+            window.particleSystem.createFloatingText(`盾破壊 -${destroyed}`, window.innerWidth / 2, window.innerHeight * 0.35, '#ff4757');
+        }
+        if (window.soundSystem && window.soundSystem.playShield) {
+            window.soundSystem.playShield();
+        }
+    }
+
+    modifyPublicOpinion(delta) {
+        if (this.app && typeof this.app.modifyPublicOpinion === 'function') {
+            this.app.modifyPublicOpinion(delta);
+        }
+    }
+
+    modifyImperialGauge(delta) {
+        if (this.app && typeof this.app.modifyImperialGauge === 'function') {
+            this.app.modifyImperialGauge(delta);
         }
     }
 
@@ -1172,6 +1221,13 @@ class BattleSystem {
     }
 
     generateCardRewards() {
+        // 進行中の時代区分（Period）の取得
+        const currentPeriod = this.app.currentPeriod || (
+            (this.app.map && GAME_DATA.getPeriodForFloor)
+                ? GAME_DATA.getPeriodForFloor(this.app.map.currentAct || 1, this.app.map.currentFloor || 0)
+                : null
+        );
+
         // 自陣営 + 西洋兵器から選定
         const availablePool = Object.keys(GAME_DATA.cards).filter(id => {
             const c = GAME_DATA.cards[id];
@@ -1179,6 +1235,10 @@ class BattleSystem {
             if (this.app.isShishiDead && this.app.isShishiDead(id)) return false;
             if (this.app.isEventCardUsed && this.app.isEventCardUsed(id)) return false;
             if (GAME_DATA.canFactionAcquireCard && !GAME_DATA.canFactionAcquireCard(id, this.app.faction)) return false;
+            // 歴史事件カードの場合、進行中の時代区分より過去のカード（および範囲外カード）は除外
+            if (c.type === 'event' && currentPeriod) {
+                if (c.year < currentPeriod.startYear || c.year > currentPeriod.endYear) return false;
+            }
             return c.faction === this.app.faction || c.faction === 'neutral';
         });
 
@@ -1227,13 +1287,6 @@ class BattleSystem {
         const rewardCount = baseRewardCount;
         const chosenCards = [];
         const poolCopy = [...availablePool];
-
-        // 進行中の時代区分（Period）の取得
-        const currentPeriod = this.app.currentPeriod || (
-            (this.app.map && GAME_DATA.getPeriodForFloor)
-                ? GAME_DATA.getPeriodForFloor(this.app.map.currentAct || 1, this.app.map.currentFloor || 0)
-                : null
-        );
 
         // 進行中の期間に合致する歴史事件カード候補
         const periodEventPool = poolCopy.filter(id => {

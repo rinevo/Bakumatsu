@@ -81,55 +81,29 @@ class MapSystem {
         // Act 1〜3: 各幕 18階層 ＋ 幕ボス（Floor 18） = 全19階層 (Floor 0〜18)
         const floorCount = 18;
 
-        // Floor 0:
-        // 第一幕: 志士を入手できる歴史事件（開始地点 3分岐確定）
-        // 第二幕・終幕: 戦場（開始地点 3分岐）
+        // Floor 0: 全幕共通で歴史事件（開始地点 3分岐確定）
         const f0Nodes = [];
         const f0Count = 3;
 
-        if (actNumber === 1) {
-            for (let i = 0; i < f0Count; i++) {
-                const id = `act${actNumber}_f0_n${i}`;
-                const node = {
-                    id,
-                    floor: 0,
-                    col: i,
-                    type: 'event',
-                    title: '歴史事件',
-                    icon: '📜',
-                    eventId: null,
-                    period: initPeriod,
-                    startYear: initPeriod.startYear,
-                    endYear: initPeriod.endYear,
-                    year: initPeriod.startYear,
-                    eraName: initPeriod.eraName,
-                    completed: false
-                };
-                this.nodes.push(node);
-                f0Nodes.push(node);
-            }
-        } else {
-            // 第二幕、終幕の最初に選択するコマは戦場
-            for (let i = 0; i < f0Count; i++) {
-                const id = `act${actNumber}_f0_n${i}`;
-                const node = {
-                    id,
-                    floor: 0,
-                    col: i,
-                    type: 'battle',
-                    title: '戦場',
-                    icon: '⚔️',
-                    eventId: null,
-                    period: initPeriod,
-                    startYear: initPeriod.startYear,
-                    endYear: initPeriod.endYear,
-                    year: initPeriod.startYear,
-                    eraName: initPeriod.eraName,
-                    completed: false
-                };
-                this.nodes.push(node);
-                f0Nodes.push(node);
-            }
+        for (let i = 0; i < f0Count; i++) {
+            const id = `act${actNumber}_f0_n${i}`;
+            const node = {
+                id,
+                floor: 0,
+                col: i,
+                type: 'event',
+                title: '歴史事件',
+                icon: '📜',
+                eventId: null,
+                period: initPeriod,
+                startYear: initPeriod.startYear,
+                endYear: initPeriod.endYear,
+                year: initPeriod.startYear,
+                eraName: initPeriod.eraName,
+                completed: false
+            };
+            this.nodes.push(node);
+            f0Nodes.push(node);
         }
 
         let prevFloorNodes = f0Nodes;
@@ -898,6 +872,9 @@ class MapSystem {
             this.app.ui.renderMap();
             if (this.app.saveRun) {
                 this.app.saveRun('map');
+            }
+            if (typeof this.app.checkAndPurgeExpiredEventCards === 'function') {
+                this.app.checkAndPurgeExpiredEventCards();
             }
         } else {
             this.app.handleGameClear();

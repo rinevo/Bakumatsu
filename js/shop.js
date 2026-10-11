@@ -61,22 +61,26 @@ class ShopSystem {
         this.shopRelics = [];
         this.healedInShop = false;
 
-        // 1. 通常カード販売（3〜4枚）
-        const candidateCardIds = Object.keys(GAME_DATA.cards).filter(id => {
-            const c = GAME_DATA.cards[id];
-            if (this.app.isShishiDead && this.app.isShishiDead(id)) return false;
-            if (this.app.isEventCardUsed && this.app.isEventCardUsed(id)) return false;
-            if (GAME_DATA.canFactionAcquireCard && !GAME_DATA.canFactionAcquireCard(id, this.app.faction)) return false;
-            return (c.faction === this.app.faction || c.faction === 'neutral') &&
-                   c.rarity !== 'starter' && c.type !== 'curse';
-        });
-
         // 進行中の時代区分（Period）の取得
         const currentPeriod = this.app.currentPeriod || (
             (this.app.map && GAME_DATA.getPeriodForFloor)
                 ? GAME_DATA.getPeriodForFloor(this.app.map.currentAct || 1, this.app.map.currentFloor || 0)
                 : null
         );
+
+        // 1. 通常カード販売（3〜4枚）
+        const candidateCardIds = Object.keys(GAME_DATA.cards).filter(id => {
+            const c = GAME_DATA.cards[id];
+            if (this.app.isShishiDead && this.app.isShishiDead(id)) return false;
+            if (this.app.isEventCardUsed && this.app.isEventCardUsed(id)) return false;
+            if (GAME_DATA.canFactionAcquireCard && !GAME_DATA.canFactionAcquireCard(id, this.app.faction)) return false;
+            // 歴史事件カードの場合、進行中の時代区分より過去のカード（および範囲外カード）は除外
+            if (c.type === 'event' && currentPeriod) {
+                if (c.year < currentPeriod.startYear || c.year > currentPeriod.endYear) return false;
+            }
+            return (c.faction === this.app.faction || c.faction === 'neutral') &&
+                   c.rarity !== 'starter' && c.type !== 'curse';
+        });
 
         // 進行期間の歴史事件カード候補
         const periodEventCards = candidateCardIds.filter(id => {

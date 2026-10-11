@@ -485,7 +485,7 @@ class UIManager {
                         handTabsContainer.querySelectorAll('.hand-tab-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                         this.battleHandFilter = btn.dataset.filter || 'all';
-                        this.renderBattleScreen();
+                        this.updateBattleUI();
                     });
                 });
             }
@@ -511,9 +511,13 @@ class UIManager {
                         cardEl.classList.add('can-play');
                     }
 
-                    // クリックでプレイ（カード本体をクリックした時のみ）
-                    cardEl.addEventListener('click', () => {
-                        b.playCard(index);
+                    // クリックでプレイ（カード本体をクリックした時のみ、安全なオブジェクト参照でインデックス特定）
+                    cardEl.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const actualIdx = b.hand.indexOf(card);
+                        if (actualIdx !== -1) {
+                            b.playCard(actualIdx);
+                        }
                     });
                 }
 

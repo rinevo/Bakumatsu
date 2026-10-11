@@ -258,6 +258,20 @@ class SoundSystem {
         setTimeout(() => this.playSlash(), 60);
     }
 
+    // 互換エイリアス
+    playSword() {
+        this.playSlash();
+    }
+
+    playSwordHeavy() {
+        this.playHeavySlash();
+    }
+
+    playShieldBash() {
+        this.playShield();
+        this.playTaiko(false);
+    }
+
     // --- 防御・鉄壁（カキィン！） ---
     playShield() {
         if (this.isSeMuted) return;
