@@ -755,9 +755,12 @@ class BakumatsuApp {
 
     getUsableEventCardsForPeriod(startYear, endYear) {
         return this.deck.filter(id => {
-            const card = GAME_DATA.cards[id];
+            const card = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[id] : null;
             if (!card || card.type !== 'event') return false;
-            return card.year >= startYear && card.year <= endYear;
+            if (card.year < startYear || card.year > endYear) return false;
+            if (card.leaderShishi && this.isMastermindDead(card.leaderShishi)) return false;
+            if (this.usedEventCards && this.usedEventCards.has(id)) return false;
+            return true;
         });
     }
 
@@ -994,11 +997,21 @@ class BakumatsuApp {
 
         const purgeCount = expiredPlayerCards.length;
 
-        // 3. 削除した山札と同じ枚数の歴史事件カードをランダムで入手
+        // 3. 山札の中で「現在年代で使用できる歴史事件カード」が3枚になるようにランダム入手
+        // （年代不一致や首謀者落命により現在使用できないカードは残存数に含めず、現在使用可能なカードが3枚になるよう不足分を補充）
+        const usablePlayerEventCards = this.getUsableEventCardsForPeriod(startYear, endYear);
+        const usablePlayerEventCardsCount = usablePlayerEventCards.length;
+        const totalPlayerEventCardsCount = this.deck.filter(id => {
+            const card = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[id] : null;
+            return card && card.type === 'event';
+        }).length;
+        const targetEventCardsCount = 3;
+        const playerAcquireCount = Math.max(0, targetEventCardsCount - usablePlayerEventCardsCount);
+
         const excludeIds = this.getUnavailableEventCardIds();
         const acquiredPlayerCards = [];
-        if (typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
-            const newIds = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, this.faction, purgeCount, excludeIds);
+        if (playerAcquireCount > 0 && typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
+            const newIds = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, this.faction, playerAcquireCount, excludeIds);
             newIds.forEach(id => {
                 if (this.addCardToDeck(id, true)) {
                     if (GAME_DATA.cards && GAME_DATA.cards[id]) {
@@ -1008,12 +1021,16 @@ class BakumatsuApp {
             });
         }
 
-        // 敵側も削除された枚数（または最低保証）を補充
+        // 敵側も「現在年代で使用できる歴史事件カード」が3枚になるように補充（または最低保証）
         const enemyFaction = this.faction === 'tobaku' ? 'sabaku' : 'tobaku';
+        const usableEnemyEventCardsCount = (this.enemyEventCards || []).filter(id => {
+            const card = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[id] : null;
+            return card && card.type === 'event' && card.year >= startYear && card.year <= endYear && (!card.leaderShishi || !this.isMastermindDead(card.leaderShishi));
+        }).length;
+        const enemyReplenishCount = Math.max(0, targetEventCardsCount - usableEnemyEventCardsCount);
         const newlyAcquiredPlayerCardIds = acquiredPlayerCards.map(c => c.id);
         const enemyExcludeIds = this.getUnavailableEventCardIds(newlyAcquiredPlayerCardIds);
         const acquiredEnemyCards = [];
-        const enemyReplenishCount = Math.max(expiredEnemyCount, purgeCount);
         if (enemyReplenishCount > 0 && typeof GAME_DATA !== 'undefined' && GAME_DATA.getRandomEventCardIdsForPeriod) {
             const enemyNewIds = GAME_DATA.getRandomEventCardIdsForPeriod(startYear, endYear, enemyFaction, enemyReplenishCount, enemyExcludeIds);
             if (!Array.isArray(this.enemyEventCards)) this.enemyEventCards = [];
@@ -1029,7 +1046,7 @@ class BakumatsuApp {
         this.replenishEnemyEventCards(period);
 
         // 4. ウィンドウ表示の流れ：
-        // 削除通知ウィンドウ -> 閉じた後に同数入手ウィンドウ -> 閉じた後に onComplete 実行
+        // 削除通知ウィンドウ -> 閉じた後に新カード入手ウィンドウ（入手カードがある場合のみ） -> 閉じた後に onComplete 実行
         const proceedToAcquisition = () => {
             if (acquiredPlayerCards.length > 0 && this.ui && typeof this.ui.showEventCardAcquiredModal === 'function') {
                 this.ui.showEventCardAcquiredModal(acquiredPlayerCards, onComplete, acquiredEnemyCards);
@@ -1039,7 +1056,7 @@ class BakumatsuApp {
         };
 
         if (this.ui && typeof this.ui.showEventCardsExpiredModal === 'function') {
-            this.ui.showEventCardsExpiredModal(expiredPlayerCards, proceedToAcquisition);
+            this.ui.showEventCardsExpiredModal(expiredPlayerCards, proceedToAcquisition, playerAcquireCount, usablePlayerEventCardsCount, totalPlayerEventCardsCount);
         } else {
             proceedToAcquisition();
         }
@@ -2176,7 +2193,7 @@ class BakumatsuApp {
                 survivalBonusDetails.push(`志士所持: ${targetNames.join('・')} (+${boost}%)`);
             }
 
-            // 3. 対象の志士と連携コンボの関係にあるカードを多く所持していれば、コンボ成立数だけ成功率を5%up（複数所持も含む）
+            // 3. 対象の志士と連携コンボの関係にあるカードを所持していれば、1枚ごとに成功率を10%up（複数所持も含む）
             const targetChars = new Set();
             targetShishiIds.forEach(sid => {
                 const c = (typeof GAME_DATA !== 'undefined' && GAME_DATA.cards) ? GAME_DATA.cards[sid] : null;
@@ -2212,7 +2229,7 @@ class BakumatsuApp {
             });
 
             if (comboPartnerCount > 0) {
-                const boost = comboPartnerCount * 5;
+                const boost = comboPartnerCount * 10;
                 survivalBonus += boost;
                 const pNames = Array.from(partnerNamesSet).slice(0, 3).join('・');
                 const suffix = partnerNamesSet.size > 3 ? '等' : '';

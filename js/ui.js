@@ -2005,7 +2005,7 @@ class UIManager {
     }
 
     // --- 期間経過による歴史事件カード削除通知モーダル ---
-    showEventCardsExpiredModal(expiredCards, onConfirm = null) {
+    showEventCardsExpiredModal(expiredCards, onConfirm = null, acquireCount = null, usableCount = null, totalCount = null) {
         const modal = document.getElementById('modal-event-cards-expired');
         if (!modal) {
             if (typeof onConfirm === 'function') onConfirm();
@@ -2015,6 +2015,7 @@ class UIManager {
         const container = document.getElementById('event-cards-expired-container');
         const closeBtn = document.getElementById('btn-close-event-cards-expired');
         const backdrop = document.getElementById('event-cards-expired-backdrop');
+        const flavorEl = modal.querySelector('.reward-flavor');
 
         if (container) {
             container.innerHTML = '';
@@ -2039,6 +2040,32 @@ class UIManager {
 
                 container.appendChild(wrapper);
             });
+        }
+
+        if (flavorEl) {
+            let noteHtml = '時代の潮流が移り変わり、過去の時代となった以下の歴史事件札が山札から役目を終えて除外されました。';
+            if (acquireCount !== null && usableCount !== null) {
+                const countDetail = (totalCount !== null && totalCount !== usableCount)
+                    ? `（現在使用可能：${usableCount}枚 / 未到来の札含む山札全体：${totalCount}枚）`
+                    : `（現在使用可能：${usableCount}枚）`;
+
+                if (acquireCount > 0) {
+                    noteHtml += `<br><span style="color: #63b3ed; font-size: 0.95rem; font-weight: bold; margin-top: 6px; display: inline-block;">※現在の時代で使用可能な歴史事件札が3枚となるよう、新たに【${acquireCount}枚】の歴史事件札を授かります。${countDetail}</span>`;
+                } else {
+                    noteHtml += `<br><span style="color: #a0aec0; font-size: 0.95rem; margin-top: 6px; display: inline-block;">※現在の時代で使用可能な歴史事件札がすでに3枚以上あるため${countDetail}、追加の補充はありません。</span>`;
+                }
+            }
+            flavorEl.innerHTML = noteHtml;
+        }
+
+        if (closeBtn) {
+            if (acquireCount !== null && acquireCount > 0) {
+                closeBtn.textContent = `新たな時代の歴史事件札を授かる（${acquireCount}枚）`;
+            } else if (acquireCount === 0) {
+                closeBtn.textContent = '了解（使用可能な札が十分あるため補充なし）';
+            } else {
+                closeBtn.textContent = '新たな時代の歴史事件札を授かる';
+            }
         }
 
         let isClosed = false;
