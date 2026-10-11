@@ -68,16 +68,32 @@ class ShopSystem {
                 : null
         );
 
+        // 入手不可なカードID（所持中イベント、敵手札イベント、使用済みイベント、首謀者落命イベントなど）
+        const unavailableEventIds = new Set(
+            (this.app.getUnavailableEventCardIds ? this.app.getUnavailableEventCardIds() : [])
+        );
+        const playerDeck = new Set(this.app.deck || []);
+
         // 1. 通常カード販売（3〜4枚）
         const candidateCardIds = Object.keys(GAME_DATA.cards).filter(id => {
             const c = GAME_DATA.cards[id];
             if (this.app.isShishiDead && this.app.isShishiDead(id)) return false;
             if (this.app.isEventCardUsed && this.app.isEventCardUsed(id)) return false;
             if (GAME_DATA.canFactionAcquireCard && !GAME_DATA.canFactionAcquireCard(id, this.app.faction)) return false;
-            // 歴史事件カードの場合、進行中の時代区分より過去のカード（および範囲外カード）は除外
-            if (c.type === 'event' && currentPeriod) {
-                if (c.year < currentPeriod.startYear || c.year > currentPeriod.endYear) return false;
+
+            // 志士カードの重複防止：すでにプレイヤーが所持している志士は除外
+            if (c.type === 'shishi' && playerDeck.has(id)) return false;
+
+            // 歴史事件カードの場合の厳格な除外判定
+            if (c.type === 'event') {
+                // プレイヤーがすでに所持している、または敵手札/使用済み/首謀者落命カードは除外
+                if (playerDeck.has(id) || unavailableEventIds.has(id)) return false;
+                // 関門イベント（必ず発生する固定事件）はカード販売除外
+                if (GAME_DATA.allChokepointEventIds && GAME_DATA.allChokepointEventIds.has(c.eventId)) return false;
+                // 進行中の時代区分より過去または未来のカードは除外
+                if (currentPeriod && (c.year < currentPeriod.startYear || c.year > currentPeriod.endYear)) return false;
             }
+
             return (c.faction === this.app.faction || c.faction === 'neutral') &&
                    c.rarity !== 'starter' && c.type !== 'curse';
         });
@@ -91,12 +107,9 @@ class ShopSystem {
         const selectedCards = [];
         const poolCopy = [...candidateCardIds];
 
-        // 進行期間の歴史事件カード枠（約80%の確率で1枠確保）
+        // 進行期間の歴史事件カード枠（約80%の確率で1枠確保：未所持のみ）
         if (periodEventCards.length > 0 && Math.random() < 0.80) {
-            const playerDeck = this.app.deck || [];
-            const unowned = periodEventCards.filter(id => !playerDeck.includes(id));
-            const targetPool = unowned.length > 0 ? unowned : periodEventCards;
-            const pickedEventId = targetPool[Math.floor(Math.random() * targetPool.length)];
+            const pickedEventId = periodEventCards[Math.floor(Math.random() * periodEventCards.length)];
             selectedCards.push(pickedEventId);
             const idx = poolCopy.indexOf(pickedEventId);
             if (idx !== -1) poolCopy.splice(idx, 1);

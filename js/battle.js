@@ -1228,6 +1228,12 @@ class BattleSystem {
                 : null
         );
 
+        // 入手不可なカードID（所持中イベント、敵手札イベント、使用済みイベント、首謀者落命イベントなど）
+        const unavailableEventIds = new Set(
+            (this.app.getUnavailableEventCardIds ? this.app.getUnavailableEventCardIds() : [])
+        );
+        const playerDeck = new Set(this.app.deck || []);
+
         // 自陣営 + 西洋兵器から選定
         const availablePool = Object.keys(GAME_DATA.cards).filter(id => {
             const c = GAME_DATA.cards[id];
@@ -1235,9 +1241,18 @@ class BattleSystem {
             if (this.app.isShishiDead && this.app.isShishiDead(id)) return false;
             if (this.app.isEventCardUsed && this.app.isEventCardUsed(id)) return false;
             if (GAME_DATA.canFactionAcquireCard && !GAME_DATA.canFactionAcquireCard(id, this.app.faction)) return false;
-            // 歴史事件カードの場合、進行中の時代区分より過去のカード（および範囲外カード）は除外
-            if (c.type === 'event' && currentPeriod) {
-                if (c.year < currentPeriod.startYear || c.year > currentPeriod.endYear) return false;
+
+            // 志士カードの重複防止：すでにプレイヤーが所持している志士は除外
+            if (c.type === 'shishi' && playerDeck.has(id)) return false;
+
+            // 歴史事件カードの場合の厳格な除外判定
+            if (c.type === 'event') {
+                // プレイヤーがすでに所持している、または敵手札/使用済み/首謀者落命カードは除外
+                if (playerDeck.has(id) || unavailableEventIds.has(id)) return false;
+                // 関門イベント（必ず発生する固定事件）はカード配布除外
+                if (GAME_DATA.allChokepointEventIds && GAME_DATA.allChokepointEventIds.has(c.eventId)) return false;
+                // 進行中の時代区分より過去または未来のカードは除外
+                if (currentPeriod && (c.year < currentPeriod.startYear || c.year > currentPeriod.endYear)) return false;
             }
             return c.faction === this.app.faction || c.faction === 'neutral';
         });
@@ -1294,13 +1309,9 @@ class BattleSystem {
             return c && c.type === 'event' && currentPeriod && c.year >= currentPeriod.startYear && c.year <= currentPeriod.endYear;
         });
 
-        // 進行中の期間の歴史事件カードを高確率（約75%）で1枚報酬枠に優先選出
+        // 進行中の期間の歴史事件カードを高確率（約75%）で1枚報酬枠に優先選出（未所持のみ）
         if (periodEventPool.length > 0 && Math.random() < 0.75 && rewardCount > 0) {
-            const playerDeck = this.app.deck || [];
-            const unownedPeriodEvents = periodEventPool.filter(id => !playerDeck.includes(id));
-            const targetEvents = unownedPeriodEvents.length > 0 ? unownedPeriodEvents : periodEventPool;
-            const pickedEventId = targetEvents[Math.floor(Math.random() * targetEvents.length)];
-
+            const pickedEventId = periodEventPool[Math.floor(Math.random() * periodEventPool.length)];
             chosenCards.push(pickedEventId);
             const pIdx = poolCopy.indexOf(pickedEventId);
             if (pIdx !== -1) poolCopy.splice(pIdx, 1);
