@@ -3569,10 +3569,6 @@ const GAME_DATA = {
             importance: 3,
             title: "大政奉還の歴史的評議",
             desc: "徳川慶喜が政権を朝廷に返上するか否か、天下を揺るがす建白書が突きつけられた。",
-            mapShishiRequirement: {
-                tobaku: ["ryoma", "goto"],
-                sabaku: ["katsu"]
-            },
             choices: [
                 {
                     riskCategory: "safe",
@@ -3754,10 +3750,6 @@ const GAME_DATA = {
             historicalAdvantage: "tobaku",
             title: "薩長同盟の密約",
             desc: "犬猿の仲だった薩摩と長州が、坂本龍馬の仲介で一つの卓を囲んだ。互いの誇りを捨て、来るべき時代に備える必要がある。",
-            mapShishiRequirement: {
-                tobaku: ["ryoma", "saigo", "katsura"],
-                sabaku: ["kondo", "hijikata"]
-            },
             choices: [
                 {
                     riskCategory: "orthodox",
@@ -3877,10 +3869,6 @@ const GAME_DATA = {
             importance: 3,
             title: "鳥羽・伏見の決戦、錦旗の翻転",
             desc: "淀川沿いに錦の御旗が高らかに翻り、砲煙弾雨の中、天下の大勢が一夜にして暗転する。幕府軍1万5千と薩長軍5千の激突、どちらの道を歩むか。",
-            mapShishiRequirement: {
-                tobaku: ["saigo", "yamada", "iwakura"],
-                sabaku: ["hijikata", "kondo", "sadaakira"]
-            },
             choices: [
                 {
                     riskCategory: "reckless",
@@ -6802,10 +6790,6 @@ const GAME_DATA = {
             importance: 3,
             title: "江戸開城前夜、最後の評議",
             desc: "江戸の町を戦火に巻き込むか、城を明け渡して人々を救うか。夜更けの評議で、最後の決断が迫られている。",
-            mapShishiRequirement: {
-                tobaku: ["saigo", "okubo"],
-                sabaku: ["katsu", "oguri"]
-            },
             choices: [
                 {
                     riskCategory: "safe",

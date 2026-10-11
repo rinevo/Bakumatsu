@@ -753,39 +753,13 @@ class UIManager {
             }
             nodeDiv.id = `node-${node.id}`;
 
-            // 志士条件（鍵付きマス）の判定
-            let lockBadgeHtml = '';
-            const hasShishiReq = node.requiredShishi && node.requiredShishi.length > 0;
-            const isAccessible = mapSystem.isNodeAccessible(node);
-
-            if (hasShishiReq) {
-                const reqNames = node.requiredShishi.map(k => this.app.getShishiDisplayName(k)).join('・');
-                if (isAccessible) {
-                    nodeDiv.classList.add('shishi-unlocked');
-                    lockBadgeHtml = `<div class="node-lock-badge unlocked" title="【志士集結】進入可能: ${reqNames}">🔓</div>`;
-                } else {
-                    nodeDiv.classList.add('shishi-locked');
-                    lockBadgeHtml = `<div class="node-lock-badge locked" title="【要志士】${reqNames}">🔒</div>`;
-                }
-            }
-
             let titleContent = node.title;
             if (node.type === 'event') {
                 const chokePrefix = node.isChokepoint ? '⛩️ ' : '';
                 titleContent = `<span class="node-name">${chokePrefix}${node.title || '歴史事件'}</span>`;
             }
 
-            if (hasShishiReq && !node.completed) {
-                const reqNames = node.requiredShishi.map(k => this.app.getShishiDisplayName(k)).join('・');
-                if (isAccessible) {
-                    titleContent += `<span class="node-req-label unlocked">✨【${reqNames}】開錠!</span>`;
-                } else {
-                    titleContent += `<span class="node-req-label locked">🔒【要:${reqNames}】</span>`;
-                }
-            }
-
             nodeDiv.innerHTML = `
-                ${lockBadgeHtml}
                 <div class="node-icon">${node.icon}</div>
                 <div class="node-title">${titleContent}</div>
             `;
