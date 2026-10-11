@@ -138,13 +138,14 @@ class ParticleSystem {
     showComboText(text, count) {
         const x = window.innerWidth / 2;
         const y = window.innerHeight * 0.38;
+        const duration = 1.0;
         this.textFloats.push({
             text,
             count,
             x, y,
-            life: 1.0,
-            maxLife: 1.0,
-            scale: 0.6
+            life: duration,
+            maxLife: duration,
+            scale: 0.7
         });
         this.createInkSplash(x, y, 22, 'rgba(20, 20, 22, ');
         if (count >= 3) {
@@ -155,14 +156,15 @@ class ParticleSystem {
     showEnemyActionText(text, count) {
         const x = window.innerWidth / 2;
         const y = window.innerHeight * 0.42;
+        const duration = 1.0;
         this.textFloats.push({
             text,
             count,
             x,
             y,
-            life: 1.0,
-            maxLife: 1.0,
-            scale: 0.6,
+            life: duration,
+            maxLife: duration,
+            scale: 0.7,
             isEnemy: true
         });
         this.createInkSplash(x, y, 18, 'rgba(110, 20, 20, ');
@@ -172,14 +174,15 @@ class ParticleSystem {
     createFloatingText(text, x, y, color = '#e6be65') {
         const posX = (typeof x === 'number' && !isNaN(x)) ? x : (window.innerWidth / 2);
         const posY = (typeof y === 'number' && !isNaN(y)) ? y : (window.innerHeight * 0.4);
+        const duration = 1.0;
         this.textFloats.push({
             text,
             count: 1,
             x: posX,
             y: posY,
-            life: 1.0,
-            maxLife: 1.0,
-            scale: 0.6,
+            life: duration,
+            maxLife: duration,
+            scale: 0.7,
             customColor: color
         });
     }
@@ -220,7 +223,7 @@ class ParticleSystem {
             }
         }
 
-        // 連鎖文字更新
+        // 連鎖文字更新（登場・余韻は元のキレを維持し、視認維持時間を0.5秒に設定）
         for (let i = this.textFloats.length - 1; i >= 0; i--) {
             const t = this.textFloats[i];
             t.life -= dt;
@@ -228,8 +231,20 @@ class ParticleSystem {
                 this.textFloats.splice(i, 1);
                 continue;
             }
-            const progress = 1 - (t.life / t.maxLife);
-            t.scale = 0.7 + Math.sin(progress * Math.PI) * 0.5;
+            const elapsed = t.maxLife - t.life;
+            if (elapsed < 0.22) {
+                // 登場フェーズ: 変更前同様の素早くキレのある拡大（0.22秒で 0.7 -> 1.15）
+                const p = elapsed / 0.22;
+                t.scale = 0.7 + Math.sin(p * Math.PI * 0.5) * 0.45;
+            } else if (elapsed < 0.72) {
+                // 視認維持フェーズ: 文字をしっかり読める時間を0.5秒間キープ（1.15 -> 1.08）
+                const p = (elapsed - 0.22) / 0.50;
+                t.scale = 1.15 - p * 0.07;
+            } else {
+                // 余韻フェーズ: 変更前同様にサッと縮小して消える（0.28秒で 1.08 -> 0.70）
+                const p = (elapsed - 0.72) / 0.28;
+                t.scale = 1.08 - p * 0.38;
+            }
             t.y -= 15 * dt;
         }
     }
@@ -289,11 +304,17 @@ class ParticleSystem {
 
         // 4. 連鎖墨文字（和風筆文字スタイル）
         this.textFloats.forEach(t => {
-            const alpha = Math.min(1, (t.life / t.maxLife) * 1.5);
+            const elapsed = t.maxLife - t.life;
+            let alpha = 1.0;
+            if (elapsed < 0.08) {
+                alpha = elapsed / 0.08;
+            } else if (elapsed > 0.72) {
+                alpha = Math.max(0, (t.maxLife - elapsed) / 0.28);
+            }
             this.ctx.save();
             this.ctx.translate(t.x, t.y);
             this.ctx.scale(t.scale, t.scale);
-            this.ctx.globalAlpha = alpha;
+            this.ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
 
             // 影（墨の滲み）
             this.ctx.font = t.isEnemy
