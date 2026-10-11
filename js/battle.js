@@ -65,6 +65,7 @@ class BattleSystem {
 
         this.isPlayerTurn = false;
         this.isBattleOver = false;
+        this.isEventBattle = false;
     }
 
     startBattle(enemyData) {
@@ -1086,6 +1087,11 @@ class BattleSystem {
     handleEnemyDefeated() {
         this.isBattleOver = true;
         this.isPlayerTurn = false;
+
+        if (this.isEventBattle && this.app && this.app.pendingEventBattleData) {
+            this.app.pendingEventBattleData.turns = Math.max(1, this.turnCount || 1);
+            this.isEventBattle = false;
+        }
 
         // 戦闘終了時に BGM を停止
         if (window.soundSystem && window.soundSystem.stopBgm) {

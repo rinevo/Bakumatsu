@@ -1920,14 +1920,15 @@ class BakumatsuApp {
     // 歴史事件：天命判定（運命の審判）システム
     // ==========================================
 
-    startEventAdventure(eventData, baseChoice) {
+    startEventAdventure(eventData, baseChoice, battleTurns = null) {
         // 確率の算出
-        const chances = this.calculateEventSuccessProbability(eventData, baseChoice);
+        const chances = this.calculateEventSuccessProbability(eventData, baseChoice, battleTurns);
         
         this.currentAdventureEvent = {
             event: eventData,
             baseChoice: baseChoice,
             chances: chances,
+            battleTurns: battleTurns,
             result: null
         };
 
@@ -1940,7 +1941,93 @@ class BakumatsuApp {
         }
     }
 
-    calculateEventSuccessProbability(eventData, baseChoice) {
+    startEventBattle(eventData, baseChoice) {
+        const enemyData = this.getEventEnemy(eventData, baseChoice);
+        if (!enemyData) {
+            console.error("敵データが見つかりません。直接天命判定を開始します。");
+            this.startEventAdventure(eventData, baseChoice);
+            return;
+        }
+
+        this.pendingEventBattleData = {
+            eventData,
+            baseChoice,
+            turns: 0
+        };
+
+        if (this.battle) {
+            this.battle.isEventBattle = true;
+            this.battle.startBattle(enemyData);
+        }
+        this.switchScreen('screen-battle');
+    }
+
+    onEventBattleRewardClosed() {
+        if (!this.pendingEventBattleData) {
+            this.checkActProgressOrReturnMap();
+            return;
+        }
+
+        const { eventData, baseChoice, turns } = this.pendingEventBattleData;
+        this.pendingEventBattleData = null;
+        this.currentEvent = eventData;
+
+        this.switchScreen('screen-event');
+        this.startEventAdventure(eventData, baseChoice, turns);
+    }
+
+    getEventEnemy(eventData, baseChoice) {
+        if (typeof GAME_DATA === 'undefined' || !GAME_DATA.enemies) return null;
+
+        // 1. 選択肢で明示指定された敵ID
+        if (baseChoice.battleEnemy && GAME_DATA.enemies[baseChoice.battleEnemy]) {
+            return GAME_DATA.enemies[baseChoice.battleEnemy];
+        }
+
+        // 2. イベントで明示指定された敵ID
+        if (eventData.battleEnemy && GAME_DATA.enemies[eventData.battleEnemy]) {
+            return GAME_DATA.enemies[eventData.battleEnemy];
+        }
+
+        // 3. 幕と自陣営に応じた敵対エリートまたは通常敵を動的選定
+        const act = Math.min(3, Math.max(1, eventData.act || (this.map ? this.map.currentAct : 1) || 1));
+        const opposingFaction = this.faction === 'tobaku' ? 'sabaku' : 'tobaku';
+
+        // エリート候補プール
+        const elitePools = {
+            1: ['act1_elite_izo', 'act1_elite_serizawa'],
+            2: ['act2_elite_iba', 'act2_elite_hanjiro'],
+            3: ['act3_elite_battotai', 'act3_elite_sagawa']
+        };
+        const actElites = elitePools[act] || elitePools[1];
+        const hostileElites = actElites.filter(id => {
+            const e = GAME_DATA.enemies[id];
+            return e && e.faction === opposingFaction;
+        });
+
+        if (hostileElites.length > 0) {
+            const pickedId = hostileElites[Math.floor(Math.random() * hostileElites.length)];
+            return GAME_DATA.enemies[pickedId];
+        }
+
+        // 通常敵候補プール
+        const normalPools = {
+            1: ['act1_normal_1', 'act1_normal_2', 'act1_normal_choshu_spy', 'act1_normal_shinsengumi'],
+            2: ['act2_normal_1', 'act2_normal_satsuma_samurai', 'act2_normal_denshitai', 'act2_normal_british_marine'],
+            3: ['act3_normal_shogitai', 'act3_normal_ouetsu', 'act3_normal_shinseifu', 'act3_normal_armstrong']
+        };
+        const actNormals = normalPools[act] || normalPools[1];
+        const hostileNormals = actNormals.filter(id => {
+            const e = GAME_DATA.enemies[id];
+            return e && e.faction === opposingFaction;
+        });
+
+        const candidatePool = hostileNormals.length > 0 ? hostileNormals : actNormals;
+        const pickedId = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+        return GAME_DATA.enemies[pickedId] || GAME_DATA.enemies['act1_normal_1'];
+    }
+
+    calculateEventSuccessProbability(eventData, baseChoice, battleTurns = null) {
         // 直接指定のチェック
         let great = 25;
         let success = 60;
@@ -2246,6 +2333,26 @@ class BakumatsuApp {
             }
         }
 
+        // ⚔️ 戦闘電撃勝利ボーナス（終了ターン数に応じた成功率UP: 1ターンなら+80%、2ターンなら+70%...）
+        let battleBonus = 0;
+        let battleBonusDesc = '';
+        if (typeof battleTurns === 'number' && battleTurns > 0) {
+            battleBonus = Math.max(0, 90 - battleTurns * 10);
+            if (battleBonus > 0) {
+                battleBonusDesc = `電撃勝利補正: ${battleTurns}ターン撃破 (+${battleBonus}%)`;
+                const currentTotalSuccess = great + success;
+                const newTotalSuccess = Math.min(100, currentTotalSuccess + battleBonus);
+                
+                // 成功率上昇の恩恵を大成功（great）にも配分し、電撃決着の快感を高める
+                const greatShare = Math.min(Math.round(battleBonus * 0.4), 100 - great);
+                great += greatShare;
+                success = Math.max(0, newTotalSuccess - great);
+                fail = Math.max(0, 100 - newTotalSuccess);
+            } else {
+                battleBonusDesc = `長期戦決着: ${battleTurns}ターン撃破 (+0%)`;
+            }
+        }
+
         // カテゴリ表示情報
         const categoryMeta = {
             safe: { label: "慎重・安全策", badgeClass: "badge-risk-safe" },
@@ -2269,7 +2376,10 @@ class BakumatsuApp {
             isPublicOpinionAdverse,
             survivalBonus,
             survivalBonusDetails,
-            survivalBonusDesc: survivalBonusDetails.join(' / ')
+            survivalBonusDesc: survivalBonusDetails.join(' / '),
+            battleTurns: (typeof battleTurns === 'number' && battleTurns > 0) ? battleTurns : null,
+            battleBonus,
+            battleBonusDesc
         };
     }
 

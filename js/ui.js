@@ -1032,11 +1032,22 @@ class UIManager {
                     </div>
                 `;
 
+                let battleBadgeHtml = '';
+                if (choice.hasBattle) {
+                    battleBadgeHtml = `<span class="badge-battle-trigger" style="background: linear-gradient(135deg, #e53e3e, #9b2c2c); color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.82rem; margin-right: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">⚔️【戦闘発生】</span> `;
+                }
+
+                let battleHintHtml = '';
+                if (choice.hasBattle) {
+                    battleHintHtml = `<div style="color: #e53e3e; font-size: 0.8rem; margin-top: 4px; font-weight: bold;">※選ぶと戦闘突入！早期ターン撃破で成功率大幅UP（1ターン:+80%、2ターン:+70%...）</div>`;
+                }
+
                 btn.innerHTML = `
-                    <div class="choice-text">${shishiReqBadgeHtml}${opinionBadgeHtml}${choice.text}</div>
+                    <div class="choice-text">${battleBadgeHtml}${shishiReqBadgeHtml}${opinionBadgeHtml}${choice.text}</div>
                     <div class="choice-effect">${choice.effectDesc || choice.desc || ''}</div>
                     ${bonusHtml}
                     ${survivalBonusHtml}
+                    ${battleHintHtml}
                     ${probBadgeHtml}
                 `;
 
@@ -1049,8 +1060,13 @@ class UIManager {
                         window.soundSystem.playTaiko(false);
                     }
 
-                    // 天命判定開始
-                    this.app.startEventAdventure(eventData, choice);
+                    if (choice.hasBattle) {
+                        // 戦闘画面へ遷移
+                        this.app.startEventBattle(eventData, choice);
+                    } else {
+                        // 天命判定開始
+                        this.app.startEventAdventure(eventData, choice);
+                    }
                 });
 
                     choicesContainer.appendChild(btn);
@@ -1079,7 +1095,15 @@ class UIManager {
 
         if (chancesEl && adventureData.chances) {
             const c = adventureData.chances;
+            let battleBonusBadge = '';
+            if (c.battleBonus > 0 && adventureData.battleTurns) {
+                battleBonusBadge = `<div style="color: #e53e3e; font-size: 0.95rem; font-weight: bold; margin-bottom: 6px;">⚔️【電撃撃破ボーナス】${adventureData.battleTurns}ターン撃破により成功率 +${c.battleBonus}% UP！</div>`;
+            } else if (adventureData.battleTurns) {
+                battleBonusBadge = `<div style="color: #718096; font-size: 0.9rem; margin-bottom: 6px;">⚔️【戦闘決着】${adventureData.battleTurns}ターン撃破（成功率ボーナス: +0%）</div>`;
+            }
+
             chancesEl.innerHTML = `
+                ${battleBonusBadge}
                 <span>🏆 大成功 <strong>${c.great}%</strong></span> ｜ 
                 <span>⭕ 成功 <strong>${c.success}%</strong></span> ｜ 
                 <span>⚠️ 失敗 <strong>${c.fail}%</strong></span>
@@ -1583,8 +1607,7 @@ class UIManager {
                 cardEl.addEventListener('click', () => {
                     this.app.addCardToDeck(cardId);
                     window.soundSystem.playTaiko(false);
-                    modal.classList.remove('active');
-                    this.app.checkActProgressOrReturnMap();
+                    this.closeRewardModal();
                 });
                 cardsContainer.appendChild(cardEl);
             });
@@ -1618,7 +1641,11 @@ class UIManager {
 
     closeRewardModal() {
         document.getElementById('modal-reward').classList.remove('active');
-        this.app.checkActProgressOrReturnMap();
+        if (this.app && this.app.pendingEventBattleData) {
+            this.app.onEventBattleRewardClosed();
+        } else {
+            this.app.checkActProgressOrReturnMap();
+        }
     }
 
     showToast(message, type = 'info') {
