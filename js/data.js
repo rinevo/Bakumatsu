@@ -1957,12 +1957,12 @@ const GAME_DATA = {
             cost: 1,
             attack: 0,
             shield: 0,
-            desc: "【西洋火器】この戦闘中、全攻撃カード威力+4。⚠️ 列強介入メーター+3%。",
+            desc: "【西洋火器】この戦闘中、全攻撃カード威力+4。⚠️ 列強介入メーター+6%。",
             rarity: "uncommon",
-            imperialRisk: 3,
+            imperialRisk: 6,
             onPlay: (b, self) => {
                 b.applyPlayerBuff("strength", 4);
-                b.modifyImperialGauge(3);
+                b.modifyImperialGauge(6);
                 window.soundSystem.playGunshot();
             }
         },
@@ -1974,13 +1974,13 @@ const GAME_DATA = {
             cost: 2,
             attack: 22,
             shield: 0,
-            desc: "敵に 22 の破滅的ダメージ。敵のシールドを全破壊。⚠️ 列強介入メーター+5%。",
+            desc: "敵に 22 の破滅的ダメージ。敵のシールドを全破壊。⚠️ 列強介入メーター+10%。",
             rarity: "rare",
-            imperialRisk: 5,
+            imperialRisk: 10,
             onPlay: (b, self) => {
                 if (b.enemy) b.enemy.shield = 0;
                 b.dealDamageToEnemy(22);
-                b.modifyImperialGauge(5);
+                b.modifyImperialGauge(10);
                 window.soundSystem.playGunshot();
             }
         },
@@ -1992,12 +1992,12 @@ const GAME_DATA = {
             cost: 2,
             attack: 0,
             shield: 0,
-            desc: "毎ターン終了時、敵に自動で 6 ダメージ。⚠️ 列強介入メーター+6%。",
+            desc: "毎ターン終了時、敵に自動で 6 ダメージ。⚠️ 列強介入メーター+12%。",
             rarity: "legendary",
-            imperialRisk: 6,
+            imperialRisk: 12,
             onPlay: (b, self) => {
                 b.applyPlayerBuff("auto_gatling", 6);
-                b.modifyImperialGauge(6);
+                b.modifyImperialGauge(12);
                 window.soundSystem.playGunshot();
             }
         },
@@ -2009,14 +2009,14 @@ const GAME_DATA = {
             cost: 3,
             attack: 36,
             shield: 10,
-            desc: "敵に 36 ダメージ、防 10。敵を気絶（次ターン行動不能）させる。⚠️ 列強介入メーター+10%。",
+            desc: "敵に 36 ダメージ、防 10。敵を気絶（次ターン行動不能）させる。⚠️ 列強介入メーター+20%。",
             rarity: "legendary",
-            imperialRisk: 10,
+            imperialRisk: 20,
             onPlay: (b, self) => {
                 b.dealDamageToEnemy(36);
                 b.gainPlayerShield(10);
                 if (b.enemy) b.enemy.stunned = true;
-                b.modifyImperialGauge(10);
+                b.modifyImperialGauge(20);
                 window.soundSystem.playGunshot();
             }
         },
@@ -2089,11 +2089,11 @@ const GAME_DATA = {
             faction: "curse",
             type: "curse",
             cost: 1,
-            desc: "【呪い・重圧】手札にある間、ターン終了時に HP 3 ダメージ。1文支払って使用するとその戦闘中は除外（Exhaust）される。",
+            desc: "【呪い・重圧】手札にある間、ターン終了時に HP 6 ダメージ。1文支払って使用するとその戦闘中は除外（Exhaust）される。",
             rarity: "curse",
             exhaust: true,
             onTurnEndInHand: (battle) => {
-                battle.damagePlayerDirect(3);
+                battle.damagePlayerDirect(6);
             },
             onPlay: (battle) => {
                 if (window.soundSystem && window.soundSystem.playWarning) {
@@ -2108,11 +2108,11 @@ const GAME_DATA = {
             type: "curse",
             cost: 0,
             unplayable: true,
-            desc: "【呪い・プレイ不可】手札にある間、ターン終了時に HP 3 ダメージ ＆ 列強介入+4%。",
+            desc: "【呪い・プレイ不可】手札にある間、ターン終了時に HP 6 ダメージ ＆ 列強介入+8%。",
             rarity: "curse",
             onTurnEndInHand: (b) => {
-                b.damagePlayerDirect(3);
-                b.modifyImperialGauge(4);
+                b.damagePlayerDirect(6);
+                b.modifyImperialGauge(8);
                 window.soundSystem.playWarning();
             }
         },
@@ -2232,10 +2232,10 @@ const GAME_DATA = {
             type: "curse",
             cost: 0,
             unplayable: true,
-            desc: "【呪い・プレイ不可】このカードを引いた時、自身に 4 ダメージ。",
+            desc: "【呪い・プレイ不可】このカードを引いた時、自身に 8 ダメージ。",
             rarity: "curse",
             onDrawn: (b) => {
-                b.damagePlayerDirect(4);
+                b.damagePlayerDirect(8);
                 window.soundSystem.playWarning();
             }
         },
@@ -3400,7 +3400,7 @@ const GAME_DATA = {
                     riskCategory: "intrigue",
                     opinionChange: 8,
                     text: "莫大な借款契約を結び、最新火器を受け取る",
-                    effectDesc: "志士『井上馨』を獲得。『新式ミニエ銃』と 30両 を獲得するが、【列強介入+12%】＆呪い『治外法権の受容』が混入！",
+                    effectDesc: "志士『井上馨』を獲得。『新式ミニエ銃』と 30両 を獲得するが、【列強介入+24%】＆呪い『治外法権の受容』が混入！",
                     shishiBonus: {
                         character: "ryoma",
                         desc: "龍馬の巧みな交渉！呪い『治外法権の受容』を回避し、軍資金+20両！",
@@ -3415,7 +3415,7 @@ const GAME_DATA = {
                         app.addCardToDeck("weapon_minie");
                         app.addCardToDeck("curse_extraterritoriality");
                         app.gold += 30;
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                         window.soundSystem.playWarning();
                     }
                 },
@@ -3788,7 +3788,7 @@ const GAME_DATA = {
                     riskCategory: "intrigue",
                     opinionChange: 12,
                     text: "片方に肩入れし、資金を引き出す",
-                    effectDesc: "志士『小松帯刀』を獲得。30両を得るが、列強介入+20%。",
+                    effectDesc: "志士『小松帯刀』を獲得。30両を得るが、列強介入+40%。",
                     riskCategory: "intrigue",
                     shishiBonus: [
                         {
@@ -3803,7 +3803,7 @@ const GAME_DATA = {
                     action: (app) => {
                         app.addCardToDeck("komatsu_coordination");
                         app.gold += 30;
-                        app.modifyImperialGauge(20);
+                        app.modifyImperialGauge(40);
                     }
                 },
                 {
@@ -4029,11 +4029,11 @@ const GAME_DATA = {
                     riskCategory: "intrigue",
                     opinionChange: -12,
                     text: "異国商人と交渉し、交易路を開く",
-                    effectDesc: "志士『島田魁』を獲得。35両を得るが、列強介入+20%。",
+                    effectDesc: "志士『島田魁』を獲得。35両を得るが、列強介入+40%。",
                     action: (app) => {
                         app.addCardToDeck("shimada_kai");
                         app.gold += 35;
-                        app.modifyImperialGauge(20);
+                        app.modifyImperialGauge(40);
                     }
                 },
                 {
@@ -4076,11 +4076,11 @@ const GAME_DATA = {
                     riskCategory: "orthodox",
                     opinionChange: 8,
                     text: "洋式兵器を受け入れ、砲術を学ぶ",
-                    effectDesc: "志士『井上馨』を獲得。『舶来ガトリング砲』を得るが、列強介入+12%。",
+                    effectDesc: "志士『井上馨』を獲得。『舶来ガトリング砲』を得るが、列強介入+24%。",
                     action: (app) => {
                         app.addCardToDeck("inoue_negotiation");
                         app.addCardToDeck("weapon_gatling");
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 },
                 {
@@ -4272,35 +4272,35 @@ const GAME_DATA = {
                     riskCategory: "orthodox",
                     opinionChange: -5,
                     text: "【佐幕派】幕府主導で交易を奨励し、国の富を増やす",
-                    effectDesc: "志士『小栗忠順』を獲得。25両を得るが、列強介入+7%。",
+                    effectDesc: "志士『小栗忠順』を獲得。25両を得るが、列強介入+14%。",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("oguri_reform");
                         app.gold += 25;
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 },
                 {
                     riskCategory: "intrigue",
                     opinionChange: 5,
                     text: "【討幕派】薩長合同の貿易拠点を築き、軍備の資金を稼ぐ",
-                    effectDesc: "志士『井上馨』を獲得。25両を得るが、列強介入+7%。",
+                    effectDesc: "志士『井上馨』を獲得。25両を得るが、列強介入+14%。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("inoue_negotiation");
                         app.gold += 25;
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 },
                 {
                     riskCategory: "orthodox",
                     opinionChange: -5,
                     text: "洋学所を開き、知識を取り入れる",
-                    effectDesc: "志士『山本覚馬』を獲得。『新式ミニエ銃』をデッキに加え、列強介入+7%。",
+                    effectDesc: "志士『山本覚馬』を獲得。『新式ミニエ銃』をデッキに加え、列強介入+14%。",
                     action: (app) => {
                         app.addCardToDeck("yamamoto_research");
                         app.addCardToDeck("weapon_minie");
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 },
                 {
@@ -4821,11 +4821,11 @@ const GAME_DATA = {
                     riskCategory: "defiance",
                     opinionChange: 8,
                     text: "【討幕派】伊牟田尚平ら薩摩浪士の赤羽橋での襲撃を支援し、異国勢力の江戸駐留を動揺させる",
-                    effectDesc: "志士『伊牟田尚平』を獲得。列強介入 +10% だが、世論討幕 8%上昇。",
+                    effectDesc: "志士『伊牟田尚平』を獲得。列強介入 +20% だが、世論討幕 8%上昇。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("imuta_shohei");
-                        app.modifyImperialGauge(10);
+                        app.modifyImperialGauge(20);
                     }
                 },
                 {
@@ -4863,12 +4863,12 @@ const GAME_DATA = {
                     riskCategory: "defiance",
                     opinionChange: 8,
                     text: "【討幕派】有賀半弥ら水戸浪士の義挙を援護し、破約攘夷の気概を天下に示す",
-                    effectDesc: "志士『有賀半弥』を獲得。次戦攻撃力 +4、列強介入 +8%。",
+                    effectDesc: "志士『有賀半弥』を獲得。次戦攻撃力 +4、列強介入 +16%。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("ariga_hanya");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
-                        app.modifyImperialGauge(8);
+                        app.modifyImperialGauge(16);
                     }
                 },
                 {
@@ -5664,13 +5664,15 @@ const GAME_DATA = {
                     hasBattle: true,
                     battleEnemy: "act1_normal_1",
                     isSurvivalRoute: true,
-                    targetShishi: ["yoshida_teaching"],
+                    targetShishi: ["yoshida_teaching", "hashimoto_sanai"],
                     opinionChange: 10,
-                    text: "【🕊️ 生存ルート】伝馬町牢屋敷の警備を強襲し、処刑寸前の吉田松陰を密かに脱出させる",
-                    effectDesc: "【生存ルート】志士『吉田松陰』を救出し歴史改変！HP 35 ダメージを受けるが、松陰は生存確定となり以降もデッキで使用可能！",
+                    text: "【🕊️ 生存ルート】伝馬町牢屋敷の警備を強襲し、処刑寸前の吉田松陰と橋本左内を密かに脱出させる",
+                    effectDesc: "【生存ルート】志士『吉田松陰』『橋本左内』を救出し歴史改変！HP 35 ダメージを受けるが、両名は生存確定となり以降もデッキで使用可能！",
                     action: (app) => {
                         app.markShishiSurvived("yoshida_teaching");
+                        app.markShishiSurvived("hashimoto_sanai");
                         if (!app.deck.includes("yoshida_teaching")) app.addCardToDeck("yoshida_teaching");
+                        if (!app.deck.includes("hashimoto_sanai")) app.addCardToDeck("hashimoto_sanai");
                         app.damagePlayer(35);
                     }
                 },
@@ -5723,23 +5725,23 @@ const GAME_DATA = {
                     riskCategory: "defiance",
                     opinionChange: 8,
                     text: "藩の威信を守り、強硬に出る",
-                    effectDesc: "志士『中村半次郎』を獲得。次の戦闘の攻撃力+3、HPを 12 失い、列強介入+12%。",
+                    effectDesc: "志士『中村半次郎』を獲得。次の戦闘の攻撃力+3、HPを 12 失い、列強介入+24%。",
                     action: (app) => {
                         app.addCardToDeck("nakamura_charge");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
                         app.damagePlayer(26);
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 },
                 {
                     riskCategory: "intrigue",
                     opinionChange: 8,
                     text: "商人を通じて秘密裏に交渉する",
-                    effectDesc: "志士『大久保利通』を獲得。25両を得るが、列強介入+12%。",
+                    effectDesc: "志士『大久保利通』を獲得。25両を得るが、列強介入+24%。",
                     action: (app) => {
                         app.addCardToDeck("okubo_strategy");
                         app.gold += 25;
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 },
                 {
@@ -6175,24 +6177,24 @@ const GAME_DATA = {
                     riskCategory: "orthodox",
                     opinionChange: -8,
                     text: "【佐幕派】条約を結び、交易の利益を得る",
-                    effectDesc: "志士『井伊直弼』を獲得。30両を得るが、列強介入+12%。",
+                    effectDesc: "志士『井伊直弼』を獲得。30両を得るが、列強介入+24%。",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("ii_naosuke");
                         app.gold += 30;
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 },
                 {
                     riskCategory: "reckless",
                     opinionChange: 8,
                     text: "【討幕派】開国の先を見据え、異国使節と堂々と渡り合う",
-                    effectDesc: "志士『横井小楠』を獲得。30両を得るが、列強介入+12%。",
+                    effectDesc: "志士『横井小楠』を獲得。30両を得るが、列強介入+24%。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("yokoi_philosophy");
                         app.gold += 30;
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 },
                 {
@@ -6242,22 +6244,22 @@ const GAME_DATA = {
                     riskCategory: "intrigue",
                     opinionChange: 8,
                     text: "敗北を認め、洋式兵器を研究する",
-                    effectDesc: "志士『黒田了介』を獲得。『アームストロング砲』をデッキに加えるが、列強介入+12%。",
+                    effectDesc: "志士『黒田了介』を獲得。『アームストロング砲』をデッキに加えるが、列強介入+24%。",
                     action: (app) => {
                         app.addCardToDeck("kuroda_frontier");
                         app.addCardToDeck("weapon_armstrong");
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 },
                 {
                     riskCategory: "safe",
                     opinionChange: 8,
                     text: "講和して、交易路を確保する",
-                    effectDesc: "志士『大久保利通』を獲得。30両を得るが、列強介入+12%。",
+                    effectDesc: "志士『大久保利通』を獲得。30両を得るが、列強介入+24%。",
                     action: (app) => {
                         app.addCardToDeck("okubo_strategy");
                         app.gold += 30;
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 }
             ]
@@ -6382,14 +6384,14 @@ const GAME_DATA = {
                     riskCategory: "reckless",
                     opinionChange: -12,
                     text: "異国の技術を学び、海軍を創設する",
-                    effectDesc: "志士『勝海舟』を獲得。異国軍制導入の反発により軍資金70両を拠出、HPを 20 失い、最大HP-10、列強介入+20%。呪い『家臣の寝返り』混入。",
+                    effectDesc: "志士『勝海舟』を獲得。異国軍制導入の反発により軍資金70両を拠出、HPを 20 失い、最大HP-10、列強介入+40%。呪い『家臣の寝返り』混入。",
                     action: (app) => {
                         app.addCardToDeck("katsu_kaishu");
                         app.addCardToDeck("curse_betrayal");
                         app.gold = Math.max(0, app.gold - 70);
                         app.maxHp = Math.max(20, app.maxHp - 10);
                         app.damagePlayer(38);
-                        app.modifyImperialGauge(20);
+                        app.modifyImperialGauge(40);
                     }
                 },
                 {
@@ -6442,11 +6444,11 @@ const GAME_DATA = {
                     riskCategory: "orthodox",
                     opinionChange: -5,
                     text: "航海の資金を武器に回す",
-                    effectDesc: "志士『木村芥舟』を獲得。25両を得るが、列強介入+7%。",
+                    effectDesc: "志士『木村芥舟』を獲得。25両を得るが、列強介入+14%。",
                     action: (app) => {
                         app.addCardToDeck("kimura_navy");
                         app.gold += 25;
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 },
                 {
@@ -6543,11 +6545,11 @@ const GAME_DATA = {
                     riskCategory: "orthodox",
                     opinionChange: -5,
                     text: "海軍総奉行・永井尚志のもと海防費を増やし、新式艦砲と銃陣を整える",
-                    effectDesc: "志士『永井尚志』を獲得。『新式ミニエ銃』をデッキに加えるが、列強介入+7%。",
+                    effectDesc: "志士『永井尚志』を獲得。『新式ミニエ銃』をデッキに加えるが、列強介入+14%。",
                     action: (app) => {
                         app.addCardToDeck("nagai_retreat");
                         app.addCardToDeck("weapon_minie");
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 },
                 {
@@ -6586,11 +6588,11 @@ const GAME_DATA = {
                     riskCategory: "orthodox",
                     opinionChange: 5,
                     text: "密かに海外交易を始める",
-                    effectDesc: "志士『岩崎弥太郎』を獲得。20両を得るが、列強介入+7%。",
+                    effectDesc: "志士『岩崎弥太郎』を獲得。20両を得るが、列強介入+14%。",
                     action: (app) => {
                         app.addCardToDeck("iwazaki_finance");
                         app.gold += 20;
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 },
                 {
@@ -6642,11 +6644,11 @@ const GAME_DATA = {
                     riskCategory: "orthodox",
                     opinionChange: 12,
                     text: "改革を急ぎ、中央の力を強める",
-                    effectDesc: "志士『桂小五郎』を獲得。次の戦闘の攻撃力+4、列強介入+20%。",
+                    effectDesc: "志士『桂小五郎』を獲得。次の戦闘の攻撃力+4、列強介入+40%。",
                     action: (app) => {
                         app.addCardToDeck("katsura_shindo");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
-                        app.modifyImperialGauge(20);
+                        app.modifyImperialGauge(40);
                     }
                 },
                 {
@@ -6760,12 +6762,12 @@ const GAME_DATA = {
                     riskCategory: "safe",
                     opinionChange: 12,
                     text: "【共通】列強に援助を求め、最新銃器を調達する",
-                    effectDesc: "志士『広沢真臣』を獲得。『新式ミニエ銃』をデッキに加えるが、列強介入+20%。",
+                    effectDesc: "志士『広沢真臣』を獲得。『新式ミニエ銃』をデッキに加えるが、列強介入+40%。",
                     riskCategory: "safe",
                     action: (app) => {
                         app.addCardToDeck("hirosawa_alliance");
                         app.addCardToDeck("weapon_minie");
-                        app.modifyImperialGauge(20);
+                        app.modifyImperialGauge(40);
                     }
                 },
                 {
@@ -6962,11 +6964,11 @@ const GAME_DATA = {
                     riskCategory: "orthodox",
                     opinionChange: -5,
                     text: "通詞から異国の情報を集める",
-                    effectDesc: "志士『水野忠徳』を獲得。『新式ミニエ銃』をデッキに加えるが、列強介入+7%。",
+                    effectDesc: "志士『水野忠徳』を獲得。『新式ミニエ銃』をデッキに加えるが、列強介入+14%。",
                     action: (app) => {
                         app.addCardToDeck("mizuno_magistrate");
                         app.addCardToDeck("weapon_minie");
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 },
                 {
@@ -6985,11 +6987,11 @@ const GAME_DATA = {
                     riskCategory: "safe",
                     opinionChange: 5,
                     text: "交易を許可し、財源を確保する",
-                    effectDesc: "志士『五代友厚』を獲得。25両を得るが、列強介入+7%。",
+                    effectDesc: "志士『五代友厚』を獲得。25両を得るが、列強介入+14%。",
                     action: (app) => {
                         app.addCardToDeck("godai_commerce");
                         app.gold += 25;
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 }
             ]
@@ -7008,11 +7010,11 @@ const GAME_DATA = {
                     riskCategory: "orthodox",
                     opinionChange: 5,
                     text: "交易を進め、洋式兵器を買い付ける",
-                    effectDesc: "志士『小松帯刀』を獲得。『新式ミニエ銃』をデッキに加えるが、列強介入+7%。",
+                    effectDesc: "志士『小松帯刀』を獲得。『新式ミニエ銃』をデッキに加えるが、列強介入+14%。",
                     action: (app) => {
                         app.addCardToDeck("komatsu_coordination");
                         app.addCardToDeck("weapon_minie");
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 },
                 {
@@ -7169,12 +7171,12 @@ const GAME_DATA = {
                     riskCategory: "defiance",
                     opinionChange: -8,
                     text: "海軍を整え、海上防衛を固める",
-                    effectDesc: "志士『榎本武揚』と志士『甲賀源吾』を獲得。列強介入+12%。",
+                    effectDesc: "志士『榎本武揚』と志士『甲賀源吾』を獲得。列強介入+24%。",
                     faction: "sabaku",
                     action: (app) => {
                         app.addCardToDeck("enomoto_naval");
                         app.addCardToDeck("koga_naval");
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 },
                 {
@@ -7227,13 +7229,13 @@ const GAME_DATA = {
                     riskCategory: "defiance",
                     opinionChange: 5,
                     text: "商人の力を借り、産業を育てる",
-                    effectDesc: "志士『横井小楠』を獲得。最大HP+2、20両を得るが、列強介入+7%。",
+                    effectDesc: "志士『横井小楠』を獲得。最大HP+2、20両を得るが、列強介入+14%。",
                     action: (app) => {
                         app.addCardToDeck("yokoi_philosophy");
                         app.maxHp += 2;
                         app.hp += 7;
                         app.gold += 20;
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 },
                 {
@@ -7446,11 +7448,11 @@ const GAME_DATA = {
                     riskCategory: "orthodox",
                     opinionChange: -8,
                     text: "港を開き、交易の道を作る",
-                    effectDesc: "志士『阿部正弘』を獲得。30両を得るが、列強介入+12%。",
+                    effectDesc: "志士『阿部正弘』を獲得。30両を得るが、列強介入+24%。",
                     action: (app) => {
                         app.addCardToDeck("abe_defense");
                         app.gold += 30;
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 },
                 {
@@ -7558,11 +7560,11 @@ const GAME_DATA = {
                     riskCategory: "intrigue",
                     opinionChange: 8,
                     text: "議場を商談の場に変える",
-                    effectDesc: "志士『小松帯刀』を獲得。30両を得るが、列強介入+12%。",
+                    effectDesc: "志士『小松帯刀』を獲得。30両を得るが、列強介入+24%。",
                     action: (app) => {
                         app.addCardToDeck("komatsu_coordination");
                         app.gold += 30;
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 }
             ]
@@ -7652,11 +7654,11 @@ const GAME_DATA = {
                     riskCategory: "intrigue",
                     opinionChange: -8,
                     text: "旅費を兵器購入に回す",
-                    effectDesc: "志士『川村純義』を獲得。『アームストロング砲』をデッキに加えるが、列強介入+12%。",
+                    effectDesc: "志士『川村純義』を獲得。『アームストロング砲』をデッキに加えるが、列強介入+24%。",
                     action: (app) => {
                         app.addCardToDeck("kawamura_navy");
                         app.addCardToDeck("weapon_armstrong");
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 },
                 {
@@ -7697,22 +7699,22 @@ const GAME_DATA = {
                     riskCategory: "defiance",
                     opinionChange: 8,
                     text: "軍を前に出し、威信を守る",
-                    effectDesc: "志士『吉井友実』を獲得。次の戦闘の攻撃力+3、列強介入+12%。",
+                    effectDesc: "志士『吉井友実』を獲得。次の戦闘の攻撃力+3、列強介入+24%。",
                     action: (app) => {
                         app.addCardToDeck("yoshii_support");
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 3;
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 },
                 {
                     riskCategory: "safe",
                     opinionChange: 8,
                     text: "交易を続け、港の利益を守る",
-                    effectDesc: "志士『岩崎弥太郎』を獲得。30両を得るが、列強介入+12%。",
+                    effectDesc: "志士『岩崎弥太郎』を獲得。30両を得るが、列強介入+24%。",
                     action: (app) => {
                         app.addCardToDeck("iwazaki_finance");
                         app.gold += 30;
-                        app.modifyImperialGauge(12);
+                        app.modifyImperialGauge(24);
                     }
                 }
             ]
@@ -9056,13 +9058,13 @@ const GAME_DATA = {
                     battleEnemy: "act2_normal_denshitai",
                     opinionChange: 12,
                     text: "【討幕派】大村益次郎の陣図に従い、最新火器で幕府総軍を四境で撃破する",
-                    effectDesc: "志士『大村益次郎』を獲得。弾薬消耗で軍資金60両拠出、列強介入+20%。世論討幕+35%、神器レリック『大村益次郎の陣図』を獲得！",
+                    effectDesc: "志士『大村益次郎』を獲得。弾薬消耗で軍資金60両拠出、列強介入+40%。世論討幕+35%、神器レリック『大村益次郎の陣図』を獲得！",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("omura_reform");
                         app.addRelic("omura_tactics_scroll");
                         app.gold = Math.max(0, app.gold - 70);
-                        app.modifyImperialGauge(20);
+                        app.modifyImperialGauge(40);
                     }
                 },
                 {
@@ -9237,11 +9239,11 @@ const GAME_DATA = {
                     riskCategory: "intrigue",
                     opinionChange: 0,
                     text: "密航の混乱に紛れ、異国船が残した洋書と最新の海図を回収する",
-                    effectDesc: "『新式ミニエ銃』をデッキに加え、最大HP +2。列強介入 +7%。",
+                    effectDesc: "『新式ミニエ銃』をデッキに加え、最大HP +2。列強介入 +14%。",
                     action: (app) => {
                         app.addCardToDeck("weapon_minie");
                         app.maxHp += 2;
-                        app.modifyImperialGauge(7);
+                        app.modifyImperialGauge(14);
                     }
                 }
             ]
@@ -9305,7 +9307,7 @@ const GAME_DATA = {
                     battleEnemy: "act1_normal_1",
                     opinionChange: 8,
                     text: "【討幕派】高杉・久坂らと共に突入し、公使館を一気に焼き払う",
-                    effectDesc: "志士『高杉晋作：奇兵隊の突進』を獲得。HP 26 ダメージを受けるが、次戦攻撃力 +4、列強介入 +10%。",
+                    effectDesc: "志士『高杉晋作：奇兵隊の突進』を獲得。HP 26 ダメージを受けるが、次戦攻撃力 +4、列強介入 +20%。",
                     faction: "tobaku",
                     shishiBonus: {
                         character: "takasugi",
@@ -9319,7 +9321,7 @@ const GAME_DATA = {
                         app.addCardToDeck("takasugi_kiheitai");
                         app.damagePlayer(26);
                         app.nextBattleStrengthBuff = (app.nextBattleStrengthBuff || 0) + 4;
-                        app.modifyImperialGauge(10);
+                        app.modifyImperialGauge(20);
                     }
                 },
                 {
@@ -9559,12 +9561,12 @@ const GAME_DATA = {
                     riskCategory: "intrigue",
                     opinionChange: 5,
                     text: "【討幕派】英国人商人との直接交渉を開き、新式ライフル銃の購入ルートを拓く",
-                    effectDesc: "『新式ミニエ銃』をデッキに加え、軍資金 25両 を獲得するが、列強介入 +6%。",
+                    effectDesc: "『新式ミニエ銃』をデッキに加え、軍資金 25両 を獲得するが、列強介入 +12%。",
                     faction: "tobaku",
                     action: (app) => {
                         app.addCardToDeck("weapon_minie");
                         app.gold += 25;
-                        app.modifyImperialGauge(6);
+                        app.modifyImperialGauge(12);
                     }
                 },
                 {
@@ -10380,10 +10382,10 @@ const GAME_DATA = {
                     riskCategory: "safe",
                     opinionChange: 0,
                     text: "条約交渉の妥結を見越し、横浜開港場での物産取引の権利を先行確保する",
-                    effectDesc: "軍資金 40両 を獲得するが、列強介入 +6%。",
+                    effectDesc: "軍資金 40両 を獲得するが、列強介入 +12%。",
                     action: (app) => {
                         app.gold += 40;
-                        app.modifyImperialGauge(6);
+                        app.modifyImperialGauge(12);
                     }
                 }
             ]
@@ -13596,6 +13598,19 @@ GAME_DATA.shishiDeaths = {
         "eventTitle": "安政の大獄の嵐",
         "reason": "安政6年10月、幕府への直言により伝馬町牢屋敷にて斬首処刑。",
         "lastWords": "「身はたとひ 武蔵の野辺に 朽ちぬとも 留め置かまし 大和魂」"
+    },
+    "hashimoto_sanai": {
+        "cardId": "hashimoto_sanai",
+        "character": "sanai",
+        "name": "橋本左内",
+        "faction": "tobaku",
+        "deathYear": 1859,
+        "deathMonth": 10,
+        "deathSortKey": 185910,
+        "eventId": "event_andei_purge",
+        "eventTitle": "安政の大獄の嵐",
+        "reason": "安政6年10月、一橋派擁立と幕政批判を罪に問われ、伝馬町牢屋敷にて斬首処刑（享年26）。",
+        "lastWords": "「破邪顕正の大義、いまだ成らずとも我が志は天に通ず」越前の俊英、志半ばに伝馬町に散る。"
     },
     "ii_naosuke": {
         "cardId": "ii_naosuke",

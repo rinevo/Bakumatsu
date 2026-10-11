@@ -775,9 +775,6 @@ class UIManager {
             }
             if (isSelectable) {
                 nodeDiv.classList.add('selectable');
-                if (hasShishiReq && !isAccessible) {
-                    nodeDiv.classList.add('selectable-locked');
-                }
                 nodeDiv.addEventListener('click', () => {
                     mapSystem.visitNode(node.id);
                 });

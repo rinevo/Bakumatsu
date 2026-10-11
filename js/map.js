@@ -58,6 +58,85 @@ class MapSystem {
         }
     }
 
+    getNodeMeta(type, floor, floorCount, isChokepoint = false) {
+        switch (type) {
+            case 'event':
+                return {
+                    icon: isChokepoint ? '⛩️' : '📜',
+                    title: isChokepoint ? '歴史の関門' : '歴史事件'
+                };
+            case 'battle':
+                return { icon: '⚔️', title: '戦場' };
+            case 'rest':
+                return {
+                    icon: '🍵',
+                    title: (floor === floorCount - 1) ? '本陣休息' : '茶屋休息'
+                };
+            case 'shop':
+                return { icon: '💰', title: '洋行商人' };
+            case 'elite':
+                return { icon: '👹', title: '強敵（刺客）' };
+            case 'treasure':
+                return { icon: '🎁', title: '武器庫' };
+            case 'boss':
+                return { icon: '🏯', title: '決戦' };
+            default:
+                return { icon: '⚔️', title: '戦場' };
+        }
+    }
+
+    getNodeTypesForFloor(f, floorCount, chokeFloor) {
+        if (f === 0) {
+            // Floor 0: 各幕の開幕地点（歴史事件1マス確定）
+            return ['event'];
+        }
+        if (f === chokeFloor) {
+            // 歴史の関門（不可避の重大歴史特異点: 1マス確定、商人は絶対に配置しない）
+            return ['event'];
+        }
+        if (f === floorCount - 1) {
+            // ボス直前フロア: 本陣休息および洋行商人の2分岐（重複なし）
+            return ['rest', 'shop'];
+        }
+        if (f === 6 || f === 13) {
+            // 前半・後半の山場: 武器庫、強敵、歴史事件（3分岐確定、重複なし）
+            return ['treasure', 'elite', 'event'];
+        }
+        if (f === 7 || f === 14) {
+            // 山場直後フロア: 休息または歴史事件、戦場
+            const colCount = (Math.random() < 0.5) ? 3 : 2;
+            const pool = ['rest', 'event', 'battle'];
+            return this.shuffleArray(pool).slice(0, colCount);
+        }
+        if (f === 4 || f === 9 || f === 16) {
+            // 寄り道フロア: 商人、歴史事件、戦場
+            const colCount = (Math.random() < 0.6) ? 3 : 2;
+            const pool = ['shop', 'event', 'battle'];
+            return this.shuffleArray(pool).slice(0, colCount);
+        }
+        if (f <= 3) {
+            // 序盤フロア (f === 1, 2, 3): 戦場、歴史事件、茶屋休息
+            const colCount = (Math.random() < 0.6) ? 3 : 2;
+            const pool = ['battle', 'event', 'rest'];
+            return this.shuffleArray(pool).slice(0, colCount);
+        }
+
+        // 一般フロア (f=5, 8, 11, 12, 15 等)
+        const colCount = (Math.random() < 0.6) ? 3 : 2;
+        // フロア進行度に応じてエリートを含める
+        const pool = ['battle', 'event', 'shop', 'rest'];
+        if (f >= 5) {
+            pool.push('elite');
+        }
+        const selected = this.shuffleArray(pool).slice(0, colCount);
+
+        // 安全策：万が一にも商人のみ（単独マスかつshop）にならないようにする
+        if (selected.length === 1 && selected[0] === 'shop') {
+            selected[0] = 'battle';
+        }
+        return selected;
+    }
+
     generateAct(actNumber) {
         this.currentAct = actNumber;
         this.currentFloor = 0;
@@ -80,26 +159,30 @@ class MapSystem {
         // 長編ローグライト階層数定義:
         // Act 1〜3: 各幕 18階層 ＋ 幕ボス（Floor 18） = 全19階層 (Floor 0〜18)
         const floorCount = 18;
+        const chokeFloor = 10;
 
-        // Floor 0: 全幕共通で歴史事件（開始地点 3分岐確定）
+        // Floor 0: 開始地点（重複のない3分岐）
+        const f0Types = this.getNodeTypesForFloor(0, floorCount, chokeFloor);
         const f0Nodes = [];
-        const f0Count = 3;
 
-        for (let i = 0; i < f0Count; i++) {
+        for (let i = 0; i < f0Types.length; i++) {
+            const type = f0Types[i];
+            const meta = this.getNodeMeta(type, 0, floorCount, false);
             const id = `act${actNumber}_f0_n${i}`;
             const node = {
                 id,
                 floor: 0,
                 col: i,
-                type: 'event',
-                title: '歴史事件',
-                icon: '📜',
+                type,
+                title: meta.title,
+                icon: meta.icon,
                 eventId: null,
                 period: initPeriod,
                 startYear: initPeriod.startYear,
                 endYear: initPeriod.endYear,
                 year: initPeriod.startYear,
                 eraName: initPeriod.eraName,
+                isChokepoint: false,
                 completed: false
             };
             this.nodes.push(node);
@@ -111,169 +194,12 @@ class MapSystem {
         // Floor 1 〜 floorCount - 1 の戦略的長編ノード網生成
         for (let f = 1; f < floorCount; f++) {
             const fNodes = [];
-            // 歴史の関門フロア（不可避の重大事件合流地点）
-            const chokeFloor = 10;
+            const isChoke = (f === chokeFloor);
+            const floorTypes = this.getNodeTypesForFloor(f, floorCount, chokeFloor);
 
-            // ボス直前フロアは2分岐（休息＆商人）、山場（f=6, f=13）は3分岐、関門（chokeFloor）は1合流、他は2〜3分岐
-            let colCount = 2;
-            if (f === chokeFloor) {
-                colCount = 1;
-            } else if (f === floorCount - 1) {
-                colCount = 2;
-            } else if (f === 6 || f === 13) {
-                colCount = 3;
-            } else {
-                colCount = (Math.random() < 0.6) ? 3 : 2;
-            }
-
-            for (let c = 0; c < colCount; c++) {
-                let type = 'battle';
-                let icon = '⚔️';
-                let title = '戦場';
-                let isChokepoint = false;
-
-                // --- 階層設計（歴史事件の体験を拡充した18層戦略配分） ---
-                if (f === chokeFloor) {
-                    // 歴史の関門: 全ルートが必ず通過する重大歴史特異点
-                    type = 'event';
-                    icon = '⛩️';
-                    title = '歴史の関門';
-                    isChokepoint = true;
-                } else if (f === floorCount - 1) {
-                    // ボス直前フロア: 本陣休息または洋行商人
-                    if (c === 0) {
-                        type = 'rest';
-                        icon = '🍵';
-                        title = '本陣休息';
-                    } else {
-                        type = 'shop';
-                        icon = '💰';
-                        title = '洋行商人';
-                    }
-                } else if (f === 6) {
-                    // 前半の山場: 武器庫（宝箱）または 強敵（エリート）または 歴史事件
-                    if (c === 0) {
-                        type = 'treasure';
-                        icon = '🎁';
-                        title = '武器庫';
-                    } else if (c === 1) {
-                        type = 'elite';
-                        icon = '👹';
-                        title = '強敵（刺客）';
-                    } else {
-                        type = 'event';
-                        icon = '📜';
-                        title = '歴史事件';
-                    }
-                } else if (f === 7) {
-                    // 前半山場直後の休息または歴史事件
-                    if (c === 0) {
-                        type = 'rest';
-                        icon = '🍵';
-                        title = '茶屋休息';
-                    } else {
-                        type = 'event';
-                        icon = '📜';
-                        title = '歴史事件';
-                    }
-                } else if (f === 13) {
-                    // 後半の山場: 武器庫（宝箱）または 強敵（エリート）または 歴史事件
-                    if (c === 0) {
-                        type = 'treasure';
-                        icon = '🎁';
-                        title = '武器庫';
-                    } else if (c === 1) {
-                        type = 'elite';
-                        icon = '👹';
-                        title = '強敵（刺客）';
-                    } else {
-                        type = 'event';
-                        icon = '📜';
-                        title = '歴史事件';
-                    }
-                } else if (f === 14) {
-                    // 後半山場直後の休息または歴史事件
-                    if (c === 0) {
-                        type = 'rest';
-                        icon = '🍵';
-                        title = '茶屋休息';
-                    } else {
-                        type = 'event';
-                        icon = '📜';
-                        title = '歴史事件';
-                    }
-                } else if (f === 15) {
-                    // 終盤の難所: 強敵（エリート）または歴史事件・商人
-                    if (c === 0) {
-                        type = 'elite';
-                        icon = '👹';
-                        title = '強敵（刺客）';
-                    } else if (c === 1) {
-                        type = 'event';
-                        icon = '📜';
-                        title = '歴史事件';
-                    } else {
-                        type = 'shop';
-                        icon = '💰';
-                        title = '洋行商人';
-                    }
-                } else if (f === 4 || f === 9 || f === 16) {
-                    // 商人・休息・歴史事件の寄り道フロア
-                    if (c === 0) {
-                        type = 'shop';
-                        icon = '💰';
-                        title = '洋行商人';
-                    } else if (c === 1) {
-                        type = 'event';
-                        icon = '📜';
-                        title = '歴史事件';
-                    } else {
-                        type = 'battle';
-                        icon = '⚔️';
-                        title = '戦場';
-                    }
-                } else if (f <= 3) {
-                    // 序盤フロア (f === 1, 2, 3): 戦場と歴史事件が選べる構成
-                    const rand = Math.random();
-                    if (rand < 0.45) {
-                        type = 'event';
-                        icon = '📜';
-                        title = '歴史事件';
-                    } else if (rand < 0.85) {
-                        type = 'battle';
-                        icon = '⚔️';
-                        title = '戦場';
-                    } else {
-                        type = 'rest';
-                        icon = '🍵';
-                        title = '茶屋休息';
-                    }
-                } else {
-                    // 一般フロア: 歴史事件の遭遇率を高めた多彩な分岐網
-                    const rand = Math.random();
-                    if (rand < 0.45) {
-                        type = 'event';
-                        icon = '📜';
-                        title = '歴史事件';
-                    } else if (rand < 0.75) {
-                        type = 'battle';
-                        icon = '⚔️';
-                        title = '戦場';
-                    } else if (rand < 0.87) {
-                        type = 'shop';
-                        icon = '💰';
-                        title = '洋行商人';
-                    } else if (rand < 0.95) {
-                        type = 'rest';
-                        icon = '🍵';
-                        title = '茶屋休息';
-                    } else {
-                        type = 'elite';
-                        icon = '👹';
-                        title = '強敵（刺客）';
-                    }
-                }
-
+            for (let c = 0; c < floorTypes.length; c++) {
+                const type = floorTypes[c];
+                const meta = this.getNodeMeta(type, f, floorCount, isChoke);
                 const id = `act${actNumber}_f${f}_n${c}`;
                 const p = this.getPeriodForFloor(actNumber, f);
                 const node = {
@@ -281,14 +207,14 @@ class MapSystem {
                     floor: f,
                     col: c,
                     type,
-                    title,
-                    icon,
+                    title: meta.title,
+                    icon: meta.icon,
                     period: p,
                     startYear: p.startYear,
                     endYear: p.endYear,
                     year: p.startYear,
                     eraName: p.eraName,
-                    isChokepoint,
+                    isChokepoint: isChoke,
                     completed: false
                 };
                 this.nodes.push(node);
@@ -310,6 +236,31 @@ class MapSystem {
                 if (!connected) {
                     const nearestPrev = prevFloorNodes[Math.min(fIndex, prevFloorNodes.length - 1)];
                     this.connections.push([nearestPrev.id, fn.id]);
+                }
+            });
+
+            // 商人マスによる進行不能（ソフトロック）防止：
+            // 前フロアのどの親ノードからも、次フロアの候補の中に必ず1つ以上の「非商人マス」が含まれるように接続を保証
+            prevFloorNodes.forEach(pn => {
+                const targetNodes = fNodes.filter(fn => 
+                    this.connections.some(c => c[0] === pn.id && c[1] === fn.id)
+                );
+                const hasNonShop = targetNodes.some(fn => fn.type !== 'shop');
+                if (!hasNonShop) {
+                    // 非ショップノードの中で列インデックス(col)が最も近いノードへ接続を追加
+                    const nonShopNodes = fNodes.filter(fn => fn.type !== 'shop');
+                    if (nonShopNodes.length > 0) {
+                        let closest = nonShopNodes[0];
+                        let minDiff = Math.abs(pn.col - closest.col);
+                        for (let k = 1; k < nonShopNodes.length; k++) {
+                            const diff = Math.abs(pn.col - nonShopNodes[k].col);
+                            if (diff < minDiff) {
+                                minDiff = diff;
+                                closest = nonShopNodes[k];
+                            }
+                        }
+                        this.connections.push([pn.id, closest.id]);
+                    }
                 }
             });
 
