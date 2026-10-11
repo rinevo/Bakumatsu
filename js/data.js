@@ -4572,6 +4572,18 @@ const GAME_DATA = {
                         app.gold += 40;
                         app.healPlayer(10);
                     }
+                },
+                {
+                    riskCategory: "intrigue",
+                    opinionChange: -6,
+                    text: "【佐幕派】開明派幕臣（岩瀬忠震ら）と連携し、一橋派と幕閣の融和を図り挙国一致の幕政改革を促す",
+                    effectDesc: "志士『岩瀬忠震：条約の理財』を獲得。軍資金 30両 獲得、HP 8 回復。",
+                    faction: "sabaku",
+                    action: (app) => {
+                        app.addCardToDeck("iwase_tadanari");
+                        app.gold += 30;
+                        app.healPlayer(8);
+                    }
                 }
             ]
         },

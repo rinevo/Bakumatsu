@@ -927,11 +927,11 @@ class UIManager {
             if (validChoices.length === 0) {
                 validChoices = [{
                     text: '【情勢静観】時代の推移を見守り、次なる好機を待つ',
-                    desc: '情勢を静観し、体力を回復して次なる機運を待つ。',
+                    effectDesc: '情勢を静観し、傷を癒して次なる機運を待つ。（HP 15 回復）',
+                    riskCategory: 'safe',
                     historicalPrediction: 'safe',
                     action: (app) => {
-                        app.player.hp = Math.min(app.player.maxHp, app.player.hp + 15);
-                        app.log('情勢を静観し、傷を癒して機を待った。（HP+15）', 'gain');
+                        app.healPlayer(15);
                     }
                 }];
             }
@@ -1034,7 +1034,7 @@ class UIManager {
 
                 btn.innerHTML = `
                     <div class="choice-text">${shishiReqBadgeHtml}${opinionBadgeHtml}${choice.text}</div>
-                    <div class="choice-effect">${choice.effectDesc}</div>
+                    <div class="choice-effect">${choice.effectDesc || choice.desc || ''}</div>
                     ${bonusHtml}
                     ${survivalBonusHtml}
                     ${probBadgeHtml}
